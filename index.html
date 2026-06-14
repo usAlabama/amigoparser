@@ -1187,88 +1187,114 @@
         }
 
         // --- УМНЫЙ ПОИСК ЧЕРЕЗ DUCKDUCKGO ---
-        async function googleSearch() {
-            const query = document.getElementById('googleSearchInput').value.trim();
-            if (!query) {
-                alert(currentLang === 'ru' ? 'Введите ключевые слова!' : currentLang === 'uk' ? 'Введіть ключові слова!' : 'Enter keywords!');
-                return;
-            }
+        // --- УМНЫЙ ПОИСК ЧЕРЕЗ DUCKDUCKGO ---
+		async function googleSearch() {
+			const query = document.getElementById('googleSearchInput').value.trim();
+			if (!query) {
+				alert(currentLang === 'ru' ? 'Введите ключевые слова!' : currentLang === 'uk' ? 'Введіть ключові слова!' : 'Enter keywords!');
+				return;
+			}
 
-            const progressDiv = document.getElementById('googleProgress');
-            const progressBar = document.getElementById('googleProgressBar');
-            const resultsDiv = document.getElementById('googleResults');
-            
-            progressDiv.style.display = 'block';
-            progressBar.style.width = '0%';
-            resultsDiv.innerHTML = `<p style="color: var(--text-secondary);">${currentLang === 'ru' ? 'Поиск...' : currentLang === 'uk' ? 'Пошук...' : 'Searching...'}</p>`;
+			const progressDiv = document.getElementById('googleProgress');
+			const progressBar = document.getElementById('googleProgressBar');
+			const resultsDiv = document.getElementById('googleResults');
+			
+			progressDiv.style.display = 'block';
+			progressBar.style.width = '0%';
+			resultsDiv.innerHTML = `<p style="color: var(--text-secondary);">${currentLang === 'ru' ? 'Поиск...' : currentLang === 'uk' ? 'Пошук...' : 'Searching...'}</p>`;
 
-            try {
-                const searchQuery = `site:t.me ${query}`;
-                const url = `https://html.duckduckgo.com/html/?q=${encodeURIComponent(searchQuery)}`;
-                const proxyUrl = CORS_PROXY + encodeURIComponent(url);
-                
-                progressBar.style.width = '50%';
-                const response = await fetch(proxyUrl);
-                const html = await response.text();
-                
-                progressBar.style.width = '100%';
-                
-                const parser = new DOMParser();
-                const doc = parser.parseFromString(html, 'text/html');
-                const links = doc.querySelectorAll('a[href*="t.me/"]');
-                
-                const foundChannels = new Set();
-                links.forEach(link => {
-                    const href = link.getAttribute('href');
-                    const match = href.match(/t\.me\/([a-zA-Z0-9_]{3,})/);
-                    if (match) {
-                        const channelName = match[1].toLowerCase();
-                        if (!['s', 'joinchat', 'addtheme', 'share', 'c'].includes(channelName)) {
-                            foundChannels.add(channelName);
-                        }
-                    }
-                });
+			try {
+				const searchQuery = `site:t.me ${query}`;
+				const url = `https://html.duckduckgo.com/html/?q=${encodeURIComponent(searchQuery)}`;
+				
+				// Пробуем несколько CORS прокси по очереди
+				const proxies = [
+					`https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
+					`https://corsproxy.io/?${encodeURIComponent(url)}`,
+					`https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`
+				];
+				
+				let html = null;
+				let lastError = null;
+				
+				for (const proxyUrl of proxies) {
+					try {
+						progressBar.style.width = '30%';
+						const response = await fetch(proxyUrl, {
+							headers: {
+								'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+							}
+						});
+						
+						if (response.ok) {
+							html = await response.text();
+							progressBar.style.width = '70%';
+							break;
+						}
+					} catch (e) {
+						lastError = e;
+						continue;
+					}
+				}
+				
+				if (!html) {
+					throw new Error(lastError?.message || 'Все прокси недоступны');
+				}
+				
+				const parser = new DOMParser();
+				const doc = parser.parseFromString(html, 'text/html');
+				const links = doc.querySelectorAll('a[href*="t.me/"]');
+				
+				const foundChannels = new Set();
+				links.forEach(link => {
+					const href = link.getAttribute('href');
+					const match = href.match(/t\.me\/([a-zA-Z0-9_]{3,})/);
+					if (match) {
+						const channelName = match[1].toLowerCase();
+						if (!['s', 'joinchat', 'addtheme', 'share', 'c', 'addstickers'].includes(channelName)) {
+							foundChannels.add(channelName);
+						}
+					}
+				});
 
-                resultsDiv.innerHTML = '';
-                let addedCount = 0;
-                
-                foundChannels.forEach(channelName => {
-                    if (!channels.find(c => c.name === channelName)) {
-                        channels.push({
-                            name: channelName,
-                            category: 'search',
-                            description: `${currentLang === 'ru' ? 'Найдено по запросу' : currentLang === 'uk' ? 'Знайдено за запитом' : 'Found by query'}: ${query}`,
-                            addedAt: new Date().toISOString()
-                        });
-                        addedCount++;
-                    }
-                    
-                    resultsDiv.innerHTML += `
-                        <div class="card" onclick="addManualChannelByName('${channelName}')">
-                            <h3>@${channelName}</h3>
-                            <p>${currentLang === 'ru' ? 'Найдено через поиск' : currentLang === 'uk' ? 'Знайдено через пошук' : 'Found via search'}</p>
-                            <div class="stats">
-                                <span>🔍 ${query}</span>
-                            </div>
-                        </div>
-                    `;
-                });
+				resultsDiv.innerHTML = '';
+				
+				foundChannels.forEach(channelName => {
+					if (!channels.find(c => c.name === channelName)) {
+						channels.push({
+							name: channelName,
+							category: 'search',
+							description: `${currentLang === 'ru' ? 'Найдено по запросу' : currentLang === 'uk' ? 'Знайдено за запитом' : 'Found by query'}: ${query}`,
+							addedAt: new Date().toISOString()
+						});
+					}
+					
+					resultsDiv.innerHTML += `
+						<div class="card" onclick="addManualChannelByName('${channelName}')">
+							<h3>@${channelName}</h3>
+							<p>${currentLang === 'ru' ? 'Найдено через поиск' : currentLang === 'uk' ? 'Знайдено через пошук' : 'Found via search'}</p>
+							<div class="stats">
+								<span>🔍 ${query}</span>
+							</div>
+						</div>
+					`;
+				});
 
-                if (foundChannels.size === 0) {
-                    resultsDiv.innerHTML = `<p style="color: var(--text-secondary);">${currentLang === 'ru' ? 'Ничего не найдено. Попробуйте другие ключевые слова.' : currentLang === 'uk' ? 'Нічого не знайдено. Спробуйте інші ключові слова.' : 'Nothing found. Try different keywords.'}</p>`;
-                } else {
-                    saveState();
-                    renderTags();
-                    updateChannelCount();
-                    log(`✅ ${currentLang === 'ru' ? 'Поиск' : currentLang === 'uk' ? 'Пошук' : 'Search'}: ${currentLang === 'ru' ? 'найдено' : currentLang === 'uk' ? 'знайдено' : 'found'} ${foundChannels.size} ${currentLang === 'ru' ? 'каналов' : currentLang === 'uk' ? 'каналів' : 'channels'}`, 'success');
-                }
-            } catch (error) {
-                resultsDiv.innerHTML = `<p style="color: var(--danger);">${currentLang === 'ru' ? 'Ошибка поиска' : currentLang === 'uk' ? 'Помилка пошуку' : 'Search error'}: ${error.message}</p>`;
-                log(`❌ ${currentLang === 'ru' ? 'Ошибка поиска' : currentLang === 'uk' ? 'Помилка пошуку' : 'Search error'}: ${error.message}`, 'error');
-            }
+				if (foundChannels.size === 0) {
+					resultsDiv.innerHTML = `<p style="color: var(--text-secondary);">${currentLang === 'ru' ? 'Ничего не найдено. Попробуйте другие ключевые слова.' : currentLang === 'uk' ? 'Нічого не знайдено. Спробуйте інші ключові слова.' : 'Nothing found. Try different keywords.'}</p>`;
+				} else {
+					saveState();
+					renderTags();
+					updateChannelCount();
+					log(`✅ ${currentLang === 'ru' ? 'Поиск' : currentLang === 'uk' ? 'Пошук' : 'Search'}: ${currentLang === 'ru' ? 'найдено' : currentLang === 'uk' ? 'знайдено' : 'found'} ${foundChannels.size} ${currentLang === 'ru' ? 'каналов' : currentLang === 'uk' ? 'каналів' : 'channels'}`, 'success');
+				}
+			} catch (error) {
+				resultsDiv.innerHTML = `<p style="color: var(--danger);">${currentLang === 'ru' ? 'Ошибка поиска' : currentLang === 'uk' ? 'Помилка пошуку' : 'Search error'}: ${error.message}</p>`;
+				log(`❌ ${currentLang === 'ru' ? 'Ошибка поиска' : currentLang === 'uk' ? 'Помилка пошуку' : 'Search error'}: ${error.message}`, 'error');
+			}
 
-            progressDiv.style.display = 'none';
-        }
+			progressDiv.style.display = 'none';
+		}
 
         function addManualChannelByName(name) {
             if (!channels.find(c => c.name === name)) {
