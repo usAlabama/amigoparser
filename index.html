@@ -1186,8 +1186,7 @@
             triggerHaptic('medium');
         }
 
-        // --- УМНЫЙ ПОИСК ЧЕРЕЗ DUCKDUCKGO ---
-        // --- УМНЫЙ ПОИСК ЧЕРЕЗ DUCKDUCKGO ---
+        // --- УМНЫЙ ПОИСК КАНАЛОВ (GitHub API + Каталоги) ---
 		async function googleSearch() {
 			const query = document.getElementById('googleSearchInput').value.trim();
 			if (!query) {
@@ -1204,59 +1203,99 @@
 			resultsDiv.innerHTML = `<p style="color: var(--text-secondary);">${currentLang === 'ru' ? 'Поиск...' : currentLang === 'uk' ? 'Пошук...' : 'Searching...'}</p>`;
 
 			try {
-				const searchQuery = `site:t.me ${query}`;
-				const url = `https://html.duckduckgo.com/html/?q=${encodeURIComponent(searchQuery)}`;
-				
-				// Пробуем несколько CORS прокси по очереди
-				const proxies = [
-					`https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
-					`https://corsproxy.io/?${encodeURIComponent(url)}`,
-					`https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`
-				];
-				
-				let html = null;
-				let lastError = null;
-				
-				for (const proxyUrl of proxies) {
-					try {
-						progressBar.style.width = '30%';
-						const response = await fetch(proxyUrl, {
-							headers: {
-								'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
-							}
-						});
-						
-						if (response.ok) {
-							html = await response.text();
-							progressBar.style.width = '70%';
-							break;
-						}
-					} catch (e) {
-						lastError = e;
-						continue;
-					}
-				}
-				
-				if (!html) {
-					throw new Error(lastError?.message || 'Все прокси недоступны');
-				}
-				
-				const parser = new DOMParser();
-				const doc = parser.parseFromString(html, 'text/html');
-				const links = doc.querySelectorAll('a[href*="t.me/"]');
-				
 				const foundChannels = new Set();
-				links.forEach(link => {
-					const href = link.getAttribute('href');
-					const match = href.match(/t\.me\/([a-zA-Z0-9_]{3,})/);
-					if (match) {
-						const channelName = match[1].toLowerCase();
-						if (!['s', 'joinchat', 'addtheme', 'share', 'c', 'addstickers'].includes(channelName)) {
-							foundChannels.add(channelName);
+				
+				// --- МЕТОД 1: GitHub API (самый надежный) ---
+				progressBar.style.width = '20%';
+				try {
+					const githubQuery = `telegram channels ${query} list`;
+					const githubUrl = `https://api.github.com/search/repositories?q=${encodeURIComponent(githubQuery)}&sort=stars&order=desc&per_page=10`;
+					
+					const githubResponse = await fetch(githubUrl, {
+						headers: {
+							'Accept': 'application/vnd.github.v3+json'
+						}
+					});
+					
+					if (githubResponse.ok) {
+						const githubData = await githubResponse.json();
+						progressBar.style.width = '40%';
+						
+						// Парсим README топ-репозиториев
+						for (const repo of githubData.items.slice(0, 5)) {
+							try {
+								const readmeUrl = `https://api.github.com/repos/${repo.full_name}/readme`;
+								const readmeResponse = await fetch(readmeUrl, {
+									headers: {
+										'Accept': 'application/vnd.github.v3.raw'
+									}
+								});
+								
+								if (readmeResponse.ok) {
+									const readmeText = await readmeResponse.text();
+									
+									// Ищем ссылки на Telegram каналы
+									const tmeMatches = readmeText.match(/t\.me\/([a-zA-Z0-9_]{3,})/g) || [];
+									tmeMatches.forEach(match => {
+										const channelName = match.replace('t.me/', '').toLowerCase();
+										if (!['s', 'joinchat', 'addtheme', 'share', 'c', 'addstickers'].includes(channelName)) {
+											foundChannels.add(channelName);
+										}
+									});
+								}
+							} catch (e) {
+								console.log('Error parsing repo:', repo.full_name, e);
+							}
+							await delay(500); // Rate limit
 						}
 					}
-				});
-
+				} catch (githubError) {
+					console.log('GitHub API error:', githubError);
+				}
+				
+				// --- МЕТОД 2: Публичные каталоги (fallback) ---
+				progressBar.style.width = '60%';
+				try {
+					const catalogUrls = [
+						`https://telegramchannels.me/search?q=${encodeURIComponent(query)}`,
+						`https://tgchannels.org/search?q=${encodeURIComponent(query)}`
+					];
+					
+					for (const catalogUrl of catalogUrls) {
+						try {
+							const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(catalogUrl)}`;
+							const response = await fetch(proxyUrl);
+							
+							if (response.ok) {
+								const html = await response.text();
+								const parser = new DOMParser();
+								const doc = parser.parseFromString(html, 'text/html');
+								
+								// Ищем ссылки на каналы
+								const links = doc.querySelectorAll('a[href*="t.me/"]');
+								links.forEach(link => {
+									const href = link.getAttribute('href');
+									const match = href.match(/t\.me\/([a-zA-Z0-9_]{3,})/);
+									if (match) {
+										const channelName = match[1].toLowerCase();
+										if (!['s', 'joinchat', 'addtheme', 'share', 'c', 'addstickers'].includes(channelName)) {
+											foundChannels.add(channelName);
+										}
+									}
+								});
+							}
+						} catch (e) {
+							console.log('Catalog error:', catalogUrl, e);
+						}
+						await delay(1000);
+					}
+				} catch (catalogError) {
+					console.log('Catalog search error:', catalogError);
+				}
+				
+				progressBar.style.width = '100%';
+				
+				// --- РЕНДЕРИНГ РЕЗУЛЬТАТОВ ---
 				resultsDiv.innerHTML = '';
 				
 				foundChannels.forEach(channelName => {
@@ -1286,7 +1325,7 @@
 					saveState();
 					renderTags();
 					updateChannelCount();
-					log(`✅ ${currentLang === 'ru' ? 'Поиск' : currentLang === 'uk' ? 'Пошук' : 'Search'}: ${currentLang === 'ru' ? 'найдено' : currentLang === 'uk' ? 'знайдено' : 'found'} ${foundChannels.size} ${currentLang === 'ru' ? 'каналов' : currentLang === 'uk' ? 'каналів' : 'channels'}`, 'success');
+					log(`✅ ${currentLang === 'ru' ? 'Найдено' : currentLang === 'uk' ? 'Знайдено' : 'Found'} ${foundChannels.size} ${currentLang === 'ru' ? 'каналов' : currentLang === 'uk' ? 'каналів' : 'channels'}`, 'success');
 				}
 			} catch (error) {
 				resultsDiv.innerHTML = `<p style="color: var(--danger);">${currentLang === 'ru' ? 'Ошибка поиска' : currentLang === 'uk' ? 'Помилка пошуку' : 'Search error'}: ${error.message}</p>`;
@@ -1295,45 +1334,6 @@
 
 			progressDiv.style.display = 'none';
 		}
-
-        function addManualChannelByName(name) {
-            if (!channels.find(c => c.name === name)) {
-                channels.push({
-                    name: name,
-                    category: 'manual',
-                    description: currentLang === 'ru' ? 'Добавлен вручную' : currentLang === 'uk' ? 'Додано вручну' : 'Added manually',
-                    addedAt: new Date().toISOString()
-                });
-                saveState();
-                renderTags();
-                updateChannelCount();
-                log(`✅ ${currentLang === 'ru' ? 'Добавлен канал' : currentLang === 'uk' ? 'Додано канал' : 'Added channel'}: @${name}`, 'success');
-                
-                triggerHaptic('medium');
-            }
-        }
-
-        // --- ДОБАВЛЕНИЕ КАНАЛА ВРУЧНУЮ ---
-        function addManualChannel() {
-            const input = document.getElementById('manualChannelInput');
-            const name = input.value.trim().toLowerCase().replace('@', '');
-            
-            if (name && !channels.find(c => c.name === name)) {
-                channels.push({
-                    name: name,
-                    category: 'manual',
-                    description: currentLang === 'ru' ? 'Добавлен вручную' : currentLang === 'uk' ? 'Додано вручну' : 'Added manually',
-                    addedAt: new Date().toISOString()
-                });
-                saveState();
-                renderTags();
-                updateChannelCount();
-                input.value = '';
-                log(`✅ ${currentLang === 'ru' ? 'Добавлен канал' : currentLang === 'uk' ? 'Додано канал' : 'Added channel'}: @${name}`, 'success');
-                
-                triggerHaptic('medium');
-            }
-        }
 
         // --- УПРАВЛЕНИЕ КЛЮЧЕВЫМИ СЛОВАМИ ---
         function addKeyword() {
