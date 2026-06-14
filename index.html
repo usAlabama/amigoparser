@@ -1,0 +1,967 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Telegram Reconnaissance Tool</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #f5f5f7;
+            color: #1d1d1f;
+            min-height: 100vh;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 10px;
+            color: #1d1d1f;
+            font-size: 2em;
+            font-weight: 600;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #86868b;
+            margin-bottom: 30px;
+            font-size: 0.95em;
+        }
+
+        .panel {
+            background: #ffffff;
+            border: 1px solid #d2d2d7;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+        }
+
+        .panel h2 {
+            color: #1d1d1f;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        input[type="text"], select {
+            flex: 1;
+            min-width: 200px;
+            padding: 10px 14px;
+            background: #ffffff;
+            border: 1px solid #d2d2d7;
+            border-radius: 8px;
+            color: #1d1d1f;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        input[type="text"]:focus, select:focus {
+            outline: none;
+            border-color: #0071e3;
+            box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.1);
+        }
+
+        button {
+            padding: 10px 20px;
+            background: #0071e3;
+            color: #ffffff;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        button:hover {
+            background: #0077ed;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 113, 227, 0.3);
+        }
+
+        button:disabled {
+            background: #d2d2d7;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        button.secondary {
+            background: #ffffff;
+            color: #0071e3;
+            border: 1px solid #0071e3;
+        }
+
+        button.secondary:hover {
+            background: #f5f5f7;
+        }
+
+        button.danger {
+            background: #ff3b30;
+        }
+
+        button.danger:hover {
+            background: #ff4539;
+        }
+
+        .tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .tag {
+            background: #f5f5f7;
+            border: 1px solid #d2d2d7;
+            padding: 6px 12px;
+            border-radius: 16px;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #1d1d1f;
+        }
+
+        .tag .remove {
+            cursor: pointer;
+            color: #ff3b30;
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        .tag .remove:hover {
+            color: #ff4539;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .card {
+            background: #ffffff;
+            border: 1px solid #d2d2d7;
+            border-radius: 10px;
+            padding: 15px;
+            transition: all 0.2s;
+        }
+
+        .card:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            transform: translateY(-2px);
+        }
+
+        .card h3 {
+            color: #0071e3;
+            font-size: 1em;
+            margin-bottom: 8px;
+            word-break: break-word;
+        }
+
+        .card p {
+            color: #86868b;
+            font-size: 0.85em;
+            margin-bottom: 10px;
+        }
+
+        .card .stats {
+            display: flex;
+            gap: 15px;
+            font-size: 0.8em;
+            color: #86868b;
+            margin-bottom: 10px;
+        }
+
+        .card .stats span {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .log {
+            background: #ffffff;
+            border: 1px solid #d2d2d7;
+            border-radius: 8px;
+            padding: 15px;
+            max-height: 500px;
+            overflow-y: auto;
+            font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Fira Code', monospace;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        .log-entry {
+            margin-bottom: 12px;
+            padding: 12px;
+            border-left: 3px solid #0071e3;
+            background: #f5f5f7;
+            border-radius: 6px;
+        }
+
+        .log-entry.alert {
+            border-left-color: #ff3b30;
+            background: #fff5f5;
+        }
+
+        .log-entry.success {
+            border-left-color: #34c759;
+            background: #f0fff4;
+        }
+
+        .log-entry .time {
+            color: #86868b;
+            font-size: 11px;
+            margin-bottom: 4px;
+        }
+
+        .log-entry .channel {
+            color: #0071e3;
+            font-weight: 600;
+            font-size: 0.95em;
+        }
+
+        .log-entry .keywords {
+            color: #ff9500;
+            font-size: 0.85em;
+            margin: 4px 0;
+        }
+
+        .log-entry .text {
+            color: #1d1d1f;
+            font-size: 0.9em;
+            margin: 8px 0;
+            line-height: 1.5;
+        }
+
+        .log-entry a {
+            color: #0071e3;
+            text-decoration: none;
+            font-size: 0.85em;
+        }
+
+        .log-entry a:hover {
+            text-decoration: underline;
+        }
+
+        .status-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 15px;
+            background: #ffffff;
+            border: 1px solid #d2d2d7;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 500;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #d2d2d7;
+        }
+
+        .status-dot.active {
+            background: #34c759;
+            box-shadow: 0 0 8px rgba(52, 199, 89, 0.5);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .export-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .warning {
+            background: #fff9e6;
+            border: 1px solid #ffd60a;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 13px;
+            color: #1d1d1f;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #d2d2d7;
+        }
+
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            color: #86868b;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .tab:hover {
+            color: #0071e3;
+        }
+
+        .tab.active {
+            color: #0071e3;
+            border-bottom-color: #0071e3;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .progress {
+            width: 100%;
+            height: 4px;
+            background: #d2d2d7;
+            border-radius: 2px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: #0071e3;
+            transition: width 0.3s;
+            width: 0%;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #86868b;
+        }
+
+        .empty-state .icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Telegram Reconnaissance Tool</h1>
+        <p class="subtitle">Автоматический поиск и мониторинг каналов по ключевым словам</p>
+
+        <div class="warning">
+            ⚠️ <strong>Важно:</strong> Этот инструмент работает только пока открыта вкладка браузера. Результаты сохраняются локально и могут быть экспортированы в JSON/CSV.
+        </div>
+
+        <div class="tabs">
+            <div class="tab active" onclick="switchTab('recon')">🎯 Разведка</div>
+            <div class="tab" onclick="switchTab('monitor')">📡 Мониторинг</div>
+            <div class="tab" onclick="switchTab('results')">📊 Результаты</div>
+        </div>
+
+        <!-- ВКЛАДКА: РАЗВЕДКА -->
+        <div id="recon-tab" class="tab-content active">
+            <div class="panel">
+                <h2>🎯 Поиск каналов по категориям</h2>
+                <p style="color: #86868b; font-size: 0.9em; margin-bottom: 15px;">
+                    Автоматический поиск каналов из публичных каталогов по выбранным тематикам
+                </p>
+                <div class="input-group">
+                    <select id="categorySelect">
+                        <option value="">Выберите категорию...</option>
+                        <option value="crypto">💰 Криптовалюты / Airdrop</option>
+                        <option value="ai">🤖 ИИ / Промпты / ML</option>
+                        <option value="dev">💻 Разработка / Код / CLI</option>
+                        <option value="news">📰 Новости / Политика</option>
+                        <option value="tech">🔧 Технологии / Гаджеты</option>
+                        <option value="business">💼 Бизнес / Стартапы</option>
+                        <option value="education">📚 Образование / Наука</option>
+                        <option value="entertainment">🎬 Развлечения / Кино</option>
+                    </select>
+                    <button onclick="discoverChannels()">🔍 Найти каналы</button>
+                </div>
+                <div class="progress" id="reconProgress" style="display: none;">
+                    <div class="progress-bar" id="reconProgressBar"></div>
+                </div>
+                <div id="discoveredChannels" class="grid"></div>
+            </div>
+
+            <div class="panel">
+                <h2>➕ Добавить канал вручную</h2>
+                <div class="input-group">
+                    <input type="text" id="manualChannelInput" placeholder="Имя канала (без @, например: durov)">
+                    <button onclick="addManualChannel()">Добавить</button>
+                </div>
+            </div>
+
+            <div class="panel">
+                <h2>📋 Найденные каналы (<span id="channelCount">0</span>)</h2>
+                <div class="tags" id="channelTags"></div>
+                <div class="export-buttons">
+                    <button class="secondary" onclick="exportChannels()">💾 Экспорт списка каналов</button>
+                    <button class="danger" onclick="clearChannels()">🗑️ Очистить все</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ВКЛАДКА: МОНИТОРИНГ -->
+        <div id="monitor-tab" class="tab-content">
+            <div class="panel">
+                <h2>🔑 Ключевые слова для поиска</h2>
+                <div class="input-group">
+                    <input type="text" id="keywordInput" placeholder="Ключевое слово или фраза (например: airdrop 2024)">
+                    <button onclick="addKeyword()">Добавить</button>
+                </div>
+                <div class="tags" id="keywordTags"></div>
+            </div>
+
+            <div class="panel">
+                <h2>⚙️ Управление мониторингом</h2>
+                <div class="input-group">
+                    <input type="text" id="intervalInput" placeholder="Интервал проверки (сек)" value="60">
+                    <select id="sortBy">
+                        <option value="date">Сортировка: по дате</option>
+                        <option value="views">Сортировка: по просмотрам</option>
+                    </select>
+                    <button id="startBtn" onclick="startMonitoring()">▶️ Запустить</button>
+                    <button id="stopBtn" class="danger" onclick="stopMonitoring()" disabled>⏹️ Остановить</button>
+                </div>
+                <div class="status-bar">
+                    <div class="status-indicator">
+                        <div class="status-dot" id="statusDot"></div>
+                        <span id="statusText">Остановлено</span>
+                    </div>
+                    <div style="color: #86868b; font-size: 0.85em;">
+                        Найдено совпадений: <strong id="matchCount">0</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ВКЛАДКА: РЕЗУЛЬТАТЫ -->
+        <div id="results-tab" class="tab-content">
+            <div class="panel">
+                <h2>📊 Найденные совпадения</h2>
+                <div class="export-buttons" style="margin-bottom: 15px;">
+                    <button class="secondary" onclick="exportResults('json')">💾 Экспорт в JSON</button>
+                    <button class="secondary" onclick="exportResults('csv')">📄 Экспорт в CSV</button>
+                    <button class="danger" onclick="clearResults()">🗑️ Очистить результаты</button>
+                </div>
+                <div class="log" id="resultsLog">
+                    <div class="empty-state">
+                        <div class="icon">📭</div>
+                        <p>Пока нет результатов. Запустите мониторинг во вкладке "Мониторинг".</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- СОСТОЯНИЕ ПРИЛОЖЕНИЯ ---
+        let channels = JSON.parse(localStorage.getItem('tg_channels') || '[]');
+        let keywords = JSON.parse(localStorage.getItem('tg_keywords') || '[]');
+        let results = JSON.parse(localStorage.getItem('tg_results') || '[]');
+        let seenMessages = new Set(JSON.parse(localStorage.getItem('tg_seen') || '[]'));
+        let monitoringInterval = null;
+        let isRunning = false;
+
+        const CORS_PROXY = 'https://api.allorigins.win/raw?url=';
+
+        // --- КАТЕГОРИИ КАНАЛОВ (база данных для разведки) ---
+        const CHANNEL_DATABASE = {
+            crypto: [
+                { name: 'crypto', desc: 'Криптовалюты и блокчейн' },
+                { name: 'binance', desc: 'Binance новости' },
+                { name: 'coinmarketcap', desc: 'CoinMarketCap' },
+                { name: 'defi', desc: 'DeFi и DeFi протоколы' },
+                { name: 'airdrop_alert', desc: 'Airdrop уведомления' },
+                { name: 'crypto_signals', desc: 'Крипто сигналы' }
+            ],
+            ai: [
+                { name: 'ai_news', desc: 'ИИ новости' },
+                { name: 'machinelearning', desc: 'Machine Learning' },
+                { name: 'prompt_engineering', desc: 'Промпт инжиниринг' },
+                { name: 'chatgpt', desc: 'ChatGPT и LLM' },
+                { name: 'artificial_intelligence', desc: 'Искусственный интеллект' }
+            ],
+            dev: [
+                { name: 'programming', desc: 'Программирование' },
+                { name: 'javascript', desc: 'JavaScript разработка' },
+                { name: 'python', desc: 'Python разработка' },
+                { name: 'devops', desc: 'DevOps и инфраструктура' },
+                { name: 'github', desc: 'GitHub проекты' }
+            ],
+            news: [
+                { name: 'breaking_news', desc: 'Срочные новости' },
+                { name: 'world_news', desc: 'Мировые новости' },
+                { name: 'politics', desc: 'Политика' }
+            ],
+            tech: [
+                { name: 'tech_news', desc: 'Технологические новости' },
+                { name: 'gadgets', desc: 'Гаджеты и устройства' },
+                { name: 'apple', desc: 'Apple новости' },
+                { name: 'google', desc: 'Google новости' }
+            ],
+            business: [
+                { name: 'startup', desc: 'Стартапы' },
+                { name: 'business_news', desc: 'Бизнес новости' },
+                { name: 'entrepreneur', desc: 'Предпринимательство' }
+            ],
+            education: [
+                { name: 'science', desc: 'Наука' },
+                { name: 'education', desc: 'Образование' },
+                { name: 'learning', desc: 'Обучение' }
+            ],
+            entertainment: [
+                { name: 'movies', desc: 'Кино и сериалы' },
+                { name: 'music', desc: 'Музыка' },
+                { name: 'gaming', desc: 'Игры' }
+            ]
+        };
+
+        // --- ИНИЦИАЛИЗАЦИЯ ---
+        function init() {
+            renderTags();
+            renderResults();
+            updateChannelCount();
+            updateMatchCount();
+            log('🚀 Инструмент готов к работе. Начните с вкладки "Разведка".', 'info');
+        }
+
+        // --- ПЕРЕКЛЮЧЕНИЕ ВКЛАДОК ---
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            
+            event.target.classList.add('active');
+            document.getElementById(`${tabName}-tab`).classList.add('active');
+        }
+
+        // --- РАЗВЕДКА: ПОИСК КАНАЛОВ ---
+        async function discoverChannels() {
+            const category = document.getElementById('categorySelect').value;
+            if (!category) {
+                alert('Выберите категорию!');
+                return;
+            }
+
+            const progressDiv = document.getElementById('reconProgress');
+            const progressBar = document.getElementById('reconProgressBar');
+            const channelsDiv = document.getElementById('discoveredChannels');
+            
+            progressDiv.style.display = 'block';
+            progressBar.style.width = '0%';
+            channelsDiv.innerHTML = '';
+
+            const categoryChannels = CHANNEL_DATABASE[category] || [];
+            let addedCount = 0;
+
+            for (let i = 0; i < categoryChannels.length; i++) {
+                const channel = categoryChannels[i];
+                
+                // Проверяем, не добавлен ли уже
+                if (!channels.find(c => c.name === channel.name)) {
+                    channels.push({
+                        name: channel.name,
+                        category: category,
+                        description: channel.desc,
+                        addedAt: new Date().toISOString()
+                    });
+                    addedCount++;
+                }
+
+                // Обновляем прогресс
+                const progress = ((i + 1) / categoryChannels.length) * 100;
+                progressBar.style.width = `${progress}%`;
+                
+                // Рендерим карточку
+                channelsDiv.innerHTML += `
+                    <div class="card">
+                        <h3>@${channel.name}</h3>
+                        <p>${channel.desc}</p>
+                        <div class="stats">
+                            <span>📁 ${category}</span>
+                        </div>
+                    </div>
+                `;
+
+                await delay(200);
+            }
+
+            saveState();
+            renderTags();
+            updateChannelCount();
+            
+            progressDiv.style.display = 'none';
+            log(`✅ Найдено и добавлено ${addedCount} каналов в категории "${category}"`, 'success');
+        }
+
+        // --- ДОБАВЛЕНИЕ КАНАЛА ВРУЧНУЮ ---
+        function addManualChannel() {
+            const input = document.getElementById('manualChannelInput');
+            const name = input.value.trim().toLowerCase().replace('@', '');
+            
+            if (name && !channels.find(c => c.name === name)) {
+                channels.push({
+                    name: name,
+                    category: 'manual',
+                    description: 'Добавлен вручную',
+                    addedAt: new Date().toISOString()
+                });
+                saveState();
+                renderTags();
+                updateChannelCount();
+                input.value = '';
+                log(`✅ Добавлен канал: @${name}`, 'success');
+            }
+        }
+
+        // --- УПРАВЛЕНИЕ КЛЮЧЕВЫМИ СЛОВАМИ ---
+        function addKeyword() {
+            const input = document.getElementById('keywordInput');
+            const keyword = input.value.trim().toLowerCase();
+            
+            if (keyword && !keywords.includes(keyword)) {
+                keywords.push(keyword);
+                saveState();
+                renderTags();
+                input.value = '';
+                log(`✅ Добавлено ключевое слово: "${keyword}"`, 'success');
+            }
+        }
+
+        function removeKeyword(keyword) {
+            keywords = keywords.filter(k => k !== keyword);
+            saveState();
+            renderTags();
+        }
+
+        // --- УДАЛЕНИЕ КАНАЛА ---
+        function removeChannel(name) {
+            channels = channels.filter(c => c.name !== name);
+            saveState();
+            renderTags();
+            updateChannelCount();
+        }
+
+        // --- РЕНДЕРИНГ ТЕГОВ ---
+        function renderTags() {
+            const channelTags = document.getElementById('channelTags');
+            channelTags.innerHTML = channels.map(c => `
+                <div class="tag">
+                    @${c.name}
+                    <span class="remove" onclick="removeChannel('${c.name}')">×</span>
+                </div>
+            `).join('');
+
+            const keywordTags = document.getElementById('keywordTags');
+            keywordTags.innerHTML = keywords.map(k => `
+                <div class="tag">
+                    ${k}
+                    <span class="remove" onclick="removeKeyword('${k}')">×</span>
+                </div>
+            `).join('');
+        }
+
+        // --- СОХРАНЕНИЕ СОСТОЯНИЯ ---
+        function saveState() {
+            localStorage.setItem('tg_channels', JSON.stringify(channels));
+            localStorage.setItem('tg_keywords', JSON.stringify(keywords));
+            localStorage.setItem('tg_results', JSON.stringify(results));
+            localStorage.setItem('tg_seen', JSON.stringify(Array.from(seenMessages)));
+        }
+
+        // --- ЛОГИРОВАНИЕ ---
+        function log(message, type = 'info') {
+            console.log(`[${type.toUpperCase()}] ${message}`);
+        }
+
+        // --- ОБНОВЛЕНИЕ СЧЕТЧИКОВ ---
+        function updateChannelCount() {
+            document.getElementById('channelCount').textContent = channels.length;
+        }
+
+        function updateMatchCount() {
+            document.getElementById('matchCount').textContent = results.length;
+        }
+
+        // --- ПАРСИНГ КАНАЛА ---
+        async function parseChannel(channelName) {
+            const url = `https://t.me/s/${channelName}`;
+            const proxyUrl = CORS_PROXY + encodeURIComponent(url);
+            
+            try {
+                const response = await fetch(proxyUrl);
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                
+                const html = await response.text();
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const messages = [];
+
+                doc.querySelectorAll('.tgme_widget_message').forEach(el => {
+                    const textEl = el.querySelector('.tgme_widget_message_text');
+                    const text = textEl ? textEl.textContent.trim() : '';
+                    const postId = el.getAttribute('data-post');
+                    const dateEl = el.querySelector('.tgme_widget_message_date time');
+                    const date = dateEl ? dateEl.getAttribute('datetime') : 'Неизвестно';
+                    const viewsEl = el.querySelector('.tgme_widget_message_views');
+                    const views = viewsEl ? viewsEl.textContent.trim() : '0';
+                    
+                    if (text && postId) {
+                        messages.push({
+                            text,
+                            postId,
+                            date,
+                            views,
+                            url: `https://t.me/${postId}`
+                        });
+                    }
+                });
+
+                return messages.reverse();
+            } catch (error) {
+                log(`❌ Ошибка парсинга @${channelName}: ${error.message}`, 'error');
+                return [];
+            }
+        }
+
+        // --- ПРОВЕРКА КЛЮЧЕВЫХ СЛОВ ---
+        function checkKeywords(messages, channelName) {
+            const sortBy = document.getElementById('sortBy').value;
+            let newResults = [];
+
+            for (const msg of messages) {
+                if (seenMessages.has(msg.postId)) continue;
+
+                const lowerText = msg.text.toLowerCase();
+                const foundKeywords = keywords.filter(kw => lowerText.includes(kw));
+
+                if (foundKeywords.length > 0) {
+                    newResults.push({
+                        channel: channelName,
+                        text: msg.text,
+                        date: msg.date,
+                        views: msg.views,
+                        url: msg.url,
+                        keywords: foundKeywords,
+                        foundAt: new Date().toISOString()
+                    });
+                }
+                
+                seenMessages.add(msg.postId);
+            }
+
+            // Сортировка
+            if (sortBy === 'views') {
+                newResults.sort((a, b) => {
+                    const viewsA = parseInt(a.views.replace(/\s|K|M/g, '')) || 0;
+                    const viewsB = parseInt(b.views.replace(/\s|K|M/g, '')) || 0;
+                    return viewsB - viewsA;
+                });
+            } else {
+                newResults.sort((a, b) => new Date(b.date) - new Date(a.date));
+            }
+
+            results = [...newResults, ...results];
+            saveState();
+            renderResults();
+            updateMatchCount();
+
+            return newResults.length;
+        }
+
+        // --- РЕНДЕРИНГ РЕЗУЛЬТАТОВ ---
+        function renderResults() {
+            const logDiv = document.getElementById('resultsLog');
+            
+            if (results.length === 0) {
+                logDiv.innerHTML = `
+                    <div class="empty-state">
+                        <div class="icon">📭</div>
+                        <p>Пока нет результатов. Запустите мониторинг во вкладке "Мониторинг".</p>
+                    </div>
+                `;
+                return;
+            }
+
+            logDiv.innerHTML = results.map(r => `
+                <div class="log-entry alert">
+                    <div class="time">${new Date(r.foundAt).toLocaleString('ru-RU')}</div>
+                    <div class="channel">📡 Канал: @${r.channel}</div>
+                    <div class="keywords">🔑 Ключевые слова: ${r.keywords.join(', ')}</div>
+                    <div class="text">${r.text.substring(0, 300)}${r.text.length > 300 ? '...' : ''}</div>
+                    <div style="display: flex; gap: 15px; font-size: 0.8em; color: #86868b; margin-top: 8px;">
+                        <span>📅 ${new Date(r.date).toLocaleString('ru-RU')}</span>
+                        <span>👁️ ${r.views} просмотров</span>
+                    </div>
+                    <a href="${r.url}" target="_blank">🔗 Открыть сообщение</a>
+                </div>
+            `).join('');
+        }
+
+        // --- ЗАПУСК МОНИТОРИНГА ---
+        async function startMonitoring() {
+            if (channels.length === 0) {
+                alert('Добавьте каналы во вкладке "Разведка"!');
+                return;
+            }
+            if (keywords.length === 0) {
+                alert('Добавьте ключевые слова во вкладке "Мониторинг"!');
+                return;
+            }
+
+            isRunning = true;
+            document.getElementById('startBtn').disabled = true;
+            document.getElementById('stopBtn').disabled = false;
+            document.getElementById('statusDot').classList.add('active');
+            document.getElementById('statusText').textContent = 'Мониторинг активен';
+
+            log('🚀 Начинаю мониторинг...', 'info');
+
+            // Первичный прогон
+            log('⏳ Выполняю первичный сбор данных...', 'info');
+            for (const channel of channels) {
+                const messages = await parseChannel(channel.name);
+                messages.forEach(msg => seenMessages.add(msg.postId));
+                await delay(1000);
+            }
+            saveState();
+            log('✅ Калибровка завершена. Активный мониторинг начат.', 'success');
+
+            // Циклический мониторинг
+            const intervalSec = parseInt(document.getElementById('intervalInput').value) || 60;
+            monitoringInterval = setInterval(async () => {
+                if (!isRunning) return;
+                
+                for (const channel of channels) {
+                    if (!isRunning) break;
+                    const messages = await parseChannel(channel.name);
+                    const found = checkKeywords(messages, channel.name);
+                    if (found > 0) {
+                        log(`🚨 Найдено ${found} совпадений в @${channel.name}`, 'alert');
+                    }
+                    await delay(1500);
+                }
+            }, intervalSec * 1000);
+        }
+
+        // --- ОСТАНОВКА МОНИТОРИНГА ---
+        function stopMonitoring() {
+            isRunning = false;
+            if (monitoringInterval) {
+                clearInterval(monitoringInterval);
+                monitoringInterval = null;
+            }
+            document.getElementById('startBtn').disabled = false;
+            document.getElementById('stopBtn').disabled = true;
+            document.getElementById('statusDot').classList.remove('active');
+            document.getElementById('statusText').textContent = 'Остановлено';
+            log('⏹️ Мониторинг остановлен.', 'info');
+        }
+
+        // --- ЭКСПОРТ ---
+        function exportChannels() {
+            const data = JSON.stringify(channels, null, 2);
+            downloadFile(data, 'channels.json', 'application/json');
+        }
+
+        function exportResults(format) {
+            if (format === 'json') {
+                const data = JSON.stringify(results, null, 2);
+                downloadFile(data, 'results.json', 'application/json');
+            } else if (format === 'csv') {
+                const csv = [
+                    ['Дата находки', 'Канал', 'Дата сообщения', 'Просмотры', 'Ключевые слова', 'Текст', 'Ссылка'],
+                    ...results.map(r => [
+                        r.foundAt,
+                        r.channel,
+                        r.date,
+                        r.views,
+                        r.keywords.join('; '),
+                        r.text.replace(/,/g, ';'),
+                        r.url
+                    ])
+                ].map(row => row.join(',')).join('\n');
+                downloadFile(csv, 'results.csv', 'text/csv');
+            }
+        }
+
+        function downloadFile(content, filename, mimeType) {
+            const blob = new Blob([content], { type: mimeType });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // --- ОЧИСТКА ---
+        function clearChannels() {
+            if (confirm('Удалить все каналы?')) {
+                channels = [];
+                saveState();
+                renderTags();
+                updateChannelCount();
+                document.getElementById('discoveredChannels').innerHTML = '';
+            }
+        }
+
+        function clearResults() {
+            if (confirm('Удалить все результаты?')) {
+                results = [];
+                saveState();
+                renderResults();
+                updateMatchCount();
+            }
+        }
+
+        // --- УТИЛИТЫ ---
+        function delay(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        // --- СТАРТ ---
+        init();
+    </script>
+</body>
+</html>
