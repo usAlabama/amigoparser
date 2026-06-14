@@ -45,15 +45,13 @@
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
-        /* ТЕМНЫЕ И НЕВИДИМЫЕ СКРОЛЛЫ */
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
         ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
         * { scrollbar-width: thin; scrollbar-color: var(--border) transparent; }
 
-        /* DRAG-TO-SCROLL CLASS */
-        .drag-scroll { cursor: grab; overflow: auto; }
+        .drag-scroll { cursor: grab; overflow-x: auto; overflow-y: hidden; }
         .drag-scroll:active { cursor: grabbing; }
 
         body {
@@ -88,7 +86,6 @@
 
         .subtitle { color: var(--text-secondary); margin-bottom: 15px; font-size: 0.95em; }
 
-        /* БЕГУЩАЯ СТРОКА (TICKER) */
         .ticker-wrap {
             width: 100%; min-width: 300px; overflow: hidden; background: var(--bg-secondary);
             border: 1px solid var(--border); border-radius: var(--radius);
@@ -122,7 +119,7 @@
 
         .input-group { display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap; }
 
-        input[type="text"], input[type="number"], input[type="url"], select, textarea {
+        input[type="text"], input[type="number"], input[type="url"], input[type="password"], select, textarea {
             flex: 1; min-width: 200px; padding: 10px 14px;
             background: var(--bg-primary); border: 1px solid var(--border);
             border-radius: var(--radius); color: var(--text-primary);
@@ -174,6 +171,7 @@
             background: var(--bg-primary); border: 1px solid var(--border);
             border-radius: var(--radius); padding: 15px; max-height: 600px;
             font-family: var(--font-mono); font-size: 13px;
+            overflow-y: auto;
         }
 
         .log-entry {
@@ -229,6 +227,16 @@
         .source-toggle { display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 0.9em; font-weight: 500;}
         .source-toggle input { width: 16px; height: 16px; accent-color: var(--accent); }
 
+        .warning-box {
+            background: rgba(255, 193, 7, 0.1);
+            border: 1px solid var(--warning);
+            border-radius: var(--radius);
+            padding: 12px;
+            margin-bottom: 15px;
+            font-size: 0.9em;
+            color: var(--text-primary);
+        }
+        .warning-box strong { color: var(--warning); }
     </style>
 </head>
 <body>
@@ -237,9 +245,8 @@
             <h1>🅰️ Amigo Recon <span class="badge">v. STEALTH</span></h1>
             <button class="theme-toggle" onclick="toggleTheme()" id="themeIcon">🌙</button>
         </div>
-        <p class="subtitle">Мульти-источниковый поиск</p>
-
-        <!-- БЕГУЩАЯ СТРОКА RSS -->
+        <p class="subtitle">Мульти-источниковый поиск и мониторинг</p>
+        
         <div class="ticker-wrap">
             <div class="ticker-label">INTEL</div>
             <div class="ticker" id="tickerContent">
@@ -260,10 +267,10 @@
                 <h2>🔎 Умный Поиск (Глобальный)</h2>
                 <p style="color: var(--text-secondary); font-size: 0.9em; margin-bottom: 15px;">Поиск каналов в Telegram (через GitHub API) и мгновенный поиск информации по внешним базам.</p>
                 <div class="source-toggles">
-                    <label class="source-toggle"><input type="checkbox" id="srcTG" checked> Telegram (через GitHub)</label>
-                    <label class="source-toggle"><input type="checkbox" id="srcHN" checked> Hacker News</label>
-                    <label class="source-toggle"><input type="checkbox" id="srcDev"> Dev.to</label>
-					<label class="source-toggle"><input type="checkbox" id="monReddit" checked> Reddit</label>
+                    <label class="source-toggle"> <input type="checkbox" id="srcTG" checked> Telegram (через GitHub) </label>
+                    <label class="source-toggle"> <input type="checkbox" id="srcHN" checked> Hacker News </label>
+                    <label class="source-toggle"> <input type="checkbox" id="srcDev"> Dev.to </label>
+                    <label class="source-toggle"> <input type="checkbox" id="srcReddit" checked> Reddit </label>
                 </div>
                 <div class="input-group">
                     <input type="text" id="googleSearchInput" placeholder="Запрос (например: automation bypass, airdrop script)">
@@ -286,20 +293,19 @@
                     <div class="tags" id="channelTags"></div>
                 </div>
             </div>
-			
-			<div class="panel">
-				<h2>➕ Управление Reddit Сабреддитами</h2>
-				<div class="input-group">
-					<input type="text" id="manualRedditInput" placeholder="Имя сабреддита (например: netsec, crypto)">
-					<button onclick="addManualReddit()">Добавить Reddit</button>
-				</div>
-				<div style="margin-top: 15px; border-top: 1px solid var(--border); padding-top: 15px;">
-					<h3 style="font-size: 1em; margin-bottom: 10px;">Цели для мониторинга (<span id="redditCount">0</span>)</h3>
-					<div class="tags" id="redditTags"></div>
-				</div>
-			</div>
+            
+            <div class="panel">
+                <h2>➕ Управление Reddit Сабреддитами</h2>
+                <div class="input-group">
+                    <input type="text" id="manualRedditInput" placeholder="Имя сабреддита (например: netsec, crypto)">
+                    <button onclick="addManualReddit()">Добавить Reddit</button>
+                </div>
+                <div style="margin-top: 15px; border-top: 1px solid var(--border); padding-top: 15px;">
+                    <h3 style="font-size: 1em; margin-bottom: 10px;">Цели для мониторинга (<span id="redditCount">0</span>)</h3>
+                    <div class="tags" id="redditTags"></div>
+                </div>
+            </div>
         </div>
-				
 
         <!-- ВКЛАДКА: МОНИТОРИНГ -->
         <div id="monitor-tab" class="tab-content">
@@ -316,23 +322,23 @@
                 <h2>⚙️ Панель управления (Stealth Mode)</h2>
                 <div class="source-toggles" style="background: var(--bg-primary); padding: 10px; border-radius: var(--radius); margin-bottom: 15px;">
                     <strong style="font-size: 0.9em; margin-right: 10px;">Активные источники:</strong>
-                    <label class="source-toggle"><input type="checkbox" id="monTG" checked> Telegram Каналы</label>
-                    <label class="source-toggle"><input type="checkbox" id="monHN" checked> Hacker News (Live)</label>
-                    <label class="source-toggle"><input type="checkbox" id="monDev" checked> Dev.to (Live)</label>
-					<label class="source-toggle"><input type="checkbox" id="monReddit" checked> Reddit</label>
+                    <label class="source-toggle"> <input type="checkbox" id="monTG" checked> Telegram Каналы </label>
+                    <label class="source-toggle"> <input type="checkbox" id="monHN" checked> Hacker News (Live) </label>
+                    <label class="source-toggle"> <input type="checkbox" id="monDev" checked> Dev.to (Live) </label>
+                    <label class="source-toggle"> <input type="checkbox" id="monReddit" checked> Reddit </label>
                 </div>
                 <div class="input-group">
-				<div style="flex: 1; min-width: 200px;">
-					<input type="number" id="intervalInput" value="60" min="30">
-					<small style="display:block; color:var(--text-secondary); margin-top:4px;">Интервал (сек)</small>
-				</div>
-				<div style="flex: 1; min-width: 200px;">
-					<input type="number" id="autoStopInput" value="15" min="1">
-					<small style="display:block; color:var(--text-secondary); margin-top:4px;">Автостоп (мин)</small>
-				</div>
-				<button id="startBtn" onclick="startMonitoring()">▶️ Запуск</button>
-				<button id="stopBtn" class="danger" onclick="stopMonitoring()" disabled>⏹️ Стоп</button>
-			</div>
+                    <div style="flex: 1; min-width: 200px;">
+                        <input type="number" id="intervalInput" value="60" min="30">
+                        <small style="display:block; color:var(--text-secondary); margin-top:4px;">Интервал (сек)</small>
+                    </div>
+                    <div style="flex: 1; min-width: 200px;">
+                        <input type="number" id="autoStopInput" value="15" min="1">
+                        <small style="display:block; color:var(--text-secondary); margin-top:4px;">Автостоп (мин)</small>
+                    </div>
+                    <button id="startBtn" onclick="startMonitoring()">▶️ Запуск</button>
+                    <button id="stopBtn" class="danger" onclick="stopMonitoring()" disabled>⏹️ Стоп</button>
+                </div>
                 <div class="status-bar">
                     <div class="status-indicator">
                         <div class="status-dot" id="statusDot"></div>
@@ -368,6 +374,18 @@
         <!-- ВКЛАДКА: НАСТРОЙКИ -->
         <div id="settings-tab" class="tab-content">
             <div class="panel">
+                <h2>🔑 GitHub API Token (для поиска по коду)</h2>
+                <div class="warning-box">
+                    <strong>⚠️ Важно:</strong> GitHub требует авторизацию для поиска по коду. Создай Personal Access Token на <a href="https://github.com/settings/tokens" target="_blank" style="color: var(--accent);">github.com/settings/tokens</a> с правами <code>repo</code> и вставь сюда.
+                </div>
+                <div class="input-group">
+                    <input type="password" id="githubTokenInput" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx">
+                    <button onclick="saveGithubToken()">💾 Сохранить</button>
+                </div>
+                <p style="color: var(--text-secondary); font-size: 0.85em; margin-top: 10px;" id="githubTokenStatus"></p>
+            </div>
+
+            <div class="panel">
                 <h2>📡 Кастомная RSS Лента (Тикер)</h2>
                 <p style="color: var(--text-secondary); font-size: 0.9em; margin-bottom: 15px;">
                     Вставь одну или несколько ссылок через запятую и пробел. Оставь пустым для дефолтного Hacker News.
@@ -376,7 +394,7 @@
                     <input type="url" id="customRssInput" placeholder="https://xakep.ru/feed/">
                     <button onclick="saveRssSettings()">💾 Сохранить</button>
                 </div>
-				<div class="tags" id="rssTags" style="margin-top: 10px;"></div>
+                <div class="tags" id="rssTags" style="margin-top: 10px;"></div>
             </div>
 
             <div class="panel">
@@ -398,7 +416,9 @@
     <script>
         // --- ИНИЦИАЛИЗАЦИЯ И ТЕМА ---
         let tg = window.Telegram?.WebApp;
-        if (tg) { tg.ready(); tg.expand(); }
+        if (tg) { 
+            try { tg.ready(); tg.expand(); } catch(e) {} 
+        }
 
         function toggleTheme() {
             const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
@@ -415,8 +435,11 @@
         }
 
         function triggerHaptic(type) {
-            if (tg && tg.HapticFeedback && parseFloat(tg.version) >= 6.1) {
-                try { tg.HapticFeedback.impactOccurred(type); } catch (e) {}
+            if (tg && tg.HapticFeedback) {
+                try { 
+                    const version = parseFloat(tg.version || '6.0');
+                    if (version >= 6.1) tg.HapticFeedback.impactOccurred(type); 
+                } catch (e) {}
             }
         }
 
@@ -428,7 +451,7 @@
             triggerHaptic('light');
         }
 
-        // --- DRAG TO SCROLL (Telegram Style) ---
+        // --- DRAG TO SCROLL ---
         function enableDragScroll() {
             const sliders = document.querySelectorAll('.drag-scroll');
             sliders.forEach(slider => {
@@ -461,7 +484,7 @@
 
         // --- СОСТОЯНИЕ ДАННЫХ ---
         let channels = JSON.parse(localStorage.getItem('amigo_channels') || '[]');
-		let reddits = JSON.parse(localStorage.getItem('amigo_reddits') || '[]');
+        let reddits = JSON.parse(localStorage.getItem('amigo_reddits') || '[]');
         let keywords = JSON.parse(localStorage.getItem('amigo_keywords') || '[]');
         let results = JSON.parse(localStorage.getItem('amigo_results') || '[]');
         let seenMessages = new Set(JSON.parse(localStorage.getItem('amigo_seen') || '[]'));
@@ -469,18 +492,21 @@
         let killSwitchTimeout = null;
         let isRunning = false;
 
-        // ПУЛ ПРОКСИ (Борьба с CORS для Telegram)
+        // ПУЛ ПРОКСИ (Борьба с CORS)
         const PROXIES = [
             url => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
             url => `https://corsproxy.io/?${encodeURIComponent(url)}`,
             url => `https://api.codetabs.com/v1/proxy/?quest=${encodeURIComponent(url)}`
         ];
 
-        async function fetchWithFallback(url) {
+        async function fetchWithFallback(url, options = {}) {
             for (let i = 0; i < PROXIES.length; i++) {
                 try {
                     const proxyUrl = PROXIES[i](url);
-                    const response = await fetch(proxyUrl, { timeout: 15000 });
+                    const response = await fetch(proxyUrl, { 
+                        ...options,
+                        signal: AbortSignal.timeout(15000) 
+                    });
                     if (response.ok) return await response.text();
                 } catch (e) {
                     console.warn(`Proxy ${i + 1} failed for ${url}`);
@@ -489,55 +515,74 @@
             throw new Error(`All CORS proxies failed for ${url}`);
         }
 
+        async function fetchJsonWithFallback(url) {
+            const text = await fetchWithFallback(url);
+            return JSON.parse(text);
+        }
+
+        // --- GITHUB TOKEN ---
+        function saveGithubToken() {
+            const token = document.getElementById('githubTokenInput').value.trim();
+            if (token) {
+                localStorage.setItem('amigo_github_token', token);
+                document.getElementById('githubTokenInput').value = '';
+                updateGithubTokenStatus();
+                alert('GitHub Token сохранён!');
+            }
+        }
+
+        function updateGithubTokenStatus() {
+            const token = localStorage.getItem('amigo_github_token');
+            const statusEl = document.getElementById('githubTokenStatus');
+            if (token) {
+                statusEl.innerHTML = `✅ <strong>Token установлен:</strong> ${token.substring(0, 8)}...${token.substring(token.length - 4)}`;
+            } else {
+                statusEl.innerHTML = `❌ <strong>Token не установлен.</strong> Поиск по коду GitHub будет пропущен.`;
+            }
+        }
+
         // --- TICKER LOGIC (RSS) ---
         async function loadTicker() {
-		    // 1. СНАЧАЛА объявляем элемент (DOM-элемент должен существовать)
-			const tickerEl = document.getElementById('tickerContent');
-			// Берем из localStorage, если пусто или массив пуст — дефолт HN
-			const saved = localStorage.getItem('amigo_rssFeeds');
-			const parsed = saved ? JSON.parse(saved) : [];
-			const feeds = parsed.length > 0 ? parsed : ['https://hnrss.org/frontpage'];
-			
-			// Инициализация при первом запуске
-			document.getElementById('customRssInput').placeholder = "https://url1.com/rss, https://url2.com/rss";
+            const tickerEl = document.getElementById('tickerContent');
+            const saved = localStorage.getItem('amigo_rssFeeds');
+            const parsed = saved ? JSON.parse(saved) : [];
+            const feeds = parsed.length > 0 ? parsed : ['https://hnrss.org/frontpage'];
+            
+            document.getElementById('customRssInput').placeholder = "https://url1.com/rss, https://url2.com/rss";
 
-			let allItems = [];
-			for (let url of feeds) {
-				try {
-					const res = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(url)}`);
-					const data = await res.json();
-					if (data.items) allItems = allItems.concat(data.items);
-				} catch (e) { console.error('Ошибка ленты:', url); }
-			}
+            let allItems = [];
+            for (let url of feeds) {
+                try {
+                    const res = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(url)}`);
+                    const data = await res.json();
+                    if (data.items) allItems = allItems.concat(data.items);
+                } catch (e) { console.error('Ошибка ленты:', url); }
+            }
 
-			if (allItems.length > 0) {
-				// Перемешиваем, чтобы ленты шли вперемешку, или оставляем как есть
-				let html = allItems.map(item => 
-					`<a href="${item.link}" target="_blank" class="ticker-item">⚡ ${item.title}</a>`
-				).join('');
-				tickerEl.innerHTML = html;
-			} else {
-				tickerEl.innerHTML = '<span class="ticker-item">[!] Нет данных от источников.</span>';
-			}
-		}
+            if (allItems.length > 0) {
+                let html = allItems.map(item => 
+                    `<a href="${item.link}" target="_blank" class="ticker-item">⚡ ${item.title}</a>`
+                ).join('');
+                tickerEl.innerHTML = html;
+            } else {
+                tickerEl.innerHTML = '<span class="ticker-item">[!] Нет данных от источников.</span>';
+            }
+        }
         
         function saveRssSettings() {
-			const val = document.getElementById('customRssInput').value.trim();
-			if (!val) return; // Если пусто, ничего не делаем
+            const val = document.getElementById('customRssInput').value.trim();
+            if (!val) return;
 
-			// Получаем текущие или создаем пустой массив
-			let currentFeeds = JSON.parse(localStorage.getItem('amigo_rssFeeds') || '[]');
-			
-			// Добавляем новые (если ввели через запятую - split и concat)
-			const newItems = val.split(',').map(s => s.trim());
-			const updatedFeeds = [...new Set([...currentFeeds, ...newItems])]; // Set убирает дубли
-			
-			localStorage.setItem('amigo_rssFeeds', JSON.stringify(updatedFeeds));
-			document.getElementById('customRssInput').value = ''; // Чистим поле ввода
-			loadTicker();
-			renderRssTags();
-			alert('Источник добавлен!');
-		}
+            let currentFeeds = JSON.parse(localStorage.getItem('amigo_rssFeeds') || '[]');
+            const newItems = val.split(',').map(s => s.trim()).filter(s => s.length > 0);
+            const updatedFeeds = [...new Set([...currentFeeds, ...newItems])];
+            
+            localStorage.setItem('amigo_rssFeeds', JSON.stringify(updatedFeeds));
+            document.getElementById('customRssInput').value = '';
+            loadTicker();
+            renderRssTags();
+            alert('Источник добавлен!');
+        }
         
         loadTicker();
 
@@ -547,7 +592,7 @@
             if (!query) return alert('Введите запрос!');
 
             const srcTG = document.getElementById('srcTG').checked;
-			const srcReddit = document.getElementById('srcReddit').checked;
+            const srcReddit = document.getElementById('srcReddit').checked;
             const srcHN = document.getElementById('srcHN').checked;
             const srcDev = document.getElementById('srcDev').checked;
 
@@ -587,57 +632,74 @@
                 } catch (e) { console.error('Dev.to Search error', e); }
                 progressBar.style.width = '70%';
             }
-			
-			// Внутри функции globalSearch(), после блока с Dev.to:
-			if (document.getElementById('srcReddit').checked) {
-				try {
-					// Используем открытый JSON-API Реддита (без ключей, работает быстро)
-					const redditRes = await fetch(`https://www.reddit.com/search.json?q=${encodeURIComponent(query)}&limit=5`);
-					if (redditRes.ok) {
-						const redditData = await redditRes.json();
-						redditData.data.children.forEach(post => {
-							resultsDiv.innerHTML += renderSearchCard('Reddit', post.data.title, `Upvotes: ${post.data.ups}`, `https://www.reddit.com${post.data.permalink}`, '🟧');
-							foundCount++;
-						});
-					}
-				} catch (e) { console.error('Reddit Search error', e); }
-				progressBar.style.width = '90%';
-			}
-
-            if (srcTG) {
+            
+            if (srcReddit) {
                 try {
-                    const ghRes = await fetch(`https://api.github.com/search/code?q=${encodeURIComponent('t.me ' + query)}&per_page=5`);
-                    if (ghRes.ok) {
-                        const ghData = await ghRes.json();
-                        const tgChannels = new Set();
-                        for (const item of (ghData.items || [])) {
-                            try {
-                                const fileRes = await fetch(item.url, { headers: { 'Accept': 'application/vnd.github.v3.raw' } });
-                                if (fileRes.ok) {
-                                    const content = await fileRes.text();
-                                    const matches = content.match(/t\.me\/([a-zA-Z0-9_]{4,})/g) || [];
-                                    matches.forEach(m => {
-                                        const ch = m.replace('t.me/', '').toLowerCase();
-                                        if (!['joinchat', 'addtheme', 'share', 'socks'].includes(ch)) tgChannels.add(ch);
-                                    });
-                                }
-                            } catch (e) {}
-                        }
-                        tgChannels.forEach(ch => {
-                            resultsDiv.innerHTML += renderSearchCard('Telegram Канал', `@${ch}`, 'Найдено на GitHub', `javascript:addManualChannelByName('${ch}')`, '✈️');
+                    const redditData = await fetchJsonWithFallback(`https://www.reddit.com/search.json?q=${encodeURIComponent(query)}&limit=5`);
+                    if (redditData && redditData.data && redditData.data.children) {
+                        redditData.data.children.forEach(post => {
+                            resultsDiv.innerHTML += renderSearchCard('Reddit', post.data.title, `Upvotes: ${post.data.ups}`, `https://www.reddit.com${post.data.permalink}`, '🟧');
                             foundCount++;
                         });
                     }
                 } catch (e) { 
-                    console.error('GitHub Search error', e); 
-                    resultsDiv.innerHTML += `<p style="color: var(--danger); width: 100%; font-size: 0.85em;">[API GitHub: 401 Unauthorized]. Поиск по коду требует авторизации. Пропущено.</p>`;
+                    console.error('Reddit Search error', e); 
+                    resultsDiv.innerHTML += `<p style="color: var(--danger); width: 100%; font-size: 0.85em;">[!] Reddit API недоступен. Попробуйте позже.</p>`;
+                }
+                progressBar.style.width = '90%';
+            }
+
+            if (srcTG) {
+                const ghToken = localStorage.getItem('amigo_github_token');
+                if (!ghToken) {
+                    resultsDiv.innerHTML += `<p style="color: var(--warning); width: 100%; font-size: 0.85em;">⚠️ GitHub поиск пропущен: не указан API Token. Добавь его в настройках.</p>`;
+                } else {
+                    try {
+                        const ghRes = await fetch(`https://api.github.com/search/code?q=${encodeURIComponent('t.me ' + query)}&per_page=5`, {
+                            headers: { 
+                                'Authorization': `token ${ghToken}`,
+                                'Accept': 'application/vnd.github.v3+json'
+                            }
+                        });
+                        if (ghRes.ok) {
+                            const ghData = await ghRes.json();
+                            const tgChannels = new Set();
+                            for (const item of (ghData.items || [])) {
+                                try {
+                                    const fileRes = await fetch(item.url, { 
+                                        headers: { 
+                                            'Accept': 'application/vnd.github.v3.raw',
+                                            'Authorization': `token ${ghToken}`
+                                        } 
+                                    });
+                                    if (fileRes.ok) {
+                                        const content = await fileRes.text();
+                                        const matches = content.match(/t\.me\/([a-zA-Z0-9_]{4,})/g) || [];
+                                        matches.forEach(m => {
+                                            const ch = m.replace('t.me/', '').toLowerCase();
+                                            if (!['joinchat', 'addtheme', 'share', 'socks'].includes(ch)) tgChannels.add(ch);
+                                        });
+                                    }
+                                } catch (e) {}
+                            }
+                            tgChannels.forEach(ch => {
+                                resultsDiv.innerHTML += renderSearchCard('Telegram Канал', `@${ch}`, 'Найдено на GitHub', `javascript:addManualChannelByName('${ch}')`, '✈️');
+                                foundCount++;
+                            });
+                        } else if (ghRes.status === 401) {
+                            resultsDiv.innerHTML += `<p style="color: var(--danger); width: 100%; font-size: 0.85em;">[!] GitHub Token недействителен. Проверь настройки.</p>`;
+                        }
+                    } catch (e) { 
+                        console.error('GitHub Search error', e); 
+                        resultsDiv.innerHTML += `<p style="color: var(--danger); width: 100%; font-size: 0.85em;">[!] Ошибка GitHub API: ${e.message}</p>`;
+                    }
                 }
             }
 
             progressBar.style.width = '100%';
             setTimeout(() => progressDiv.style.display = 'none', 500);
 
-            if (foundCount === 0 && !resultsDiv.innerHTML.includes('401')) {
+            if (foundCount === 0 && !resultsDiv.innerHTML.includes('401') && !resultsDiv.innerHTML.includes('Ошибка') && !resultsDiv.innerHTML.includes('недоступен')) {
                 resultsDiv.innerHTML = `<p style="color: var(--text-secondary); width: 100%;">По запросу "${query}" ничего не найдено.</p>`;
             }
         }
@@ -679,24 +741,31 @@
                 input.value = '';
             }
         }
-		
-		function addManualReddit() {
-			const input = document.getElementById('manualRedditInput');
-			const name = input.value.replace('r/', '').trim().toLowerCase();
-			if (name && !reddits.includes(name)) {
-				reddits.push(name);
-				saveState(); renderUI();
-				input.value = '';
-			}
-		}
+        
+        function addManualReddit() {
+            const input = document.getElementById('manualRedditInput');
+            const name = input.value.replace('r/', '').trim().toLowerCase();
+            if (name && !reddits.includes(name)) {
+                reddits.push(name);
+                saveState(); renderUI();
+                input.value = '';
+            }
+        }
 
-		function removeReddit(name) {
-			reddits = reddits.filter(r => r !== name);
-			saveState(); renderUI();
-		}
+        function removeReddit(name) {
+            reddits = reddits.filter(r => r !== name);
+            saveState(); renderUI();
+        }
 
-        function removeChannel(name) { channels = channels.filter(c => c.name !== name); saveState(); renderUI(); }
-        function removeKeyword(kw) { keywords = keywords.filter(k => k !== kw); saveState(); renderUI(); }
+        function removeChannel(name) { 
+            channels = channels.filter(c => c.name !== name); 
+            saveState(); renderUI(); 
+        }
+        
+        function removeKeyword(kw) { 
+            keywords = keywords.filter(k => k !== kw); 
+            saveState(); renderUI(); 
+        }
 
         // --- ПАРСИНГ ИСТОЧНИКОВ ---
         async function parseTelegram(channelName) {
@@ -713,7 +782,7 @@
                             id: `tg_${postId}`,
                             source: `Telegram: @${channelName}`,
                             text: text,
-                            url: `https://t.me/${postId}`,
+                            url: `https://t.me/${channelName}/${postId.split('_')[1] || postId}`,
                             date: new Date().toISOString()
                         });
                     }
@@ -742,7 +811,7 @@
                             });
                         });
                     }
-                } catch (e) {}
+                } catch (e) { console.error('HN Parse Error:', e); }
             }
             return messages;
         }
@@ -764,7 +833,33 @@
                             });
                         });
                     }
-                } catch (e) {}
+                } catch (e) { console.error('Dev.to Parse Error:', e); }
+            }
+            return messages;
+        }
+
+        async function parseReddit(subreddit) {
+            let messages = [];
+            try {
+                const data = await fetchJsonWithFallback(`https://www.reddit.com/r/${subreddit}/new.json?limit=15`);
+                if (data && data.data && data.data.children) {
+                    data.data.children.forEach(post => {
+                        const fullText = `${post.data.title} ${post.data.selftext || ''}`.toLowerCase();
+                        const matchedKws = keywords.filter(kw => fullText.includes(kw.toLowerCase()));
+                        
+                        if (matchedKws.length > 0) {
+                            messages.push({
+                                id: `reddit_${post.data.id}`,
+                                source: `Reddit: r/${subreddit}`,
+                                text: `${post.data.title}\n${post.data.selftext || '[Только ссылка]'}`,
+                                url: `https://www.reddit.com${post.data.permalink}`,
+                                date: new Date(post.data.created_utc * 1000).toISOString()
+                            });
+                        }
+                    });
+                }
+            } catch (e) { 
+                console.error(`Reddit Parse Error [r/${subreddit}]:`, e); 
             }
             return messages;
         }
@@ -774,26 +869,36 @@
             let newResults = 0;
             messages.forEach(msg => {
                 if (seenMessages.has(msg.id)) return;
-                seenMessages.add(msg.id);
-
+                
                 const lowerText = msg.text.toLowerCase();
                 const matchedKws = keywords.filter(kw => lowerText.includes(kw));
 
                 if (matchedKws.length > 0) {
+                    seenMessages.add(msg.id);
                     results.unshift({ ...msg, keywords: matchedKws, foundAt: new Date().toISOString() });
                     newResults++;
                 }
             });
 
-            if (newResults > 0) { saveState(); renderResults(); triggerHaptic('heavy'); }
+            // Защита от переполнения localStorage
+            if (seenMessages.size > 3000) {
+                const arr = Array.from(seenMessages);
+                seenMessages = new Set(arr.slice(arr.length - 2000));
+            }
+
+            if (newResults > 0) { 
+                saveState(); 
+                renderResults(); 
+                triggerHaptic('heavy'); 
+            }
             return newResults;
         }
 
         async function monitorCycle() {
             if (!isRunning) return;
             
+            const doReddit = document.getElementById('monReddit').checked;
             const doTG = document.getElementById('monTG').checked;
-			const doReddit = document.getElementById('monReddit').checked;
             const doHN = document.getElementById('monHN').checked;
             const doDev = document.getElementById('monDev').checked;
 
@@ -806,19 +911,14 @@
                     allFound += checkAndSaveMessages(msgs);
                 }
             }
-			
-			// ... внутри функции monitorCycle() ...
-
-			// Добавляем этот блок:
-			if (doReddit && reddits.length > 0) {
-				for (const r of reddits) {
-					if (!isRunning) break;
-					const redditMsgs = await parseReddit(r); // Передаем имя сабреддита
-					allFound += checkAndSaveMessages(redditMsgs);
-				}
-			}
-
-			// ... дальше идут остальные проверки ...
+            
+            if (doReddit && reddits.length > 0) {
+                for (const r of reddits) {
+                    if (!isRunning) break;
+                    const redditMsgs = await parseReddit(r);
+                    allFound += checkAndSaveMessages(redditMsgs);
+                }
+            }
 
             if (doHN && keywords.length > 0) {
                 const hnMsgs = await parseHackerNews();
@@ -847,7 +947,6 @@
 
             logConsole(`Запуск сканирования... Kill Switch сработает через ${autoStopMins} мин.`, 'info');
             
-            // Запуск таймера автостопа
             killSwitchTimeout = setTimeout(() => {
                 if (isRunning) {
                     stopMonitoring();
@@ -855,7 +954,6 @@
                 }
             }, autoStopMins * 60 * 1000);
 
-            // Первый прогон
             await monitorCycle();
             monitoringInterval = setInterval(monitorCycle, interval * 1000);
         }
@@ -872,10 +970,15 @@
         }
 
         // --- UI РЕНДЕРИНГ ---
+        function escapeRegExp(string) {
+            return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        }
+
         function highlightText(text, kws) {
             let highlighted = text;
             kws.forEach(kw => {
-                const regex = new RegExp(`(${kw})`, 'gi');
+                const safeKw = escapeRegExp(kw);
+                const regex = new RegExp(`(${safeKw})`, 'gi');
                 highlighted = highlighted.replace(regex, '<span class="highlight">$1</span>');
             });
             return highlighted;
@@ -912,43 +1015,42 @@
             document.getElementById('keywordTags').innerHTML = keywords.map(k => `
                 <div class="tag">${k} <span class="remove" onclick="removeKeyword('${k}')">×</span></div>
             `).join('');
-			
-			// Внутри renderUI()
-			document.getElementById('redditTags').innerHTML = reddits.map(r => `
-				<div class="tag">r/${r} <span class="remove" onclick="removeReddit('${r}')">×</span></div>
-			`).join('');
-			document.getElementById('redditCount').textContent = reddits.length;
+            
+            document.getElementById('redditTags').innerHTML = reddits.map(r => `
+                <div class="tag">r/${r} <span class="remove" onclick="removeReddit('${r}')">×</span></div>
+            `).join('');
+            document.getElementById('redditCount').textContent = reddits.length;
         }
 
         function saveState() {
             localStorage.setItem('amigo_channels', JSON.stringify(channels));
-			localStorage.setItem('amigo_reddits', JSON.stringify(reddits));
+            localStorage.setItem('amigo_reddits', JSON.stringify(reddits));
             localStorage.setItem('amigo_keywords', JSON.stringify(keywords));
             localStorage.setItem('amigo_results', JSON.stringify(results));
             localStorage.setItem('amigo_seen', JSON.stringify(Array.from(seenMessages)));
         }
 
         function logConsole(msg) { console.log(`[OSINT] ${msg}`); }
-		
-		function renderRssTags() {
-			const feeds = JSON.parse(localStorage.getItem('amigo_rssFeeds') || '[]');
-			const container = document.getElementById('rssTags');
-			container.innerHTML = feeds.map(url => `
-				<div class="tag">
-					${url.substring(0, 25)}... 
-					<span class="remove" onclick="removeRss('${url}')">×</span>
-				</div>
-			`).join('');
-		}
+        
+        function renderRssTags() {
+            const feeds = JSON.parse(localStorage.getItem('amigo_rssFeeds') || '[]');
+            const container = document.getElementById('rssTags');
+            container.innerHTML = feeds.map(url => `
+                <div class="tag">
+                    ${url.substring(0, 25)}... 
+                    <span class="remove" onclick="removeRss('${url.replace(/'/g, "\\'")}')">×</span>
+                </div>
+            `).join('');
+        }
 
-		function removeRss(url) {
-			let feeds = JSON.parse(localStorage.getItem('amigo_rssFeeds') || '[]');
-			feeds = feeds.filter(f => f !== url);
-			localStorage.setItem('amigo_rssFeeds', JSON.stringify(feeds));
-			document.getElementById('customRssInput').value = feeds.join(', ');
-			loadTicker();
-			renderRssTags();
-		}
+        function removeRss(url) {
+            let feeds = JSON.parse(localStorage.getItem('amigo_rssFeeds') || '[]');
+            feeds = feeds.filter(f => f !== url);
+            localStorage.setItem('amigo_rssFeeds', JSON.stringify(feeds));
+            document.getElementById('customRssInput').value = feeds.join(', ');
+            loadTicker();
+            renderRssTags();
+        }
 
         // --- ЭКСПОРТ / УТИЛИТЫ ---
         function downloadFile(content, filename, type) {
@@ -962,13 +1064,15 @@
         function exportResults(fmt) {
             if (fmt === 'json') downloadFile(JSON.stringify(results, null, 2), 'osint_intel.json', 'application/json');
             if (fmt === 'csv') {
-                const csv = ['Source,Time,Link,Text'].concat(results.map(r => `"${r.source}","${r.foundAt}","${r.url}","${r.text.replace(/"/g, '""')}"`)).join('\n');
+                const csv = ['Source,Time,Link,Text'].concat(results.map(r => 
+                    `"${r.source}","${r.foundAt}","${r.url}","${r.text.replace(/"/g, '""').replace(/\n/g, ' ')}"`
+                )).join('\n');
                 downloadFile(csv, 'osint_intel.csv', 'text/csv');
             }
         }
 
         function exportAllData() {
-            downloadFile(JSON.stringify({ channels, keywords, results, seen: Array.from(seenMessages) }, null, 2), 'amigo_backup.json', 'application/json');
+            downloadFile(JSON.stringify({ channels, reddits, keywords, results, seen: Array.from(seenMessages) }, null, 2), 'amigo_backup.json', 'application/json');
         }
 
         function importAllData(e) {
@@ -978,28 +1082,47 @@
             reader.onload = ev => {
                 try {
                     const d = JSON.parse(ev.target.result);
-                    channels = d.channels || []; keywords = d.keywords || [];
-                    results = d.results || []; seenMessages = new Set(d.seen || []);
+                    channels = d.channels || []; 
+                    reddits = d.reddits || [];
+                    keywords = d.keywords || [];
+                    results = d.results || []; 
+                    seenMessages = new Set(d.seen || []);
                     saveState(); renderUI(); renderResults();
-                    alert('Бэкап загружен!');
-                } catch(err) { alert('Ошибка импорта.'); }
+                    alert('Бэкап успешно загружен!');
+                } catch(err) { alert('Ошибка импорта: неверный формат файла.'); }
             };
             reader.readAsText(file);
         }
 
-        function clearResults() { if(confirm('Очистить базу найденного?')) { results = []; saveState(); renderResults(); } }
+        function clearResults() { 
+            if(confirm('Очистить базу найденного?')) { 
+                results = []; 
+                saveState(); 
+                renderResults(); 
+            } 
+        }
+        
         function clearAllData() {
-            if(confirm('Удалить ВСЕ настройки и данные?')) {
-                localStorage.clear(); channels=[]; keywords=[]; results=[]; seenMessages=new Set();
-                renderUI(); renderResults();
+            if(confirm('Удалить ВСЕ настройки и данные? Это действие необратимо.')) {
+                localStorage.clear(); 
+                channels=[]; 
+                reddits=[]; 
+                keywords=[]; 
+                results=[]; 
+                seenMessages=new Set();
+                renderUI(); 
+                renderResults();
+                renderRssTags();
+                updateGithubTokenStatus();
             }
         }
 
         // Init
         renderUI();
         renderResults();
-		renderRssTags(); // <--- ЭТА СТРОЧКА ОЖИВИТ ТЕГИ
-		loadTicker();    // И убедись, что loadTicker тоже здесь
+        renderRssTags();
+        updateGithubTokenStatus();
+        loadTicker();
     </script>
 </body>
 </html>
