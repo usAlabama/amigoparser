@@ -23,19 +23,19 @@
         }
 
         [data-theme="dark"] {
-            --bg-primary: #1c1c1e;
-            --bg-secondary: #2c2c2e;
-            --bg-tertiary: #3a3a3c;
-            --text-primary: #ffffff;
-            --text-secondary: #98989d;
-            --border: #48484a;
-            --accent: #0a84ff;
-            --accent-hover: #409cff;
-            --danger: #ff453a;
-            --success: #30d158;
-            --warning: #ffd60a;
-            --card-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
-            --card-shadow-hover: 0 4px 12px rgba(0, 0, 0, 0.5);
+            --bg-primary: #0a1929;
+            --bg-secondary: #1b2838;
+            --bg-tertiary: #243447;
+            --text-primary: #e0f2f1;
+            --text-secondary: #80cbc4;
+            --border: #2d4a5e;
+            --accent: #00b4d8;
+            --accent-hover: #48cae4;
+            --danger: #ff6b6b;
+            --success: #51cf66;
+            --warning: #ffd43b;
+            --card-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+            --card-shadow-hover: 0 4px 12px rgba(0, 180, 216, 0.2);
         }
 
         * {
@@ -141,7 +141,7 @@
         input[type="text"]:focus, select:focus, textarea:focus {
             outline: none;
             border-color: var(--accent);
-            box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.1);
+            box-shadow: 0 0 0 3px rgba(0, 180, 216, 0.1);
         }
 
         button {
@@ -160,7 +160,7 @@
         button:hover {
             background: var(--accent-hover);
             transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(0, 113, 227, 0.3);
+            box-shadow: 0 4px 12px rgba(0, 180, 216, 0.3);
         }
 
         button:active {
@@ -292,12 +292,12 @@
 
         .log-entry.alert {
             border-left-color: var(--danger);
-            background: rgba(255, 59, 48, 0.1);
+            background: rgba(255, 107, 107, 0.1);
         }
 
         .log-entry.success {
             border-left-color: var(--success);
-            background: rgba(52, 199, 89, 0.1);
+            background: rgba(81, 207, 102, 0.1);
         }
 
         .log-entry .time {
@@ -364,7 +364,7 @@
 
         .status-dot.active {
             background: var(--success);
-            box-shadow: 0 0 8px rgba(52, 199, 89, 0.5);
+            box-shadow: 0 0 8px rgba(81, 207, 102, 0.5);
             animation: pulse 2s infinite;
         }
 
@@ -381,7 +381,7 @@
         }
 
         .warning {
-            background: rgba(255, 214, 10, 0.1);
+            background: rgba(255, 212, 59, 0.1);
             border: 1px solid var(--warning);
             padding: 12px;
             border-radius: 8px;
@@ -535,35 +535,35 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>🔍 Telegram Recon Tool</h1>
+            <h1>🔍 <span data-i18n="title">Telegram Recon Tool</span></h1>
             <button class="theme-toggle" onclick="toggleTheme()">🌙</button>
         </div>
-        <p class="subtitle">Автоматический поиск и мониторинг каналов по ключевым словам</p>
+        <p class="subtitle" data-i18n="subtitle">Автоматический поиск и мониторинг каналов по ключевым словам</p>
 
         <div class="warning">
-            ⚠️ <strong>Важно:</strong> Этот инструмент работает только пока открыта вкладка браузера. Результаты сохраняются локально и могут быть экспортированы в JSON/CSV.
+            ⚠️ <strong data-i18n="warning_title">Важно:</strong> <span data-i18n="warning_text">Этот инструмент работает только пока открыта вкладка браузера. Результаты сохраняются локально и могут быть экспортированы в JSON/CSV.</span>
         </div>
 
         <div class="tabs">
-            <div class="tab active" onclick="switchTab('recon')">🎯 Разведка</div>
-            <div class="tab" onclick="switchTab('monitor')">📡 Мониторинг</div>
-            <div class="tab" onclick="switchTab('results')">📊 Результаты</div>
-            <div class="tab" onclick="switchTab('settings')">⚙️ Настройки</div>
+            <div class="tab active" onclick="switchTab('recon')">🎯 <span data-i18n="tab_recon">Разведка</span></div>
+            <div class="tab" onclick="switchTab('monitor')">📡 <span data-i18n="tab_monitor">Мониторинг</span></div>
+            <div class="tab" onclick="switchTab('results')">📊 <span data-i18n="tab_results">Результаты</span></div>
+            <div class="tab" onclick="switchTab('settings')">⚙️ <span data-i18n="tab_settings">Настройки</span></div>
         </div>
 
         <!-- ВКЛАДКА: РАЗВЕДКА -->
         <div id="recon-tab" class="tab-content active">
             <div class="panel">
-                <h2>🎯 Поиск каналов по категориям</h2>
-                <p style="color: var(--text-secondary); font-size: 0.9em; margin-bottom: 15px;">
+                <h2>🎯 <span data-i18n="search_by_category">Поиск каналов по категориям</span></h2>
+                <p style="color: var(--text-secondary); font-size: 0.9em; margin-bottom: 15px;" data-i18n="search_by_category_desc">
                     Автоматический поиск каналов из публичных каталогов по выбранным тематикам
                 </p>
                 <div class="input-group">
                     <select id="categorySelect">
-                        <option value="">Выберите категорию...</option>
+                        <option value="" data-i18n="select_category">Выберите категорию...</option>
                     </select>
-                    <button onclick="manageCategories()">➕ Управление категориями</button>
-                    <button onclick="discoverChannels()">🔍 Найти каналы</button>
+                    <button onclick="manageCategories()">➕ <span data-i18n="manage_categories">Управление категориями</span></button>
+                    <button onclick="discoverChannels()">🔍 <span data-i18n="find_channels">Найти каналы</span></button>
                 </div>
                 <div class="progress" id="reconProgress" style="display: none;">
                     <div class="progress-bar" id="reconProgressBar"></div>
@@ -572,13 +572,13 @@
             </div>
 
             <div class="panel">
-                <h2>🔎 Умный поиск каналов</h2>
-                <p style="color: var(--text-secondary); font-size: 0.9em; margin-bottom: 15px;">
-                    Поиск каналов через Google по ключевым словам
+                <h2>🔎 <span data-i18n="smart_search">Умный поиск каналов</span></h2>
+                <p style="color: var(--text-secondary); font-size: 0.9em; margin-bottom: 15px;" data-i18n="smart_search_desc">
+                    Поиск каналов через DuckDuckGo по ключевым словам
                 </p>
                 <div class="input-group">
-                    <input type="text" id="googleSearchInput" placeholder="Ключевые слова (например: crypto airdrop 2024)">
-                    <button onclick="googleSearch()">🔍 Искать</button>
+                    <input type="text" id="googleSearchInput" placeholder="Ключевые слова (например: crypto airdrop 2024)" data-i18n-placeholder="search_placeholder">
+                    <button onclick="googleSearch()">🔍 <span data-i18n="search">Искать</span></button>
                 </div>
                 <div class="progress" id="googleProgress" style="display: none;">
                     <div class="progress-bar" id="googleProgressBar"></div>
@@ -587,19 +587,19 @@
             </div>
 
             <div class="panel">
-                <h2>➕ Добавить канал вручную</h2>
+                <h2>➕ <span data-i18n="add_manual">Добавить канал вручную</span></h2>
                 <div class="input-group">
-                    <input type="text" id="manualChannelInput" placeholder="Имя канала (без @, например: durov)">
-                    <button onclick="addManualChannel()">Добавить</button>
+                    <input type="text" id="manualChannelInput" placeholder="Имя канала (без @, например: durov)" data-i18n-placeholder="channel_placeholder">
+                    <button onclick="addManualChannel()"><span data-i18n="add">Добавить</span></button>
                 </div>
             </div>
 
             <div class="panel">
-                <h2>📋 Найденные каналы (<span id="channelCount">0</span>)</h2>
+                <h2>📋 <span data-i18n="found_channels">Найденные каналы</span> (<span id="channelCount">0</span>)</h2>
                 <div class="tags" id="channelTags"></div>
                 <div class="export-buttons">
-                    <button class="secondary" onclick="exportChannels()">💾 Экспорт списка каналов</button>
-                    <button class="danger" onclick="clearChannels()">🗑️ Очистить все</button>
+                    <button class="secondary" onclick="exportChannels()">💾 <span data-i18n="export_channels">Экспорт списка каналов</span></button>
+                    <button class="danger" onclick="clearChannels()">🗑️ <span data-i18n="clear_all">Очистить все</span></button>
                 </div>
             </div>
         </div>
@@ -607,32 +607,32 @@
         <!-- ВКЛАДКА: МОНИТОРИНГ -->
         <div id="monitor-tab" class="tab-content">
             <div class="panel">
-                <h2>🔑 Ключевые слова для поиска</h2>
+                <h2>🔑 <span data-i18n="keywords">Ключевые слова для поиска</span></h2>
                 <div class="input-group">
-                    <input type="text" id="keywordInput" placeholder="Ключевое слово или фраза (например: airdrop 2024)">
-                    <button onclick="addKeyword()">Добавить</button>
+                    <input type="text" id="keywordInput" placeholder="Ключевое слово или фраза (например: airdrop 2024)" data-i18n-placeholder="keyword_placeholder">
+                    <button onclick="addKeyword()"><span data-i18n="add">Добавить</span></button>
                 </div>
                 <div class="tags" id="keywordTags"></div>
             </div>
 
             <div class="panel">
-                <h2>⚙️ Управление мониторингом</h2>
+                <h2>⚙️ <span data-i18n="monitoring_control">Управление мониторингом</span></h2>
                 <div class="input-group">
-                    <input type="text" id="intervalInput" placeholder="Интервал проверки (сек)" value="60">
+                    <input type="text" id="intervalInput" placeholder="Интервал проверки (сек)" value="60" data-i18n-placeholder="interval_placeholder">
                     <select id="sortBy">
-                        <option value="date">Сортировка: по дате</option>
-                        <option value="views">Сортировка: по просмотрам</option>
+                        <option value="date" data-i18n="sort_date">Сортировка: по дате</option>
+                        <option value="views" data-i18n="sort_views">Сортировка: по просмотрам</option>
                     </select>
-                    <button id="startBtn" onclick="startMonitoring()">▶️ Запустить</button>
-                    <button id="stopBtn" class="danger" onclick="stopMonitoring()" disabled>⏹️ Остановить</button>
+                    <button id="startBtn" onclick="startMonitoring()">▶️ <span data-i18n="start">Запустить</span></button>
+                    <button id="stopBtn" class="danger" onclick="stopMonitoring()" disabled>⏹️ <span data-i18n="stop">Остановить</span></button>
                 </div>
                 <div class="status-bar">
                     <div class="status-indicator">
                         <div class="status-dot" id="statusDot"></div>
-                        <span id="statusText">Остановлено</span>
+                        <span id="statusText" data-i18n="stopped">Остановлено</span>
                     </div>
                     <div style="color: var(--text-secondary); font-size: 0.85em;">
-                        Найдено совпадений: <strong id="matchCount">0</strong>
+                        <span data-i18n="found_matches">Найдено совпадений:</span> <strong id="matchCount">0</strong>
                     </div>
                 </div>
             </div>
@@ -641,16 +641,16 @@
         <!-- ВКЛАДКА: РЕЗУЛЬТАТЫ -->
         <div id="results-tab" class="tab-content">
             <div class="panel">
-                <h2>📊 Найденные совпадения</h2>
+                <h2>📊 <span data-i18n="found_matches_title">Найденные совпадения</span></h2>
                 <div class="export-buttons" style="margin-bottom: 15px;">
-                    <button class="secondary" onclick="exportResults('json')">💾 Экспорт в JSON</button>
-                    <button class="secondary" onclick="exportResults('csv')">📄 Экспорт в CSV</button>
-                    <button class="danger" onclick="clearResults()">🗑️ Очистить результаты</button>
+                    <button class="secondary" onclick="exportResults('json')">💾 <span data-i18n="export_json">Экспорт в JSON</span></button>
+                    <button class="secondary" onclick="exportResults('csv')">📄 <span data-i18n="export_csv">Экспорт в CSV</span></button>
+                    <button class="danger" onclick="clearResults()">🗑️ <span data-i18n="clear_results">Очистить результаты</span></button>
                 </div>
                 <div class="log" id="resultsLog">
                     <div class="empty-state">
                         <div class="icon">📭</div>
-                        <p>Пока нет результатов. Запустите мониторинг во вкладке "Мониторинг".</p>
+                        <p data-i18n="no_results">Пока нет результатов. Запустите мониторинг во вкладке "Мониторинг".</p>
                     </div>
                 </div>
             </div>
@@ -659,37 +659,23 @@
         <!-- ВКЛАДКА: НАСТРОЙКИ -->
         <div id="settings-tab" class="tab-content">
             <div class="panel">
-                <h2>🔌 API ключи (опционально)</h2>
-                <p style="color: var(--text-secondary); font-size: 0.9em; margin-bottom: 15px;">
-                    Для расширенного функционала с TGStat и Telemetr
-                </p>
-                <div class="input-group">
-                    <input type="text" id="tgstatApiKey" placeholder="TGStat API Key (необязательно)">
-                </div>
-                <div class="input-group">
-                    <input type="text" id="telemetrApiKey" placeholder="Telemetr API Key (необязательно)">
-                </div>
-                <button onclick="saveApiKeys()">💾 Сохранить ключи</button>
-            </div>
-
-            <div class="panel">
-                <h2>💾 Экспорт / Импорт данных</h2>
-                <p style="color: var(--text-secondary); font-size: 0.9em; margin-bottom: 15px;">
+                <h2>💾 <span data-i18n="export_import">Экспорт / Импорт данных</span></h2>
+                <p style="color: var(--text-secondary); font-size: 0.9em; margin-bottom: 15px;" data-i18n="export_import_desc">
                     Полный бэкап всех настроек, каналов и результатов
                 </p>
                 <div class="export-buttons">
-                    <button class="secondary" onclick="exportAllData()">📤 Экспорт всех данных</button>
-                    <button class="secondary" onclick="document.getElementById('importFile').click()">📥 Импорт данных</button>
+                    <button class="secondary" onclick="exportAllData()">📤 <span data-i18n="export_all">Экспорт всех данных</span></button>
+                    <button class="secondary" onclick="document.getElementById('importFile').click()">📥 <span data-i18n="import_data">Импорт данных</span></button>
                     <input type="file" id="importFile" style="display: none;" accept=".json" onchange="importAllData(event)">
                 </div>
             </div>
 
             <div class="panel">
-                <h2>🗑️ Очистка данных</h2>
-                <p style="color: var(--text-secondary); font-size: 0.9em; margin-bottom: 15px;">
+                <h2>🗑️ <span data-i18n="clear_data">Очистка данных</span></h2>
+                <p style="color: var(--text-secondary); font-size: 0.9em; margin-bottom: 15px;" data-i18n="clear_data_desc">
                     Удалить все сохраненные данные
                 </p>
-                <button class="danger" onclick="clearAllData()">Очистить все данные</button>
+                <button class="danger" onclick="clearAllData()"><span data-i18n="clear_all_data">Очистить все данные</span></button>
             </div>
         </div>
     </div>
@@ -698,32 +684,229 @@
     <div class="modal" id="categoriesModal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2>➕ Управление категориями</h2>
+                <h2>➕ <span data-i18n="manage_categories">Управление категориями</span></h2>
                 <button class="modal-close" onclick="closeModal('categoriesModal')">×</button>
             </div>
             <div class="input-group">
-                <input type="text" id="newCategoryName" placeholder="Название категории (например: Крипта)">
-                <input type="text" id="newCategoryEmoji" placeholder="Эмодзи (например: 💰)" maxlength="2">
+                <input type="text" id="newCategoryName" placeholder="Название категории (например: Крипта)" data-i18n-placeholder="category_name_placeholder">
+                <input type="text" id="newCategoryEmoji" placeholder="Эмодзи (например: 💰)" maxlength="2" data-i18n-placeholder="category_emoji_placeholder">
             </div>
             <div class="input-group">
-                <textarea id="newCategoryChannels" placeholder="Каналы (каждый с новой строки, формат: имя|описание)" rows="5"></textarea>
+                <textarea id="newCategoryChannels" placeholder="Каналы (каждый с новой строки, формат: имя|описание)" rows="5" data-i18n-placeholder="category_channels_placeholder"></textarea>
             </div>
-            <button onclick="addCategory()">Добавить категорию</button>
+            <button onclick="addCategory()"><span data-i18n="add_category">Добавить категорию</span></button>
             <div style="margin-top: 20px;">
-                <h3 style="margin-bottom: 10px; font-size: 1em;">Существующие категории:</h3>
+                <h3 style="margin-bottom: 10px; font-size: 1em;" data-i18n="existing_categories">Существующие категории:</h3>
                 <div class="tags" id="categoriesList"></div>
             </div>
         </div>
     </div>
 
     <script>
+        // --- МУЛЬТИЯЗЫЧНОСТЬ ---
+        const translations = {
+            ru: {
+                title: 'Telegram Recon Tool',
+                subtitle: 'Автоматический поиск и мониторинг каналов по ключевым словам',
+                warning_title: 'Важно:',
+                warning_text: 'Этот инструмент работает только пока открыта вкладка браузера. Результаты сохраняются локально и могут быть экспортированы в JSON/CSV.',
+                tab_recon: 'Разведка',
+                tab_monitor: 'Мониторинг',
+                tab_results: 'Результаты',
+                tab_settings: 'Настройки',
+                search_by_category: 'Поиск каналов по категориям',
+                search_by_category_desc: 'Автоматический поиск каналов из публичных каталогов по выбранным тематикам',
+                select_category: 'Выберите категорию...',
+                manage_categories: 'Управление категориями',
+                find_channels: 'Найти каналы',
+                smart_search: 'Умный поиск каналов',
+                smart_search_desc: 'Поиск каналов через DuckDuckGo по ключевым словам',
+                search_placeholder: 'Ключевые слова (например: crypto airdrop 2024)',
+                search: 'Искать',
+                add_manual: 'Добавить канал вручную',
+                channel_placeholder: 'Имя канала (без @, например: durov)',
+                add: 'Добавить',
+                found_channels: 'Найденные каналы',
+                export_channels: 'Экспорт списка каналов',
+                clear_all: 'Очистить все',
+                keywords: 'Ключевые слова для поиска',
+                keyword_placeholder: 'Ключевое слово или фраза (например: airdrop 2024)',
+                monitoring_control: 'Управление мониторингом',
+                interval_placeholder: 'Интервал проверки (сек)',
+                sort_date: 'Сортировка: по дате',
+                sort_views: 'Сортировка: по просмотрам',
+                start: 'Запустить',
+                stop: 'Остановить',
+                stopped: 'Остановлено',
+                running: 'Мониторинг активен',
+                found_matches: 'Найдено совпадений:',
+                found_matches_title: 'Найденные совпадения',
+                export_json: 'Экспорт в JSON',
+                export_csv: 'Экспорт в CSV',
+                clear_results: 'Очистить результаты',
+                no_results: 'Пока нет результатов. Запустите мониторинг во вкладке "Мониторинг".',
+                export_import: 'Экспорт / Импорт данных',
+                export_import_desc: 'Полный бэкап всех настроек, каналов и результатов',
+                export_all: 'Экспорт всех данных',
+                import_data: 'Импорт данных',
+                clear_data: 'Очистка данных',
+                clear_data_desc: 'Удалить все сохраненные данные',
+                clear_all_data: 'Очистить все данные',
+                category_name_placeholder: 'Название категории (например: Крипта)',
+                category_emoji_placeholder: 'Эмодзи (например: 💰)',
+                category_channels_placeholder: 'Каналы (каждый с новой строки, формат: имя|описание)',
+                add_category: 'Добавить категорию',
+                existing_categories: 'Существующие категории:',
+                subscribers: 'подписчиков',
+                avg_views: 'средние просмотры',
+                er: 'ER'
+            },
+            en: {
+                title: 'Telegram Recon Tool',
+                subtitle: 'Automatic channel search and monitoring by keywords',
+                warning_title: 'Important:',
+                warning_text: 'This tool only works while the browser tab is open. Results are saved locally and can be exported to JSON/CSV.',
+                tab_recon: 'Recon',
+                tab_monitor: 'Monitoring',
+                tab_results: 'Results',
+                tab_settings: 'Settings',
+                search_by_category: 'Search channels by categories',
+                search_by_category_desc: 'Automatic channel search from public directories by selected topics',
+                select_category: 'Select category...',
+                manage_categories: 'Manage categories',
+                find_channels: 'Find channels',
+                smart_search: 'Smart channel search',
+                smart_search_desc: 'Search channels via DuckDuckGo by keywords',
+                search_placeholder: 'Keywords (e.g.: crypto airdrop 2024)',
+                search: 'Search',
+                add_manual: 'Add channel manually',
+                channel_placeholder: 'Channel name (without @, e.g.: durov)',
+                add: 'Add',
+                found_channels: 'Found channels',
+                export_channels: 'Export channel list',
+                clear_all: 'Clear all',
+                keywords: 'Keywords for search',
+                keyword_placeholder: 'Keyword or phrase (e.g.: airdrop 2024)',
+                monitoring_control: 'Monitoring control',
+                interval_placeholder: 'Check interval (sec)',
+                sort_date: 'Sort: by date',
+                sort_views: 'Sort: by views',
+                start: 'Start',
+                stop: 'Stop',
+                stopped: 'Stopped',
+                running: 'Monitoring active',
+                found_matches: 'Found matches:',
+                found_matches_title: 'Found matches',
+                export_json: 'Export to JSON',
+                export_csv: 'Export to CSV',
+                clear_results: 'Clear results',
+                no_results: 'No results yet. Start monitoring in the "Monitoring" tab.',
+                export_import: 'Export / Import data',
+                export_import_desc: 'Full backup of all settings, channels and results',
+                export_all: 'Export all data',
+                import_data: 'Import data',
+                clear_data: 'Clear data',
+                clear_data_desc: 'Delete all saved data',
+                clear_all_data: 'Clear all data',
+                category_name_placeholder: 'Category name (e.g.: Crypto)',
+                category_emoji_placeholder: 'Emoji (e.g.: 💰)',
+                category_channels_placeholder: 'Channels (each on new line, format: name|description)',
+                add_category: 'Add category',
+                existing_categories: 'Existing categories:',
+                subscribers: 'subscribers',
+                avg_views: 'avg views',
+                er: 'ER'
+            },
+            uk: {
+                title: 'Telegram Recon Tool',
+                subtitle: 'Автоматичний пошук та моніторинг каналів за ключовими словами',
+                warning_title: 'Важливо:',
+                warning_text: 'Цей інструмент працює тільки поки відкрита вкладка браузера. Результати зберігаються локально і можуть бути експортовані в JSON/CSV.',
+                tab_recon: 'Розвідка',
+                tab_monitor: 'Моніторинг',
+                tab_results: 'Результати',
+                tab_settings: 'Налаштування',
+                search_by_category: 'Пошук каналів за категоріями',
+                search_by_category_desc: 'Автоматичний пошук каналів з публічних каталогів за обраними тематиками',
+                select_category: 'Оберіть категорію...',
+                manage_categories: 'Управління категоріями',
+                find_channels: 'Знайти канали',
+                smart_search: 'Розумний пошук каналів',
+                smart_search_desc: 'Пошук каналів через DuckDuckGo за ключовими словами',
+                search_placeholder: 'Ключові слова (наприклад: crypto airdrop 2024)',
+                search: 'Шукати',
+                add_manual: 'Додати канал вручну',
+                channel_placeholder: "Ім'я каналу (без @, наприклад: durov)",
+                add: 'Додати',
+                found_channels: 'Знайдені канали',
+                export_channels: 'Експорт списку каналів',
+                clear_all: 'Очистити все',
+                keywords: 'Ключові слова для пошуку',
+                keyword_placeholder: 'Ключове слово або фраза (наприклад: airdrop 2024)',
+                monitoring_control: 'Управління моніторингом',
+                interval_placeholder: 'Інтервал перевірки (сек)',
+                sort_date: 'Сортування: за датою',
+                sort_views: 'Сортування: за переглядами',
+                start: 'Запустити',
+                stop: 'Зупинити',
+                stopped: 'Зупинено',
+                running: 'Моніторинг активний',
+                found_matches: 'Знайдено збігів:',
+                found_matches_title: 'Знайдені збіги',
+                export_json: 'Експорт в JSON',
+                export_csv: 'Експорт в CSV',
+                clear_results: 'Очистити результати',
+                no_results: 'Поки немає результатів. Запустіть моніторинг у вкладці "Моніторинг".',
+                export_import: 'Експорт / Імпорт даних',
+                export_import_desc: 'Повний бекап всіх налаштувань, каналів та результатів',
+                export_all: 'Експорт всіх даних',
+                import_data: 'Імпорт даних',
+                clear_data: 'Очистка даних',
+                clear_data_desc: 'Видалити всі збережені дані',
+                clear_all_data: 'Очистити всі дані',
+                category_name_placeholder: 'Назва категорії (наприклад: Крипта)',
+                category_emoji_placeholder: 'Емодзі (наприклад: 💰)',
+                category_channels_placeholder: 'Канали (кожен з нового рядка, формат: ім\'я|опис)',
+                add_category: 'Додати категорію',
+                existing_categories: 'Існуючі категорії:',
+                subscribers: 'підписників',
+                avg_views: 'середні перегляди',
+                er: 'ER'
+            }
+        };
+
+        let currentLang = 'ru';
+
+        function detectLanguage() {
+            const lang = navigator.language || navigator.userLanguage;
+            const langCode = lang.split('-')[0];
+            if (translations[langCode]) {
+                currentLang = langCode;
+            }
+        }
+
+        function applyTranslations() {
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (translations[currentLang][key]) {
+                    el.textContent = translations[currentLang][key];
+                }
+            });
+
+            document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+                const key = el.getAttribute('data-i18n-placeholder');
+                if (translations[currentLang][key]) {
+                    el.placeholder = translations[currentLang][key];
+                }
+            });
+        }
+
         // --- TELEGRAM WEBAPP INIT ---
         let tg = window.Telegram?.WebApp;
         if (tg) {
             tg.ready();
             tg.expand();
             
-            // Синхронизация темы с Telegram
             if (tg.colorScheme === 'dark') {
                 document.documentElement.setAttribute('data-theme', 'dark');
                 document.querySelector('.theme-toggle').textContent = '☀️';
@@ -739,7 +922,7 @@
         let monitoringInterval = null;
         let isRunning = false;
 
-        const CORS_PROXY = 'https://api.allorigins.win/raw?url=';
+        const CORS_PROXY = 'https://corsproxy.io/?';
 
         // --- БАЗА КАНАЛОВ ПО КАТЕГОРИЯМ ---
         const CHANNEL_DATABASE = {
@@ -806,12 +989,13 @@
 
         // --- ИНИЦИАЛИЗАЦИЯ ---
         function init() {
+            detectLanguage();
+            applyTranslations();
             renderTags();
             renderResults();
             updateChannelCount();
             updateMatchCount();
             populateCategorySelect();
-            loadApiKeys();
             log('🚀 Инструмент готов к работе. Начните с вкладки "Разведка".', 'info');
         }
 
@@ -823,16 +1007,27 @@
             document.querySelector('.theme-toggle').textContent = newTheme === 'dark' ? '☀️' : '🌙';
             localStorage.setItem('tg_theme', newTheme);
             
-            if (tg) {
-                tg.HapticFeedback?.impactOccurred('light');
-            }
+            triggerHaptic('light');
         }
 
-        // Загрузка темы при старте
         const savedTheme = localStorage.getItem('tg_theme');
         if (savedTheme) {
             document.documentElement.setAttribute('data-theme', savedTheme);
             document.querySelector('.theme-toggle').textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+        }
+
+        // --- HAPTIC FEEDBACK ---
+        function triggerHaptic(type) {
+            if (tg && tg.HapticFeedback) {
+                try {
+                    const version = parseInt(tg.version);
+                    if (version >= 6.1) {
+                        tg.HapticFeedback.impactOccurred(type);
+                    }
+                } catch (e) {
+                    console.log('Haptic feedback not supported');
+                }
+            }
         }
 
         // --- ПЕРЕКЛЮЧЕНИЕ ВКЛАДОК ---
@@ -843,17 +1038,14 @@
             event.target.classList.add('active');
             document.getElementById(`${tabName}-tab`).classList.add('active');
             
-            if (tg) {
-                tg.HapticFeedback?.selectionChanged();
-            }
+            triggerHaptic('light');
         }
 
         // --- ЗАПОЛНЕНИЕ СПИСКА КАТЕГОРИЙ ---
         function populateCategorySelect() {
             const select = document.getElementById('categorySelect');
-            select.innerHTML = '<option value="">Выберите категорию...</option>';
+            select.innerHTML = `<option value="">${translations[currentLang].select_category}</option>`;
             
-            // Встроенные категории
             Object.keys(CHANNEL_DATABASE).forEach(key => {
                 const option = document.createElement('option');
                 option.value = key;
@@ -861,7 +1053,6 @@
                 select.appendChild(option);
             });
             
-            // Пользовательские категории
             Object.keys(customCategories).forEach(key => {
                 const option = document.createElement('option');
                 option.value = key;
@@ -887,7 +1078,7 @@
                     ${customCategories[key].name}
                     <span class="remove" onclick="removeCategory('${key}')">×</span>
                 </div>
-            `).join('') || '<p style="color: var(--text-secondary);">Нет пользовательских категорий</p>';
+            `).join('') || `<p style="color: var(--text-secondary);">${currentLang === 'ru' ? 'Нет пользовательских категорий' : currentLang === 'uk' ? 'Немає користувацьких категорій' : 'No custom categories'}</p>`;
         }
 
         function addCategory() {
@@ -896,14 +1087,14 @@
             const channelsText = document.getElementById('newCategoryChannels').value.trim();
             
             if (!name) {
-                alert('Введите название категории!');
+                alert(currentLang === 'ru' ? 'Введите название категории!' : currentLang === 'uk' ? 'Введіть назву категорії!' : 'Enter category name!');
                 return;
             }
             
             const key = 'custom_' + Date.now();
             const channels = channelsText.split('\n').filter(l => l.trim()).map(line => {
                 const [chName, chDesc] = line.split('|').map(s => s.trim());
-                return { name: chName, desc: chDesc || 'Пользовательский канал' };
+                return { name: chName, desc: chDesc || (currentLang === 'ru' ? 'Пользовательский канал' : currentLang === 'uk' ? 'Користувацький канал' : 'Custom channel') };
             });
             
             customCategories[key] = {
@@ -915,16 +1106,15 @@
             populateCategorySelect();
             renderCategoriesList();
             
-            // Очистка формы
             document.getElementById('newCategoryName').value = '';
             document.getElementById('newCategoryEmoji').value = '';
             document.getElementById('newCategoryChannels').value = '';
             
-            alert(`Категория "${name}" добавлена!`);
+            alert((currentLang === 'ru' ? 'Категория' : currentLang === 'uk' ? 'Категорія' : 'Category') + ` "${name}" ` + (currentLang === 'ru' ? 'добавлена!' : currentLang === 'uk' ? 'додана!' : 'added!'));
         }
 
         function removeCategory(key) {
-            if (confirm('Удалить эту категорию?')) {
+            if (confirm(currentLang === 'ru' ? 'Удалить эту категорию?' : currentLang === 'uk' ? 'Видалити цю категорію?' : 'Delete this category?')) {
                 delete customCategories[key];
                 localStorage.setItem('tg_custom_categories', JSON.stringify(customCategories));
                 populateCategorySelect();
@@ -936,7 +1126,7 @@
         async function discoverChannels() {
             const category = document.getElementById('categorySelect').value;
             if (!category) {
-                alert('Выберите категорию!');
+                alert(currentLang === 'ru' ? 'Выберите категорию!' : currentLang === 'uk' ? 'Оберіть категорію!' : 'Select category!');
                 return;
             }
 
@@ -948,7 +1138,6 @@
             progressBar.style.width = '0%';
             channelsDiv.innerHTML = '';
 
-            // Получаем каналы из встроенной базы или пользовательской категории
             let categoryChannels = [];
             if (CHANNEL_DATABASE[category]) {
                 categoryChannels = CHANNEL_DATABASE[category];
@@ -992,18 +1181,16 @@
             updateChannelCount();
             
             progressDiv.style.display = 'none';
-            log(`✅ Найдено и добавлено ${addedCount} каналов`, 'success');
+            log(`✅ ${currentLang === 'ru' ? 'Найдено и добавлено' : currentLang === 'uk' ? 'Знайдено та додано' : 'Found and added'} ${addedCount} ${currentLang === 'ru' ? 'каналов' : currentLang === 'uk' ? 'каналів' : 'channels'}`, 'success');
             
-            if (tg) {
-                tg.HapticFeedback?.notificationOccurred('success');
-            }
+            triggerHaptic('medium');
         }
 
-        // --- УМНЫЙ ПОИСК ЧЕРЕЗ GOOGLE ---
+        // --- УМНЫЙ ПОИСК ЧЕРЕЗ DUCKDUCKGO ---
         async function googleSearch() {
             const query = document.getElementById('googleSearchInput').value.trim();
             if (!query) {
-                alert('Введите ключевые слова!');
+                alert(currentLang === 'ru' ? 'Введите ключевые слова!' : currentLang === 'uk' ? 'Введіть ключові слова!' : 'Enter keywords!');
                 return;
             }
 
@@ -1013,11 +1200,11 @@
             
             progressDiv.style.display = 'block';
             progressBar.style.width = '0%';
-            resultsDiv.innerHTML = '<p style="color: var(--text-secondary);">Поиск...</p>';
+            resultsDiv.innerHTML = `<p style="color: var(--text-secondary);">${currentLang === 'ru' ? 'Поиск...' : currentLang === 'uk' ? 'Пошук...' : 'Searching...'}</p>`;
 
             try {
                 const searchQuery = `site:t.me ${query}`;
-                const url = `https://www.google.com/search?q=${encodeURIComponent(searchQuery)}&num=20`;
+                const url = `https://html.duckduckgo.com/html/?q=${encodeURIComponent(searchQuery)}`;
                 const proxyUrl = CORS_PROXY + encodeURIComponent(url);
                 
                 progressBar.style.width = '50%';
@@ -1049,8 +1236,8 @@
                     if (!channels.find(c => c.name === channelName)) {
                         channels.push({
                             name: channelName,
-                            category: 'google_search',
-                            description: `Найдено по запросу: ${query}`,
+                            category: 'search',
+                            description: `${currentLang === 'ru' ? 'Найдено по запросу' : currentLang === 'uk' ? 'Знайдено за запитом' : 'Found by query'}: ${query}`,
                             addedAt: new Date().toISOString()
                         });
                         addedCount++;
@@ -1059,7 +1246,7 @@
                     resultsDiv.innerHTML += `
                         <div class="card" onclick="addManualChannelByName('${channelName}')">
                             <h3>@${channelName}</h3>
-                            <p>Найдено через Google</p>
+                            <p>${currentLang === 'ru' ? 'Найдено через поиск' : currentLang === 'uk' ? 'Знайдено через пошук' : 'Found via search'}</p>
                             <div class="stats">
                                 <span>🔍 ${query}</span>
                             </div>
@@ -1068,16 +1255,16 @@
                 });
 
                 if (foundChannels.size === 0) {
-                    resultsDiv.innerHTML = '<p style="color: var(--text-secondary);">Ничего не найдено. Попробуйте другие ключевые слова.</p>';
+                    resultsDiv.innerHTML = `<p style="color: var(--text-secondary);">${currentLang === 'ru' ? 'Ничего не найдено. Попробуйте другие ключевые слова.' : currentLang === 'uk' ? 'Нічого не знайдено. Спробуйте інші ключові слова.' : 'Nothing found. Try different keywords.'}</p>`;
                 } else {
                     saveState();
                     renderTags();
                     updateChannelCount();
-                    log(`✅ Google поиск: найдено ${foundChannels.size} каналов`, 'success');
+                    log(`✅ ${currentLang === 'ru' ? 'Поиск' : currentLang === 'uk' ? 'Пошук' : 'Search'}: ${currentLang === 'ru' ? 'найдено' : currentLang === 'uk' ? 'знайдено' : 'found'} ${foundChannels.size} ${currentLang === 'ru' ? 'каналов' : currentLang === 'uk' ? 'каналів' : 'channels'}`, 'success');
                 }
             } catch (error) {
-                resultsDiv.innerHTML = `<p style="color: var(--danger);">Ошибка поиска: ${error.message}</p>`;
-                log(`❌ Ошибка Google поиска: ${error.message}`, 'error');
+                resultsDiv.innerHTML = `<p style="color: var(--danger);">${currentLang === 'ru' ? 'Ошибка поиска' : currentLang === 'uk' ? 'Помилка пошуку' : 'Search error'}: ${error.message}</p>`;
+                log(`❌ ${currentLang === 'ru' ? 'Ошибка поиска' : currentLang === 'uk' ? 'Помилка пошуку' : 'Search error'}: ${error.message}`, 'error');
             }
 
             progressDiv.style.display = 'none';
@@ -1088,17 +1275,15 @@
                 channels.push({
                     name: name,
                     category: 'manual',
-                    description: 'Добавлен вручную',
+                    description: currentLang === 'ru' ? 'Добавлен вручную' : currentLang === 'uk' ? 'Додано вручну' : 'Added manually',
                     addedAt: new Date().toISOString()
                 });
                 saveState();
                 renderTags();
                 updateChannelCount();
-                log(`✅ Добавлен канал: @${name}`, 'success');
+                log(`✅ ${currentLang === 'ru' ? 'Добавлен канал' : currentLang === 'uk' ? 'Додано канал' : 'Added channel'}: @${name}`, 'success');
                 
-                if (tg) {
-                    tg.HapticFeedback?.impactOccurred('medium');
-                }
+                triggerHaptic('medium');
             }
         }
 
@@ -1111,18 +1296,16 @@
                 channels.push({
                     name: name,
                     category: 'manual',
-                    description: 'Добавлен вручную',
+                    description: currentLang === 'ru' ? 'Добавлен вручную' : currentLang === 'uk' ? 'Додано вручну' : 'Added manually',
                     addedAt: new Date().toISOString()
                 });
                 saveState();
                 renderTags();
                 updateChannelCount();
                 input.value = '';
-                log(`✅ Добавлен канал: @${name}`, 'success');
+                log(`✅ ${currentLang === 'ru' ? 'Добавлен канал' : currentLang === 'uk' ? 'Додано канал' : 'Added channel'}: @${name}`, 'success');
                 
-                if (tg) {
-                    tg.HapticFeedback?.impactOccurred('medium');
-                }
+                triggerHaptic('medium');
             }
         }
 
@@ -1136,7 +1319,7 @@
                 saveState();
                 renderTags();
                 input.value = '';
-                log(`✅ Добавлено ключевое слово: "${keyword}"`, 'success');
+                log(`✅ ${currentLang === 'ru' ? 'Добавлено ключевое слово' : currentLang === 'uk' ? 'Додано ключове слово' : 'Added keyword'}: "${keyword}"`, 'success');
             }
         }
 
@@ -1230,7 +1413,7 @@
 
                 return messages.reverse();
             } catch (error) {
-                log(`❌ Ошибка парсинга @${channelName}: ${error.message}`, 'error');
+                log(`❌ ${currentLang === 'ru' ? 'Ошибка парсинга' : currentLang === 'uk' ? 'Помилка парсингу' : 'Parsing error'} @${channelName}: ${error.message}`, 'error');
                 return [];
             }
         }
@@ -1287,7 +1470,7 @@
                 logDiv.innerHTML = `
                     <div class="empty-state">
                         <div class="icon">📭</div>
-                        <p>Пока нет результатов. Запустите мониторинг во вкладке "Мониторинг".</p>
+                        <p data-i18n="no_results">${translations[currentLang].no_results}</p>
                     </div>
                 `;
                 return;
@@ -1295,15 +1478,15 @@
 
             logDiv.innerHTML = results.map(r => `
                 <div class="log-entry alert">
-                    <div class="time">${new Date(r.foundAt).toLocaleString('ru-RU')}</div>
-                    <div class="channel">📡 Канал: @${r.channel}</div>
-                    <div class="keywords">🔑 Ключевые слова: ${r.keywords.join(', ')}</div>
+                    <div class="time">${new Date(r.foundAt).toLocaleString(currentLang === 'ru' ? 'ru-RU' : currentLang === 'uk' ? 'uk-UA' : 'en-US')}</div>
+                    <div class="channel">📡 ${currentLang === 'ru' ? 'Канал' : currentLang === 'uk' ? 'Канал' : 'Channel'}: @${r.channel}</div>
+                    <div class="keywords">🔑 ${currentLang === 'ru' ? 'Ключевые слова' : currentLang === 'uk' ? 'Ключові слова' : 'Keywords'}: ${r.keywords.join(', ')}</div>
                     <div class="text">${r.text.substring(0, 300)}${r.text.length > 300 ? '...' : ''}</div>
                     <div style="display: flex; gap: 15px; font-size: 0.8em; color: var(--text-secondary); margin-top: 8px; flex-wrap: wrap;">
-                        <span>📅 ${new Date(r.date).toLocaleString('ru-RU')}</span>
-                        <span>👁️ ${r.views} просмотров</span>
+                        <span>📅 ${new Date(r.date).toLocaleString(currentLang === 'ru' ? 'ru-RU' : currentLang === 'uk' ? 'uk-UA' : 'en-US')}</span>
+                        <span>👁️ ${r.views} ${translations[currentLang].avg_views}</span>
                     </div>
-                    <a href="${r.url}" target="_blank">🔗 Открыть сообщение</a>
+                    <a href="${r.url}" target="_blank">🔗 ${currentLang === 'ru' ? 'Открыть сообщение' : currentLang === 'uk' ? 'Відкрити повідомлення' : 'Open message'}</a>
                 </div>
             `).join('');
         }
@@ -1311,11 +1494,11 @@
         // --- ЗАПУСК МОНИТОРИНГА ---
         async function startMonitoring() {
             if (channels.length === 0) {
-                alert('Добавьте каналы во вкладке "Разведка"!');
+                alert(currentLang === 'ru' ? 'Добавьте каналы во вкладке "Разведка"!' : currentLang === 'uk' ? 'Додайте канали у вкладці "Розвідка"!' : 'Add channels in the "Recon" tab!');
                 return;
             }
             if (keywords.length === 0) {
-                alert('Добавьте ключевые слова во вкладке "Мониторинг"!');
+                alert(currentLang === 'ru' ? 'Добавьте ключевые слова во вкладке "Мониторинг"!' : currentLang === 'uk' ? 'Додайте ключові слова у вкладці "Моніторинг"!' : 'Add keywords in the "Monitoring" tab!');
                 return;
             }
 
@@ -1323,18 +1506,18 @@
             document.getElementById('startBtn').disabled = true;
             document.getElementById('stopBtn').disabled = false;
             document.getElementById('statusDot').classList.add('active');
-            document.getElementById('statusText').textContent = 'Мониторинг активен';
+            document.getElementById('statusText').textContent = translations[currentLang].running;
 
-            log('🚀 Начинаю мониторинг...', 'info');
+            log('🚀 ' + (currentLang === 'ru' ? 'Начинаю мониторинг...' : currentLang === 'uk' ? 'Починаю моніторинг...' : 'Starting monitoring...'), 'info');
 
-            log('⏳ Выполняю первичный сбор данных...', 'info');
+            log('⏳ ' + (currentLang === 'ru' ? 'Выполняю первичный сбор данных...' : currentLang === 'uk' ? 'Виконую первинний збір даних...' : 'Performing initial data collection...'), 'info');
             for (const channel of channels) {
                 const messages = await parseChannel(channel.name);
                 messages.forEach(msg => seenMessages.add(msg.postId));
                 await delay(1000);
             }
             saveState();
-            log('✅ Калибровка завершена. Активный мониторинг начат.', 'success');
+            log('✅ ' + (currentLang === 'ru' ? 'Калибровка завершена. Активный мониторинг начат.' : currentLang === 'uk' ? 'Калібрування завершено. Активний моніторинг розпочато.' : 'Calibration completed. Active monitoring started.'), 'success');
 
             const intervalSec = parseInt(document.getElementById('intervalInput').value) || 60;
             monitoringInterval = setInterval(async () => {
@@ -1345,7 +1528,7 @@
                     const messages = await parseChannel(channel.name);
                     const found = checkKeywords(messages, channel.name);
                     if (found > 0) {
-                        log(`🚨 Найдено ${found} совпадений в @${channel.name}`, 'alert');
+                        log(`🚨 ${currentLang === 'ru' ? 'Найдено' : currentLang === 'uk' ? 'Знайдено' : 'Found'} ${found} ${currentLang === 'ru' ? 'совпадений в' : currentLang === 'uk' ? 'збігів у' : 'matches in'} @${channel.name}`, 'alert');
                     }
                     await delay(1500);
                 }
@@ -1362,8 +1545,8 @@
             document.getElementById('startBtn').disabled = false;
             document.getElementById('stopBtn').disabled = true;
             document.getElementById('statusDot').classList.remove('active');
-            document.getElementById('statusText').textContent = 'Остановлено';
-            log('⏹️ Мониторинг остановлен.', 'info');
+            document.getElementById('statusText').textContent = translations[currentLang].stopped;
+            log('⏹️ ' + (currentLang === 'ru' ? 'Мониторинг остановлен.' : currentLang === 'uk' ? 'Моніторинг зупинено.' : 'Monitoring stopped.'), 'info');
         }
 
         // --- ЭКСПОРТ ---
@@ -1403,20 +1586,6 @@
             URL.revokeObjectURL(url);
         }
 
-        // --- API КЛЮЧИ ---
-        function saveApiKeys() {
-            const tgstat = document.getElementById('tgstatApiKey').value.trim();
-            const telemetr = document.getElementById('telemetrApiKey').value.trim();
-            localStorage.setItem('tg_tgstat_key', tgstat);
-            localStorage.setItem('tg_telemetr_key', telemetr);
-            alert('API ключи сохранены!');
-        }
-
-        function loadApiKeys() {
-            document.getElementById('tgstatApiKey').value = localStorage.getItem('tg_tgstat_key') || '';
-            document.getElementById('telemetrApiKey').value = localStorage.getItem('tg_telemetr_key') || '';
-        }
-
         // --- ЭКСПОРТ / ИМПОРТ ВСЕХ ДАННЫХ ---
         function exportAllData() {
             const data = {
@@ -1425,8 +1594,6 @@
                 results,
                 seenMessages: Array.from(seenMessages),
                 customCategories,
-                tgstatKey: localStorage.getItem('tg_tgstat_key') || '',
-                telemetrKey: localStorage.getItem('tg_telemetr_key') || '',
                 theme: localStorage.getItem('tg_theme') || 'light',
                 exportedAt: new Date().toISOString()
             };
@@ -1453,8 +1620,6 @@
                     localStorage.setItem('tg_seen', JSON.stringify(Array.from(seenMessages)));
                     localStorage.setItem('tg_custom_categories', JSON.stringify(customCategories));
                     
-                    if (data.tgstatKey) localStorage.setItem('tg_tgstat_key', data.tgstatKey);
-                    if (data.telemetrKey) localStorage.setItem('tg_telemetr_key', data.telemetrKey);
                     if (data.theme) {
                         localStorage.setItem('tg_theme', data.theme);
                         document.documentElement.setAttribute('data-theme', data.theme);
@@ -1466,11 +1631,10 @@
                     updateChannelCount();
                     updateMatchCount();
                     populateCategorySelect();
-                    loadApiKeys();
                     
-                    alert('Данные успешно импортированы!');
+                    alert(currentLang === 'ru' ? 'Данные успешно импортированы!' : currentLang === 'uk' ? 'Дані успішно імпортовано!' : 'Data successfully imported!');
                 } catch (error) {
-                    alert('Ошибка импорта: ' + error.message);
+                    alert((currentLang === 'ru' ? 'Ошибка импорта' : currentLang === 'uk' ? 'Помилка імпорту' : 'Import error') + ': ' + error.message);
                 }
             };
             reader.readAsText(file);
@@ -1478,7 +1642,7 @@
 
         // --- ОЧИСТКА ---
         function clearChannels() {
-            if (confirm('Удалить все каналы?')) {
+            if (confirm(currentLang === 'ru' ? 'Удалить все каналы?' : currentLang === 'uk' ? 'Видалити всі канали?' : 'Delete all channels?')) {
                 channels = [];
                 saveState();
                 renderTags();
@@ -1488,7 +1652,7 @@
         }
 
         function clearResults() {
-            if (confirm('Удалить все результаты?')) {
+            if (confirm(currentLang === 'ru' ? 'Удалить все результаты?' : currentLang === 'uk' ? 'Видалити всі результати?' : 'Delete all results?')) {
                 results = [];
                 saveState();
                 renderResults();
@@ -1497,7 +1661,7 @@
         }
 
         function clearAllData() {
-            if (confirm('Удалить ВСЕ данные? Это действие нельзя отменить!')) {
+            if (confirm(currentLang === 'ru' ? 'Удалить ВСЕ данные? Это действие нельзя отменить!' : currentLang === 'uk' ? 'Видалити ВСІ дані? Цю дію не можна скасувати!' : 'Delete ALL data? This action cannot be undone!')) {
                 localStorage.clear();
                 channels = [];
                 keywords = [];
@@ -1509,8 +1673,7 @@
                 updateChannelCount();
                 updateMatchCount();
                 populateCategorySelect();
-                loadApiKeys();
-                alert('Все данные удалены!');
+                alert(currentLang === 'ru' ? 'Все данные удалены!' : currentLang === 'uk' ? 'Всі дані видалено!' : 'All data deleted!');
             }
         }
 
