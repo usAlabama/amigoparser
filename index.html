@@ -2,9 +2,42 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Telegram Reconnaissance Tool</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Telegram Recon Tool</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
+        :root {
+            --bg-primary: #f5f5f7;
+            --bg-secondary: #ffffff;
+            --bg-tertiary: #f0f0f2;
+            --text-primary: #1d1d1f;
+            --text-secondary: #86868b;
+            --border: #d2d2d7;
+            --accent: #0071e3;
+            --accent-hover: #0077ed;
+            --danger: #ff3b30;
+            --success: #34c759;
+            --warning: #ffd60a;
+            --card-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+            --card-shadow-hover: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        [data-theme="dark"] {
+            --bg-primary: #1c1c1e;
+            --bg-secondary: #2c2c2e;
+            --bg-tertiary: #3a3a3c;
+            --text-primary: #ffffff;
+            --text-secondary: #98989d;
+            --border: #48484a;
+            --accent: #0a84ff;
+            --accent-hover: #409cff;
+            --danger: #ff453a;
+            --success: #30d158;
+            --warning: #ffd60a;
+            --card-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+            --card-shadow-hover: 0 4px 12px rgba(0, 0, 0, 0.5);
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -13,11 +46,16 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: #f5f5f7;
-            color: #1d1d1f;
+            background: var(--bg-primary);
+            color: var(--text-primary);
             min-height: 100vh;
             padding: 20px;
+            padding-top: calc(20px + env(safe-area-inset-top));
+            padding-bottom: calc(20px + env(safe-area-inset-bottom));
+            padding-left: calc(20px + env(safe-area-inset-left));
+            padding-right: calc(20px + env(safe-area-inset-right));
             line-height: 1.6;
+            transition: background 0.3s, color 0.3s;
         }
 
         .container {
@@ -25,32 +63,53 @@
             margin: 0 auto;
         }
 
-        h1 {
-            text-align: center;
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             margin-bottom: 10px;
-            color: #1d1d1f;
-            font-size: 2em;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        h1 {
+            color: var(--text-primary);
+            font-size: 1.8em;
             font-weight: 600;
         }
 
+        .theme-toggle {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 8px 16px;
+            cursor: pointer;
+            font-size: 1.2em;
+            transition: all 0.2s;
+        }
+
+        .theme-toggle:hover {
+            background: var(--bg-tertiary);
+        }
+
         .subtitle {
-            text-align: center;
-            color: #86868b;
-            margin-bottom: 30px;
+            color: var(--text-secondary);
+            margin-bottom: 20px;
             font-size: 0.95em;
         }
 
         .panel {
-            background: #ffffff;
-            border: 1px solid #d2d2d7;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
             border-radius: 12px;
             padding: 20px;
             margin-bottom: 20px;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+            box-shadow: var(--card-shadow);
+            transition: all 0.2s;
         }
 
         .panel h2 {
-            color: #1d1d1f;
+            color: var(--text-primary);
             margin-bottom: 15px;
             font-size: 1.1em;
             font-weight: 600;
@@ -66,27 +125,28 @@
             flex-wrap: wrap;
         }
 
-        input[type="text"], select {
+        input[type="text"], select, textarea {
             flex: 1;
             min-width: 200px;
             padding: 10px 14px;
-            background: #ffffff;
-            border: 1px solid #d2d2d7;
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
             border-radius: 8px;
-            color: #1d1d1f;
+            color: var(--text-primary);
             font-size: 14px;
             transition: all 0.2s;
+            font-family: inherit;
         }
 
-        input[type="text"]:focus, select:focus {
+        input[type="text"]:focus, select:focus, textarea:focus {
             outline: none;
-            border-color: #0071e3;
+            border-color: var(--accent);
             box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.1);
         }
 
         button {
             padding: 10px 20px;
-            background: #0071e3;
+            background: var(--accent);
             color: #ffffff;
             border: none;
             border-radius: 8px;
@@ -94,32 +154,37 @@
             font-weight: 500;
             font-size: 14px;
             transition: all 0.2s;
+            white-space: nowrap;
         }
 
         button:hover {
-            background: #0077ed;
+            background: var(--accent-hover);
             transform: translateY(-1px);
             box-shadow: 0 4px 12px rgba(0, 113, 227, 0.3);
         }
 
+        button:active {
+            transform: translateY(0);
+        }
+
         button:disabled {
-            background: #d2d2d7;
+            background: var(--border);
             cursor: not-allowed;
             transform: none;
         }
 
         button.secondary {
-            background: #ffffff;
-            color: #0071e3;
-            border: 1px solid #0071e3;
+            background: var(--bg-secondary);
+            color: var(--accent);
+            border: 1px solid var(--accent);
         }
 
         button.secondary:hover {
-            background: #f5f5f7;
+            background: var(--bg-tertiary);
         }
 
         button.danger {
-            background: #ff3b30;
+            background: var(--danger);
         }
 
         button.danger:hover {
@@ -134,20 +199,20 @@
         }
 
         .tag {
-            background: #f5f5f7;
-            border: 1px solid #d2d2d7;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
             padding: 6px 12px;
             border-radius: 16px;
             font-size: 13px;
             display: flex;
             align-items: center;
             gap: 8px;
-            color: #1d1d1f;
+            color: var(--text-primary);
         }
 
         .tag .remove {
             cursor: pointer;
-            color: #ff3b30;
+            color: var(--danger);
             font-weight: bold;
             font-size: 16px;
         }
@@ -158,33 +223,34 @@
 
         .grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
             gap: 15px;
             margin-top: 15px;
         }
 
         .card {
-            background: #ffffff;
-            border: 1px solid #d2d2d7;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
             border-radius: 10px;
             padding: 15px;
             transition: all 0.2s;
+            cursor: pointer;
         }
 
         .card:hover {
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            box-shadow: var(--card-shadow-hover);
             transform: translateY(-2px);
         }
 
         .card h3 {
-            color: #0071e3;
+            color: var(--accent);
             font-size: 1em;
             margin-bottom: 8px;
             word-break: break-word;
         }
 
         .card p {
-            color: #86868b;
+            color: var(--text-secondary);
             font-size: 0.85em;
             margin-bottom: 10px;
         }
@@ -193,8 +259,9 @@
             display: flex;
             gap: 15px;
             font-size: 0.8em;
-            color: #86868b;
+            color: var(--text-secondary);
             margin-bottom: 10px;
+            flex-wrap: wrap;
         }
 
         .card .stats span {
@@ -204,8 +271,8 @@
         }
 
         .log {
-            background: #ffffff;
-            border: 1px solid #d2d2d7;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
             border-radius: 8px;
             padding: 15px;
             max-height: 500px;
@@ -218,48 +285,48 @@
         .log-entry {
             margin-bottom: 12px;
             padding: 12px;
-            border-left: 3px solid #0071e3;
-            background: #f5f5f7;
+            border-left: 3px solid var(--accent);
+            background: var(--bg-tertiary);
             border-radius: 6px;
         }
 
         .log-entry.alert {
-            border-left-color: #ff3b30;
-            background: #fff5f5;
+            border-left-color: var(--danger);
+            background: rgba(255, 59, 48, 0.1);
         }
 
         .log-entry.success {
-            border-left-color: #34c759;
-            background: #f0fff4;
+            border-left-color: var(--success);
+            background: rgba(52, 199, 89, 0.1);
         }
 
         .log-entry .time {
-            color: #86868b;
+            color: var(--text-secondary);
             font-size: 11px;
             margin-bottom: 4px;
         }
 
         .log-entry .channel {
-            color: #0071e3;
+            color: var(--accent);
             font-weight: 600;
             font-size: 0.95em;
         }
 
         .log-entry .keywords {
-            color: #ff9500;
+            color: var(--warning);
             font-size: 0.85em;
             margin: 4px 0;
         }
 
         .log-entry .text {
-            color: #1d1d1f;
+            color: var(--text-primary);
             font-size: 0.9em;
             margin: 8px 0;
             line-height: 1.5;
         }
 
         .log-entry a {
-            color: #0071e3;
+            color: var(--accent);
             text-decoration: none;
             font-size: 0.85em;
         }
@@ -273,10 +340,12 @@
             justify-content: space-between;
             align-items: center;
             padding: 12px 15px;
-            background: #ffffff;
-            border: 1px solid #d2d2d7;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
             border-radius: 8px;
             margin-bottom: 15px;
+            flex-wrap: wrap;
+            gap: 10px;
         }
 
         .status-indicator {
@@ -290,11 +359,11 @@
             width: 8px;
             height: 8px;
             border-radius: 50%;
-            background: #d2d2d7;
+            background: var(--border);
         }
 
         .status-dot.active {
-            background: #34c759;
+            background: var(--success);
             box-shadow: 0 0 8px rgba(52, 199, 89, 0.5);
             animation: pulse 2s infinite;
         }
@@ -308,41 +377,44 @@
             display: flex;
             gap: 10px;
             margin-top: 15px;
+            flex-wrap: wrap;
         }
 
         .warning {
-            background: #fff9e6;
-            border: 1px solid #ffd60a;
+            background: rgba(255, 214, 10, 0.1);
+            border: 1px solid var(--warning);
             padding: 12px;
             border-radius: 8px;
             margin-bottom: 20px;
             font-size: 13px;
-            color: #1d1d1f;
+            color: var(--text-primary);
         }
 
         .tabs {
             display: flex;
             gap: 5px;
             margin-bottom: 20px;
-            border-bottom: 1px solid #d2d2d7;
+            border-bottom: 1px solid var(--border);
+            overflow-x: auto;
         }
 
         .tab {
             padding: 10px 20px;
             cursor: pointer;
             border-bottom: 2px solid transparent;
-            color: #86868b;
+            color: var(--text-secondary);
             font-weight: 500;
             transition: all 0.2s;
+            white-space: nowrap;
         }
 
         .tab:hover {
-            color: #0071e3;
+            color: var(--accent);
         }
 
         .tab.active {
-            color: #0071e3;
-            border-bottom-color: #0071e3;
+            color: var(--accent);
+            border-bottom-color: var(--accent);
         }
 
         .tab-content {
@@ -356,7 +428,7 @@
         .progress {
             width: 100%;
             height: 4px;
-            background: #d2d2d7;
+            background: var(--border);
             border-radius: 2px;
             overflow: hidden;
             margin-top: 10px;
@@ -364,7 +436,7 @@
 
         .progress-bar {
             height: 100%;
-            background: #0071e3;
+            background: var(--accent);
             transition: width 0.3s;
             width: 0%;
         }
@@ -372,18 +444,100 @@
         .empty-state {
             text-align: center;
             padding: 40px 20px;
-            color: #86868b;
+            color: var(--text-secondary);
         }
 
         .empty-state .icon {
             font-size: 48px;
             margin-bottom: 15px;
         }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            padding: 25px;
+            max-width: 500px;
+            width: 100%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--text-secondary);
+            padding: 0;
+            width: 30px;
+            height: 30px;
+        }
+
+        .modal-close:hover {
+            color: var(--text-primary);
+            background: none;
+            transform: none;
+            box-shadow: none;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 1.4em;
+            }
+
+            .panel {
+                padding: 15px;
+            }
+
+            .grid {
+                grid-template-columns: 1fr;
+            }
+
+            .input-group {
+                flex-direction: column;
+            }
+
+            input[type="text"], select, button {
+                width: 100%;
+            }
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🔍 Telegram Reconnaissance Tool</h1>
+        <div class="header">
+            <h1>🔍 Telegram Recon Tool</h1>
+            <button class="theme-toggle" onclick="toggleTheme()">🌙</button>
+        </div>
         <p class="subtitle">Автоматический поиск и мониторинг каналов по ключевым словам</p>
 
         <div class="warning">
@@ -394,33 +548,42 @@
             <div class="tab active" onclick="switchTab('recon')">🎯 Разведка</div>
             <div class="tab" onclick="switchTab('monitor')">📡 Мониторинг</div>
             <div class="tab" onclick="switchTab('results')">📊 Результаты</div>
+            <div class="tab" onclick="switchTab('settings')">⚙️ Настройки</div>
         </div>
 
         <!-- ВКЛАДКА: РАЗВЕДКА -->
         <div id="recon-tab" class="tab-content active">
             <div class="panel">
                 <h2>🎯 Поиск каналов по категориям</h2>
-                <p style="color: #86868b; font-size: 0.9em; margin-bottom: 15px;">
+                <p style="color: var(--text-secondary); font-size: 0.9em; margin-bottom: 15px;">
                     Автоматический поиск каналов из публичных каталогов по выбранным тематикам
                 </p>
                 <div class="input-group">
                     <select id="categorySelect">
                         <option value="">Выберите категорию...</option>
-                        <option value="crypto">💰 Криптовалюты / Airdrop</option>
-                        <option value="ai">🤖 ИИ / Промпты / ML</option>
-                        <option value="dev">💻 Разработка / Код / CLI</option>
-                        <option value="news">📰 Новости / Политика</option>
-                        <option value="tech">🔧 Технологии / Гаджеты</option>
-                        <option value="business">💼 Бизнес / Стартапы</option>
-                        <option value="education">📚 Образование / Наука</option>
-                        <option value="entertainment">🎬 Развлечения / Кино</option>
                     </select>
+                    <button onclick="manageCategories()">➕ Управление категориями</button>
                     <button onclick="discoverChannels()">🔍 Найти каналы</button>
                 </div>
                 <div class="progress" id="reconProgress" style="display: none;">
                     <div class="progress-bar" id="reconProgressBar"></div>
                 </div>
                 <div id="discoveredChannels" class="grid"></div>
+            </div>
+
+            <div class="panel">
+                <h2>🔎 Умный поиск каналов</h2>
+                <p style="color: var(--text-secondary); font-size: 0.9em; margin-bottom: 15px;">
+                    Поиск каналов через Google по ключевым словам
+                </p>
+                <div class="input-group">
+                    <input type="text" id="googleSearchInput" placeholder="Ключевые слова (например: crypto airdrop 2024)">
+                    <button onclick="googleSearch()">🔍 Искать</button>
+                </div>
+                <div class="progress" id="googleProgress" style="display: none;">
+                    <div class="progress-bar" id="googleProgressBar"></div>
+                </div>
+                <div id="googleResults" class="grid"></div>
             </div>
 
             <div class="panel">
@@ -468,7 +631,7 @@
                         <div class="status-dot" id="statusDot"></div>
                         <span id="statusText">Остановлено</span>
                     </div>
-                    <div style="color: #86868b; font-size: 0.85em;">
+                    <div style="color: var(--text-secondary); font-size: 0.85em;">
                         Найдено совпадений: <strong id="matchCount">0</strong>
                     </div>
                 </div>
@@ -492,20 +655,93 @@
                 </div>
             </div>
         </div>
+
+        <!-- ВКЛАДКА: НАСТРОЙКИ -->
+        <div id="settings-tab" class="tab-content">
+            <div class="panel">
+                <h2>🔌 API ключи (опционально)</h2>
+                <p style="color: var(--text-secondary); font-size: 0.9em; margin-bottom: 15px;">
+                    Для расширенного функционала с TGStat и Telemetr
+                </p>
+                <div class="input-group">
+                    <input type="text" id="tgstatApiKey" placeholder="TGStat API Key (необязательно)">
+                </div>
+                <div class="input-group">
+                    <input type="text" id="telemetrApiKey" placeholder="Telemetr API Key (необязательно)">
+                </div>
+                <button onclick="saveApiKeys()">💾 Сохранить ключи</button>
+            </div>
+
+            <div class="panel">
+                <h2>💾 Экспорт / Импорт данных</h2>
+                <p style="color: var(--text-secondary); font-size: 0.9em; margin-bottom: 15px;">
+                    Полный бэкап всех настроек, каналов и результатов
+                </p>
+                <div class="export-buttons">
+                    <button class="secondary" onclick="exportAllData()">📤 Экспорт всех данных</button>
+                    <button class="secondary" onclick="document.getElementById('importFile').click()">📥 Импорт данных</button>
+                    <input type="file" id="importFile" style="display: none;" accept=".json" onchange="importAllData(event)">
+                </div>
+            </div>
+
+            <div class="panel">
+                <h2>🗑️ Очистка данных</h2>
+                <p style="color: var(--text-secondary); font-size: 0.9em; margin-bottom: 15px;">
+                    Удалить все сохраненные данные
+                </p>
+                <button class="danger" onclick="clearAllData()">Очистить все данные</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- МОДАЛЬНОЕ ОКНО: УПРАВЛЕНИЕ КАТЕГОРИЯМИ -->
+    <div class="modal" id="categoriesModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>➕ Управление категориями</h2>
+                <button class="modal-close" onclick="closeModal('categoriesModal')">×</button>
+            </div>
+            <div class="input-group">
+                <input type="text" id="newCategoryName" placeholder="Название категории (например: Крипта)">
+                <input type="text" id="newCategoryEmoji" placeholder="Эмодзи (например: 💰)" maxlength="2">
+            </div>
+            <div class="input-group">
+                <textarea id="newCategoryChannels" placeholder="Каналы (каждый с новой строки, формат: имя|описание)" rows="5"></textarea>
+            </div>
+            <button onclick="addCategory()">Добавить категорию</button>
+            <div style="margin-top: 20px;">
+                <h3 style="margin-bottom: 10px; font-size: 1em;">Существующие категории:</h3>
+                <div class="tags" id="categoriesList"></div>
+            </div>
+        </div>
     </div>
 
     <script>
+        // --- TELEGRAM WEBAPP INIT ---
+        let tg = window.Telegram?.WebApp;
+        if (tg) {
+            tg.ready();
+            tg.expand();
+            
+            // Синхронизация темы с Telegram
+            if (tg.colorScheme === 'dark') {
+                document.documentElement.setAttribute('data-theme', 'dark');
+                document.querySelector('.theme-toggle').textContent = '☀️';
+            }
+        }
+
         // --- СОСТОЯНИЕ ПРИЛОЖЕНИЯ ---
         let channels = JSON.parse(localStorage.getItem('tg_channels') || '[]');
         let keywords = JSON.parse(localStorage.getItem('tg_keywords') || '[]');
         let results = JSON.parse(localStorage.getItem('tg_results') || '[]');
         let seenMessages = new Set(JSON.parse(localStorage.getItem('tg_seen') || '[]'));
+        let customCategories = JSON.parse(localStorage.getItem('tg_custom_categories') || '{}');
         let monitoringInterval = null;
         let isRunning = false;
 
         const CORS_PROXY = 'https://api.allorigins.win/raw?url=';
 
-        // --- КАТЕГОРИИ КАНАЛОВ (база данных для разведки) ---
+        // --- БАЗА КАНАЛОВ ПО КАТЕГОРИЯМ ---
         const CHANNEL_DATABASE = {
             crypto: [
                 { name: 'crypto', desc: 'Криптовалюты и блокчейн' },
@@ -557,13 +793,46 @@
             ]
         };
 
+        const CATEGORY_NAMES = {
+            crypto: '💰 Криптовалюты / Airdrop',
+            ai: '🤖 ИИ / Промпты / ML',
+            dev: '💻 Разработка / Код / CLI',
+            news: '📰 Новости / Политика',
+            tech: '🔧 Технологии / Гаджеты',
+            business: '💼 Бизнес / Стартапы',
+            education: '📚 Образование / Наука',
+            entertainment: '🎬 Развлечения / Кино'
+        };
+
         // --- ИНИЦИАЛИЗАЦИЯ ---
         function init() {
             renderTags();
             renderResults();
             updateChannelCount();
             updateMatchCount();
+            populateCategorySelect();
+            loadApiKeys();
             log('🚀 Инструмент готов к работе. Начните с вкладки "Разведка".', 'info');
+        }
+
+        // --- ТЕМА ---
+        function toggleTheme() {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', newTheme);
+            document.querySelector('.theme-toggle').textContent = newTheme === 'dark' ? '☀️' : '🌙';
+            localStorage.setItem('tg_theme', newTheme);
+            
+            if (tg) {
+                tg.HapticFeedback?.impactOccurred('light');
+            }
+        }
+
+        // Загрузка темы при старте
+        const savedTheme = localStorage.getItem('tg_theme');
+        if (savedTheme) {
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            document.querySelector('.theme-toggle').textContent = savedTheme === 'dark' ? '☀️' : '🌙';
         }
 
         // --- ПЕРЕКЛЮЧЕНИЕ ВКЛАДОК ---
@@ -573,6 +842,94 @@
             
             event.target.classList.add('active');
             document.getElementById(`${tabName}-tab`).classList.add('active');
+            
+            if (tg) {
+                tg.HapticFeedback?.selectionChanged();
+            }
+        }
+
+        // --- ЗАПОЛНЕНИЕ СПИСКА КАТЕГОРИЙ ---
+        function populateCategorySelect() {
+            const select = document.getElementById('categorySelect');
+            select.innerHTML = '<option value="">Выберите категорию...</option>';
+            
+            // Встроенные категории
+            Object.keys(CHANNEL_DATABASE).forEach(key => {
+                const option = document.createElement('option');
+                option.value = key;
+                option.textContent = CATEGORY_NAMES[key];
+                select.appendChild(option);
+            });
+            
+            // Пользовательские категории
+            Object.keys(customCategories).forEach(key => {
+                const option = document.createElement('option');
+                option.value = key;
+                option.textContent = customCategories[key].name;
+                select.appendChild(option);
+            });
+        }
+
+        // --- МОДАЛЬНЫЕ ОКНА ---
+        function manageCategories() {
+            document.getElementById('categoriesModal').classList.add('active');
+            renderCategoriesList();
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+
+        function renderCategoriesList() {
+            const list = document.getElementById('categoriesList');
+            list.innerHTML = Object.keys(customCategories).map(key => `
+                <div class="tag">
+                    ${customCategories[key].name}
+                    <span class="remove" onclick="removeCategory('${key}')">×</span>
+                </div>
+            `).join('') || '<p style="color: var(--text-secondary);">Нет пользовательских категорий</p>';
+        }
+
+        function addCategory() {
+            const name = document.getElementById('newCategoryName').value.trim();
+            const emoji = document.getElementById('newCategoryEmoji').value.trim() || '📁';
+            const channelsText = document.getElementById('newCategoryChannels').value.trim();
+            
+            if (!name) {
+                alert('Введите название категории!');
+                return;
+            }
+            
+            const key = 'custom_' + Date.now();
+            const channels = channelsText.split('\n').filter(l => l.trim()).map(line => {
+                const [chName, chDesc] = line.split('|').map(s => s.trim());
+                return { name: chName, desc: chDesc || 'Пользовательский канал' };
+            });
+            
+            customCategories[key] = {
+                name: `${emoji} ${name}`,
+                channels: channels
+            };
+            
+            localStorage.setItem('tg_custom_categories', JSON.stringify(customCategories));
+            populateCategorySelect();
+            renderCategoriesList();
+            
+            // Очистка формы
+            document.getElementById('newCategoryName').value = '';
+            document.getElementById('newCategoryEmoji').value = '';
+            document.getElementById('newCategoryChannels').value = '';
+            
+            alert(`Категория "${name}" добавлена!`);
+        }
+
+        function removeCategory(key) {
+            if (confirm('Удалить эту категорию?')) {
+                delete customCategories[key];
+                localStorage.setItem('tg_custom_categories', JSON.stringify(customCategories));
+                populateCategorySelect();
+                renderCategoriesList();
+            }
         }
 
         // --- РАЗВЕДКА: ПОИСК КАНАЛОВ ---
@@ -591,13 +948,19 @@
             progressBar.style.width = '0%';
             channelsDiv.innerHTML = '';
 
-            const categoryChannels = CHANNEL_DATABASE[category] || [];
+            // Получаем каналы из встроенной базы или пользовательской категории
+            let categoryChannels = [];
+            if (CHANNEL_DATABASE[category]) {
+                categoryChannels = CHANNEL_DATABASE[category];
+            } else if (customCategories[category]) {
+                categoryChannels = customCategories[category].channels;
+            }
+
             let addedCount = 0;
 
             for (let i = 0; i < categoryChannels.length; i++) {
                 const channel = categoryChannels[i];
                 
-                // Проверяем, не добавлен ли уже
                 if (!channels.find(c => c.name === channel.name)) {
                     channels.push({
                         name: channel.name,
@@ -608,11 +971,9 @@
                     addedCount++;
                 }
 
-                // Обновляем прогресс
                 const progress = ((i + 1) / categoryChannels.length) * 100;
                 progressBar.style.width = `${progress}%`;
                 
-                // Рендерим карточку
                 channelsDiv.innerHTML += `
                     <div class="card">
                         <h3>@${channel.name}</h3>
@@ -631,7 +992,114 @@
             updateChannelCount();
             
             progressDiv.style.display = 'none';
-            log(`✅ Найдено и добавлено ${addedCount} каналов в категории "${category}"`, 'success');
+            log(`✅ Найдено и добавлено ${addedCount} каналов`, 'success');
+            
+            if (tg) {
+                tg.HapticFeedback?.notificationOccurred('success');
+            }
+        }
+
+        // --- УМНЫЙ ПОИСК ЧЕРЕЗ GOOGLE ---
+        async function googleSearch() {
+            const query = document.getElementById('googleSearchInput').value.trim();
+            if (!query) {
+                alert('Введите ключевые слова!');
+                return;
+            }
+
+            const progressDiv = document.getElementById('googleProgress');
+            const progressBar = document.getElementById('googleProgressBar');
+            const resultsDiv = document.getElementById('googleResults');
+            
+            progressDiv.style.display = 'block';
+            progressBar.style.width = '0%';
+            resultsDiv.innerHTML = '<p style="color: var(--text-secondary);">Поиск...</p>';
+
+            try {
+                const searchQuery = `site:t.me ${query}`;
+                const url = `https://www.google.com/search?q=${encodeURIComponent(searchQuery)}&num=20`;
+                const proxyUrl = CORS_PROXY + encodeURIComponent(url);
+                
+                progressBar.style.width = '50%';
+                const response = await fetch(proxyUrl);
+                const html = await response.text();
+                
+                progressBar.style.width = '100%';
+                
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const links = doc.querySelectorAll('a[href*="t.me/"]');
+                
+                const foundChannels = new Set();
+                links.forEach(link => {
+                    const href = link.getAttribute('href');
+                    const match = href.match(/t\.me\/([a-zA-Z0-9_]{3,})/);
+                    if (match) {
+                        const channelName = match[1].toLowerCase();
+                        if (!['s', 'joinchat', 'addtheme', 'share', 'c'].includes(channelName)) {
+                            foundChannels.add(channelName);
+                        }
+                    }
+                });
+
+                resultsDiv.innerHTML = '';
+                let addedCount = 0;
+                
+                foundChannels.forEach(channelName => {
+                    if (!channels.find(c => c.name === channelName)) {
+                        channels.push({
+                            name: channelName,
+                            category: 'google_search',
+                            description: `Найдено по запросу: ${query}`,
+                            addedAt: new Date().toISOString()
+                        });
+                        addedCount++;
+                    }
+                    
+                    resultsDiv.innerHTML += `
+                        <div class="card" onclick="addManualChannelByName('${channelName}')">
+                            <h3>@${channelName}</h3>
+                            <p>Найдено через Google</p>
+                            <div class="stats">
+                                <span>🔍 ${query}</span>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                if (foundChannels.size === 0) {
+                    resultsDiv.innerHTML = '<p style="color: var(--text-secondary);">Ничего не найдено. Попробуйте другие ключевые слова.</p>';
+                } else {
+                    saveState();
+                    renderTags();
+                    updateChannelCount();
+                    log(`✅ Google поиск: найдено ${foundChannels.size} каналов`, 'success');
+                }
+            } catch (error) {
+                resultsDiv.innerHTML = `<p style="color: var(--danger);">Ошибка поиска: ${error.message}</p>`;
+                log(`❌ Ошибка Google поиска: ${error.message}`, 'error');
+            }
+
+            progressDiv.style.display = 'none';
+        }
+
+        function addManualChannelByName(name) {
+            if (!channels.find(c => c.name === name)) {
+                channels.push({
+                    name: name,
+                    category: 'manual',
+                    description: 'Добавлен вручную',
+                    addedAt: new Date().toISOString()
+                });
+                saveState();
+                renderTags();
+                updateChannelCount();
+                log(`✅ Добавлен канал: @${name}`, 'success');
+                
+                if (tg) {
+                    tg.HapticFeedback?.impactOccurred('medium');
+                }
+            }
         }
 
         // --- ДОБАВЛЕНИЕ КАНАЛА ВРУЧНУЮ ---
@@ -651,6 +1119,10 @@
                 updateChannelCount();
                 input.value = '';
                 log(`✅ Добавлен канал: @${name}`, 'success');
+                
+                if (tg) {
+                    tg.HapticFeedback?.impactOccurred('medium');
+                }
             }
         }
 
@@ -674,7 +1146,6 @@
             renderTags();
         }
 
-        // --- УДАЛЕНИЕ КАНАЛА ---
         function removeChannel(name) {
             channels = channels.filter(c => c.name !== name);
             saveState();
@@ -790,7 +1261,6 @@
                 seenMessages.add(msg.postId);
             }
 
-            // Сортировка
             if (sortBy === 'views') {
                 newResults.sort((a, b) => {
                     const viewsA = parseInt(a.views.replace(/\s|K|M/g, '')) || 0;
@@ -829,7 +1299,7 @@
                     <div class="channel">📡 Канал: @${r.channel}</div>
                     <div class="keywords">🔑 Ключевые слова: ${r.keywords.join(', ')}</div>
                     <div class="text">${r.text.substring(0, 300)}${r.text.length > 300 ? '...' : ''}</div>
-                    <div style="display: flex; gap: 15px; font-size: 0.8em; color: #86868b; margin-top: 8px;">
+                    <div style="display: flex; gap: 15px; font-size: 0.8em; color: var(--text-secondary); margin-top: 8px; flex-wrap: wrap;">
                         <span>📅 ${new Date(r.date).toLocaleString('ru-RU')}</span>
                         <span>👁️ ${r.views} просмотров</span>
                     </div>
@@ -857,7 +1327,6 @@
 
             log('🚀 Начинаю мониторинг...', 'info');
 
-            // Первичный прогон
             log('⏳ Выполняю первичный сбор данных...', 'info');
             for (const channel of channels) {
                 const messages = await parseChannel(channel.name);
@@ -867,7 +1336,6 @@
             saveState();
             log('✅ Калибровка завершена. Активный мониторинг начат.', 'success');
 
-            // Циклический мониторинг
             const intervalSec = parseInt(document.getElementById('intervalInput').value) || 60;
             monitoringInterval = setInterval(async () => {
                 if (!isRunning) return;
@@ -935,6 +1403,79 @@
             URL.revokeObjectURL(url);
         }
 
+        // --- API КЛЮЧИ ---
+        function saveApiKeys() {
+            const tgstat = document.getElementById('tgstatApiKey').value.trim();
+            const telemetr = document.getElementById('telemetrApiKey').value.trim();
+            localStorage.setItem('tg_tgstat_key', tgstat);
+            localStorage.setItem('tg_telemetr_key', telemetr);
+            alert('API ключи сохранены!');
+        }
+
+        function loadApiKeys() {
+            document.getElementById('tgstatApiKey').value = localStorage.getItem('tg_tgstat_key') || '';
+            document.getElementById('telemetrApiKey').value = localStorage.getItem('tg_telemetr_key') || '';
+        }
+
+        // --- ЭКСПОРТ / ИМПОРТ ВСЕХ ДАННЫХ ---
+        function exportAllData() {
+            const data = {
+                channels,
+                keywords,
+                results,
+                seenMessages: Array.from(seenMessages),
+                customCategories,
+                tgstatKey: localStorage.getItem('tg_tgstat_key') || '',
+                telemetrKey: localStorage.getItem('tg_telemetr_key') || '',
+                theme: localStorage.getItem('tg_theme') || 'light',
+                exportedAt: new Date().toISOString()
+            };
+            downloadFile(JSON.stringify(data, null, 2), 'telegram_recon_backup.json', 'application/json');
+        }
+
+        function importAllData(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    channels = data.channels || [];
+                    keywords = data.keywords || [];
+                    results = data.results || [];
+                    seenMessages = new Set(data.seenMessages || []);
+                    customCategories = data.customCategories || {};
+                    
+                    localStorage.setItem('tg_channels', JSON.stringify(channels));
+                    localStorage.setItem('tg_keywords', JSON.stringify(keywords));
+                    localStorage.setItem('tg_results', JSON.stringify(results));
+                    localStorage.setItem('tg_seen', JSON.stringify(Array.from(seenMessages)));
+                    localStorage.setItem('tg_custom_categories', JSON.stringify(customCategories));
+                    
+                    if (data.tgstatKey) localStorage.setItem('tg_tgstat_key', data.tgstatKey);
+                    if (data.telemetrKey) localStorage.setItem('tg_telemetr_key', data.telemetrKey);
+                    if (data.theme) {
+                        localStorage.setItem('tg_theme', data.theme);
+                        document.documentElement.setAttribute('data-theme', data.theme);
+                        document.querySelector('.theme-toggle').textContent = data.theme === 'dark' ? '☀️' : '🌙';
+                    }
+                    
+                    renderTags();
+                    renderResults();
+                    updateChannelCount();
+                    updateMatchCount();
+                    populateCategorySelect();
+                    loadApiKeys();
+                    
+                    alert('Данные успешно импортированы!');
+                } catch (error) {
+                    alert('Ошибка импорта: ' + error.message);
+                }
+            };
+            reader.readAsText(file);
+        }
+
         // --- ОЧИСТКА ---
         function clearChannels() {
             if (confirm('Удалить все каналы?')) {
@@ -952,6 +1493,24 @@
                 saveState();
                 renderResults();
                 updateMatchCount();
+            }
+        }
+
+        function clearAllData() {
+            if (confirm('Удалить ВСЕ данные? Это действие нельзя отменить!')) {
+                localStorage.clear();
+                channels = [];
+                keywords = [];
+                results = [];
+                seenMessages = new Set();
+                customCategories = {};
+                renderTags();
+                renderResults();
+                updateChannelCount();
+                updateMatchCount();
+                populateCategorySelect();
+                loadApiKeys();
+                alert('Все данные удалены!');
             }
         }
 
