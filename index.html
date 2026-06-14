@@ -363,6 +363,7 @@
                     <input type="url" id="customRssInput" placeholder="https://xakep.ru/feed/">
                     <button onclick="saveRssSettings()">💾 Сохранить</button>
                 </div>
+				<div class="tags" id="rssTags" style="margin-top: 10px;"></div>
             </div>
 
             <div class="panel">
@@ -476,9 +477,10 @@
 
         // --- TICKER LOGIC (RSS) ---
         async function loadTicker() {
-			const tickerEl = document.getElementById('tickerContent');
+			// Берем из localStorage, если пусто или массив пуст — дефолт HN
 			const saved = localStorage.getItem('amigo_rssFeeds');
-			const feeds = saved ? JSON.parse(saved) : ['https://hnrss.org/frontpage'];
+			const parsed = saved ? JSON.parse(saved) : [];
+			const feeds = parsed.length > 0 ? parsed : ['https://hnrss.org/frontpage'];
 			
 			// Инициализация при первом запуске
 			document.getElementById('customRssInput').placeholder = "https://url1.com/rss, https://url2.com/rss";
@@ -867,6 +869,26 @@
         }
 
         function logConsole(msg) { console.log(`[OSINT] ${msg}`); }
+		
+		function renderRssTags() {
+			const feeds = JSON.parse(localStorage.getItem('amigo_rssFeeds') || '[]');
+			const container = document.getElementById('rssTags');
+			container.innerHTML = feeds.map(url => `
+				<div class="tag">
+					${url.substring(0, 25)}... 
+					<span class="remove" onclick="removeRss('${url}')">×</span>
+				</div>
+			`).join('');
+		}
+
+		function removeRss(url) {
+			let feeds = JSON.parse(localStorage.getItem('amigo_rssFeeds') || '[]');
+			feeds = feeds.filter(f => f !== url);
+			localStorage.setItem('amigo_rssFeeds', JSON.stringify(feeds));
+			document.getElementById('customRssInput').value = feeds.join(', ');
+			loadTicker();
+			renderRssTags();
+		}
 
         // --- ЭКСПОРТ / УТИЛИТЫ ---
         function downloadFile(content, filename, type) {
