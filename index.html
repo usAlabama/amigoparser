@@ -257,8 +257,8 @@
         <!-- ВКЛАДКА: РАЗВЕДКА -->
         <div id="recon-tab" class="tab-content active">
             <div class="panel">
-                <h2>🔎 Умный OSINT Поиск (Глобальный)</h2>
-                <p style="color: var(--text-secondary); font-size: 0.9em; margin-bottom: 15px;">Поиск каналов в Telegram (через GitHub API) и мгновенный поиск инсайтов по внешним базам.</p>
+                <h2>🔎 Умный Поиск (Глобальный)</h2>
+                <p style="color: var(--text-secondary); font-size: 0.9em; margin-bottom: 15px;">Поиск каналов в Telegram (через GitHub API) и мгновенный поиск информации по внешним базам.</p>
                 <div class="source-toggles">
                     <label class="source-toggle"><input type="checkbox" id="srcTG" checked> Telegram (через GitHub)</label>
                     <label class="source-toggle"><input type="checkbox" id="srcHN" checked> Hacker News</label>
@@ -326,7 +326,7 @@
                         <span id="statusText">Режим ожидания</span>
                     </div>
                     <div style="color: var(--text-secondary); font-size: 0.9em;">
-                        Перехвачено инсайтов: <strong id="matchCount" style="color: var(--accent);">0</strong>
+                        Перехвачено данных: <strong id="matchCount" style="color: var(--accent);">0</strong>
                     </div>
                 </div>
             </div>
@@ -357,7 +357,7 @@
             <div class="panel">
                 <h2>📡 Кастомная RSS Лента (Тикер)</h2>
                 <p style="color: var(--text-secondary); font-size: 0.9em; margin-bottom: 15px;">
-                    Вставь ссылку на любой RSS feed, чтобы выводить его в бегущей строке вверху. Оставь пустым для дефолтного Hacker News.
+                    Вставь одну или несколько ссылок через запятую и пробел. Оставь пустым для дефолтного Hacker News.
                 </p>
                 <div class="input-group">
                     <input type="url" id="customRssInput" placeholder="https://xakep.ru/feed/">
@@ -476,37 +476,43 @@
 
         // --- TICKER LOGIC (RSS) ---
         async function loadTicker() {
-            const tickerEl = document.getElementById('tickerContent');
-            const customRss = localStorage.getItem('amigo_rssUrl');
-            const defaultRss = 'https://hnrss.org/frontpage';
-            const targetUrl = customRss || defaultRss;
+			const tickerEl = document.getElementById('tickerContent');
+			const saved = localStorage.getItem('amigo_rssFeeds');
+			const feeds = saved ? JSON.parse(saved) : ['https://hnrss.org/frontpage'];
+			
+			// Инициализация при первом запуске
+			document.getElementById('customRssInput').placeholder = "https://url1.com/rss, https://url2.com/rss";
 
-            document.getElementById('customRssInput').value = customRss || '';
+			let allItems = [];
+			for (let url of feeds) {
+				try {
+					const res = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(url)}`);
+					const data = await res.json();
+					if (data.items) allItems = allItems.concat(data.items);
+				} catch (e) { console.error('Ошибка ленты:', url); }
+			}
 
-            try {
-                // Free RSS to JSON API, handles CORS beautifully
-                const res = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(targetUrl)}`);
-                if (res.ok) {
-                    const data = await res.json();
-                    if (data.items && data.items.length > 0) {
-                        let html = '';
-                        data.items.slice(0, 10).forEach(item => {
-                            html += `<a href="${item.link}" target="_blank" class="ticker-item">⚡ ${item.title}</a>`;
-                        });
-                        tickerEl.innerHTML = html;
-                        return;
-                    }
-                }
-            } catch (e) { console.error('Ticker Error', e); }
-            tickerEl.innerHTML = '<span class="ticker-item" style="color: var(--danger);">[!] Ошибка подключения к источнику разведданных.</span>';
-        }
+			if (allItems.length > 0) {
+				// Перемешиваем, чтобы ленты шли вперемешку, или оставляем как есть
+				let html = allItems.map(item => 
+					`<a href="${item.link}" target="_blank" class="ticker-item">⚡ ${item.title}</a>`
+				).join('');
+				tickerEl.innerHTML = html;
+			} else {
+				tickerEl.innerHTML = '<span class="ticker-item">[!] Нет данных от источников.</span>';
+			}
+		}
         
         function saveRssSettings() {
-            const val = document.getElementById('customRssInput').value.trim();
-            localStorage.setItem('amigo_rssUrl', val);
-            loadTicker();
-            alert('Источник RSS обновлен!');
-        }
+			const val = document.getElementById('customRssInput').value.trim();
+			
+			// Если поле пустое, берем массив с дефолтной ссылкой, иначе разбиваем ввод
+			const rssList = val ? val.split(',').map(s => s.trim()) : ['https://hnrss.org/frontpage'];
+			
+			localStorage.setItem('amigo_rssFeeds', JSON.stringify(rssList));
+			loadTicker();
+			alert('RSS-источники обновлены!');
+		}
         
         loadTicker();
 
