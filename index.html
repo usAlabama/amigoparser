@@ -45,6 +45,17 @@
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
+        /* ТЕМНЫЕ И НЕВИДИМЫЕ СКРОЛЛЫ */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+        * { scrollbar-width: thin; scrollbar-color: var(--border) transparent; }
+
+        /* DRAG-TO-SCROLL CLASS */
+        .drag-scroll { cursor: grab; overflow: auto; }
+        .drag-scroll:active { cursor: grabbing; }
+
         body {
             font-family: var(--font-main);
             background: var(--bg-primary);
@@ -75,7 +86,31 @@
         }
         .theme-toggle:hover { background: var(--bg-tertiary); transform: scale(1.05); }
 
-        .subtitle { color: var(--text-secondary); margin-bottom: 25px; font-size: 0.95em; }
+        .subtitle { color: var(--text-secondary); margin-bottom: 15px; font-size: 0.95em; }
+
+        /* БЕГУЩАЯ СТРОКА (TICKER) */
+        .ticker-wrap {
+            width: 100%; min-width: 300px; overflow: hidden; background: var(--bg-secondary);
+            border: 1px solid var(--border); border-radius: var(--radius);
+            padding: 8px 0; margin-bottom: 20px; box-shadow: inset 0 0 10px rgba(0,0,0,0.05);
+            display: flex; align-items: center; white-space: nowrap; position: relative;
+        }
+        .ticker-label {
+            background: var(--accent); color: white; padding: 0 15px; font-weight: bold; font-size: 0.85em;
+            height: 100%; display: flex; align-items: center; position: absolute; left: 0; z-index: 2;
+            box-shadow: 5px 0 10px var(--bg-secondary); text-transform: uppercase; letter-spacing: 1px;
+        }
+        .ticker {
+            display: inline-block; white-space: nowrap; padding-left: 120px; animation: ticker 60s linear infinite; will-change: transform;
+        }
+        .ticker:hover { animation-play-state: paused; }
+        @keyframes ticker { 0% { transform: translate3d(100%, 0, 0); } 100% { transform: translate3d(-100%, 0, 0); } }
+        .ticker-item {
+            display: inline-block; padding: 0 2rem; font-family: var(--font-mono); font-size: 0.85em;
+            color: var(--text-primary); text-decoration: none; cursor: pointer; transition: color 0.2s;
+        }
+        .ticker-item:hover { color: var(--accent); text-decoration: underline; }
+        .ticker-item::after { content: " | "; color: var(--border); margin-left: 2rem; }
 
         .panel {
             background: var(--bg-secondary); border: 1px solid var(--border);
@@ -87,14 +122,14 @@
 
         .input-group { display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap; }
 
-        input[type="text"], select, textarea {
+        input[type="text"], input[type="number"], input[type="url"], select, textarea {
             flex: 1; min-width: 200px; padding: 10px 14px;
             background: var(--bg-primary); border: 1px solid var(--border);
             border-radius: var(--radius); color: var(--text-primary);
             font-size: 14px; transition: all 0.2s; font-family: inherit;
         }
 
-        input[type="text"]:focus, select:focus, textarea:focus {
+        input:focus, select:focus, textarea:focus {
             outline: none; border-color: var(--accent);
             box-shadow: 0 0 0 3px var(--accent-glow);
         }
@@ -138,7 +173,7 @@
         .log {
             background: var(--bg-primary); border: 1px solid var(--border);
             border-radius: var(--radius); padding: 15px; max-height: 600px;
-            overflow-y: auto; font-family: var(--font-mono); font-size: 13px;
+            font-family: var(--font-mono); font-size: 13px;
         }
 
         .log-entry {
@@ -171,7 +206,7 @@
 
         @keyframes pulse { 0% { opacity: 1; transform: scale(1); } 50% { opacity: 0.6; transform: scale(1.2); } 100% { opacity: 1; transform: scale(1); } }
 
-        .tabs { display: flex; gap: 5px; margin-bottom: 20px; border-bottom: 1px solid var(--border); overflow-x: auto; padding-bottom: 2px;}
+        .tabs { display: flex; gap: 5px; margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 2px;}
         .tab {
             padding: 10px 20px; cursor: pointer; border-bottom: 2px solid transparent;
             color: var(--text-secondary); font-weight: 600; transition: all 0.2s; white-space: nowrap;
@@ -190,19 +225,6 @@
         .empty-state { text-align: center; padding: 40px 20px; color: var(--text-secondary); }
         .empty-state .icon { font-size: 48px; margin-bottom: 15px; opacity: 0.5; }
 
-        .modal {
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(4px); z-index: 1000;
-            align-items: center; justify-content: center; padding: 20px;
-        }
-        .modal.active { display: flex; }
-        .modal-content {
-            background: var(--bg-secondary); border-radius: var(--radius); padding: 25px;
-            max-width: 500px; width: 100%; box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-        }
-        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .modal-close { background: none; border: none; font-size: 24px; cursor: pointer; color: var(--text-secondary); }
-
         .source-toggles { display: flex; gap: 15px; margin-bottom: 15px; flex-wrap: wrap; }
         .source-toggle { display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 0.9em; font-weight: 500;}
         .source-toggle input { width: 16px; height: 16px; accent-color: var(--accent); }
@@ -212,22 +234,27 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>🌐 Amigo Recon <span class="badge">v2.0 OSINT</span></h1>
+            <h1>🅰️ Amigo Recon <span class="badge">vv STEALTH</span></h1>
             <button class="theme-toggle" onclick="toggleTheme()" id="themeIcon">🌙</button>
         </div>
-        <p class="subtitle" data-i18n="subtitle">Мульти-источниковый поиск инсайтов: Telegram, Hacker News, Dev.to, GitHub</p>
+        <p class="subtitle">Мульти-источниковый поиск инсайтов. Анонимно. Эффективно.</p>
 
-        <div class="panel" style="background: rgba(245, 158, 11, 0.1); border-color: var(--warning);">
-            <strong style="color: var(--warning);">⚠️ OPSEC Notice:</strong> <span style="font-size: 0.9em;">Все данные обрабатываются исключительно в браузере (Client-Side). Для обхода блокировок Telegram используется пул CORS-прокси. Hacker News и Dev.to опрашиваются напрямую.</span>
+        <!-- БЕГУЩАЯ СТРОКА RSS -->
+        <div class="ticker-wrap">
+            <div class="ticker-label">INTEL</div>
+            <div class="ticker" id="tickerContent">
+                <span class="ticker-item">Загрузка данных канала связи...</span>
+            </div>
         </div>
 
-        <div class="tabs">
-            <div class="tab active" onclick="switchTab('recon')">🎯 Разведка</div>
-            <div class="tab" onclick="switchTab('monitor')">📡 Мониторинг</div>
-            <div class="tab" onclick="switchTab('results')">📊 База Инсайтов</div>
+        <div class="tabs drag-scroll">
+            <div class="tab active" onclick="switchTab('recon')">🔍 Разведка</div>
+            <div class="tab" onclick="switchTab('monitor')">Ⓜ️ Мониторинг</div>
+            <div class="tab" onclick="switchTab('results')">🗜 База Инфо</div>
             <div class="tab" onclick="switchTab('settings')">⚙️ Система</div>
         </div>
 
+        <!-- ВКЛАДКА: РАЗВЕДКА -->
         <div id="recon-tab" class="tab-content active">
             <div class="panel">
                 <h2>🔎 Умный OSINT Поиск (Глобальный)</h2>
@@ -244,7 +271,7 @@
                 <div class="progress" id="googleProgress" style="display: none;">
                     <div class="progress-bar" id="googleProgressBar"></div>
                 </div>
-                <div id="googleResults" class="grid"></div>
+                <div id="googleResults" class="grid drag-scroll"></div>
             </div>
 
             <div class="panel">
@@ -260,6 +287,7 @@
             </div>
         </div>
 
+        <!-- ВКЛАДКА: МОНИТОРИНГ -->
         <div id="monitor-tab" class="tab-content">
             <div class="panel">
                 <h2>🔑 Ключевые слова / Триггеры</h2>
@@ -271,7 +299,7 @@
             </div>
 
             <div class="panel">
-                <h2>⚙️ Панель управления мониторингом</h2>
+                <h2>⚙️ Панель управления (Stealth Mode)</h2>
                 <div class="source-toggles" style="background: var(--bg-primary); padding: 10px; border-radius: var(--radius); margin-bottom: 15px;">
                     <strong style="font-size: 0.9em; margin-right: 10px;">Активные источники:</strong>
                     <label class="source-toggle"><input type="checkbox" id="monTG" checked> Telegram Каналы</label>
@@ -279,7 +307,8 @@
                     <label class="source-toggle"><input type="checkbox" id="monDev" checked> Dev.to (Live)</label>
                 </div>
                 <div class="input-group">
-                    <input type="number" id="intervalInput" placeholder="Интервал проверки (сек)" value="60" min="30">
+                    <input type="number" id="intervalInput" placeholder="Шаг (сек)" value="60" min="30" title="Интервал проверки">
+                    <input type="number" id="autoStopInput" placeholder="Kill Switch (мин)" value="15" min="1" title="Автоматическая остановка через N минут">
                     <button id="startBtn" onclick="startMonitoring()">▶️ Запуск скрипта</button>
                     <button id="stopBtn" class="danger" onclick="stopMonitoring()" disabled>⏹️ Стоп</button>
                 </div>
@@ -295,6 +324,7 @@
             </div>
         </div>
 
+        <!-- ВКЛАДКА: РЕЗУЛЬТАТЫ -->
         <div id="results-tab" class="tab-content">
             <div class="panel">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
@@ -305,7 +335,7 @@
                         <button class="danger" onclick="clearResults()">🗑️ Очистить</button>
                     </div>
                 </div>
-                <div class="log" id="resultsLog">
+                <div class="log drag-scroll" id="resultsLog">
                     <div class="empty-state">
                         <div class="icon">📭</div>
                         <p>Лог пуст. Настройте триггеры и запустите мониторинг.</p>
@@ -314,15 +344,24 @@
             </div>
         </div>
 
+        <!-- ВКЛАДКА: НАСТРОЙКИ -->
         <div id="settings-tab" class="tab-content">
             <div class="panel">
-                <h2>💾 Экспорт / Импорт конфигурации</h2>
+                <h2>📡 Кастомная RSS Лента (Тикер)</h2>
                 <p style="color: var(--text-secondary); font-size: 0.9em; margin-bottom: 15px;">
-                    Полный бэкап всех таргетов, триггеров и собранной базы.
+                    Вставь ссылку на любой RSS feed, чтобы выводить его в бегущей строке вверху. Оставь пустым для дефолтного Hacker News.
                 </p>
                 <div class="input-group">
-                    <button class="secondary" onclick="exportAllData()">📤 Скачать бэкап</button>
-                    <button class="secondary" onclick="document.getElementById('importFile').click()">📥 Загрузить бэкап</button>
+                    <input type="url" id="customRssInput" placeholder="https://xakep.ru/feed/">
+                    <button onclick="saveRssSettings()">💾 Сохранить</button>
+                </div>
+            </div>
+
+            <div class="panel">
+                <h2>💾 Экспорт / Импорт конфигурации</h2>
+                <div class="input-group">
+                    <button class="secondary" onclick="exportAllData()">⬇️ Скачать бэкап</button>
+                    <button class="secondary" onclick="document.getElementById('importFile').click()">⬆️ Загрузить бэкап</button>
                     <input type="file" id="importFile" style="display: none;" accept=".json" onchange="importAllData(event)">
                 </div>
             </div>
@@ -367,12 +406,44 @@
             triggerHaptic('light');
         }
 
+        // --- DRAG TO SCROLL (Telegram Style) ---
+        function enableDragScroll() {
+            const sliders = document.querySelectorAll('.drag-scroll');
+            sliders.forEach(slider => {
+                let isDown = false;
+                let startX, startY, scrollLeft, scrollTop;
+
+                slider.addEventListener('mousedown', (e) => {
+                    isDown = true;
+                    slider.classList.add('active');
+                    startX = e.pageX - slider.offsetLeft;
+                    startY = e.pageY - slider.offsetTop;
+                    scrollLeft = slider.scrollLeft;
+                    scrollTop = slider.scrollTop;
+                });
+                slider.addEventListener('mouseleave', () => { isDown = false; slider.classList.remove('active'); });
+                slider.addEventListener('mouseup', () => { isDown = false; slider.classList.remove('active'); });
+                slider.addEventListener('mousemove', (e) => {
+                    if (!isDown) return;
+                    e.preventDefault();
+                    const x = e.pageX - slider.offsetLeft;
+                    const y = e.pageY - slider.offsetTop;
+                    const walkX = (x - startX) * 1.5;
+                    const walkY = (y - startY) * 1.5;
+                    slider.scrollLeft = scrollLeft - walkX;
+                    slider.scrollTop = scrollTop - walkY;
+                });
+            });
+        }
+        document.addEventListener('DOMContentLoaded', enableDragScroll);
+
         // --- СОСТОЯНИЕ ДАННЫХ ---
         let channels = JSON.parse(localStorage.getItem('amigo_channels') || '[]');
         let keywords = JSON.parse(localStorage.getItem('amigo_keywords') || '[]');
         let results = JSON.parse(localStorage.getItem('amigo_results') || '[]');
         let seenMessages = new Set(JSON.parse(localStorage.getItem('amigo_seen') || '[]'));
         let monitoringInterval = null;
+        let killSwitchTimeout = null;
         let isRunning = false;
 
         // ПУЛ ПРОКСИ (Борьба с CORS для Telegram)
@@ -395,6 +466,42 @@
             throw new Error(`All CORS proxies failed for ${url}`);
         }
 
+        // --- TICKER LOGIC (RSS) ---
+        async function loadTicker() {
+            const tickerEl = document.getElementById('tickerContent');
+            const customRss = localStorage.getItem('amigo_rssUrl');
+            const defaultRss = 'https://hnrss.org/frontpage';
+            const targetUrl = customRss || defaultRss;
+
+            document.getElementById('customRssInput').value = customRss || '';
+
+            try {
+                // Free RSS to JSON API, handles CORS beautifully
+                const res = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(targetUrl)}`);
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data.items && data.items.length > 0) {
+                        let html = '';
+                        data.items.slice(0, 10).forEach(item => {
+                            html += `<a href="${item.link}" target="_blank" class="ticker-item">⚡ ${item.title}</a>`;
+                        });
+                        tickerEl.innerHTML = html;
+                        return;
+                    }
+                }
+            } catch (e) { console.error('Ticker Error', e); }
+            tickerEl.innerHTML = '<span class="ticker-item" style="color: var(--danger);">[!] Ошибка подключения к источнику разведданных.</span>';
+        }
+        
+        function saveRssSettings() {
+            const val = document.getElementById('customRssInput').value.trim();
+            localStorage.setItem('amigo_rssUrl', val);
+            loadTicker();
+            alert('Источник RSS обновлен!');
+        }
+        
+        loadTicker();
+
         // --- ГЛОБАЛЬНЫЙ OSINT ПОИСК ---
         async function globalSearch() {
             const query = document.getElementById('googleSearchInput').value.trim();
@@ -413,7 +520,6 @@
             resultsDiv.innerHTML = '';
             let foundCount = 0;
 
-            // 1. Hacker News API (No CORS issues)
             if (srcHN) {
                 try {
                     const hnRes = await fetch(`https://hn.algolia.com/api/v1/search?query=${encodeURIComponent(query)}&tags=story&hitsPerPage=5`);
@@ -428,7 +534,6 @@
                 progressBar.style.width = '40%';
             }
 
-            // 2. Dev.to API (No CORS issues)
             if (srcDev) {
                 try {
                     const devRes = await fetch(`https://dev.to/api/articles?q=${encodeURIComponent(query)}&per_page=5`);
@@ -443,7 +548,6 @@
                 progressBar.style.width = '70%';
             }
 
-            // 3. Telegram via GitHub API
             if (srcTG) {
                 try {
                     const ghRes = await fetch(`https://api.github.com/search/code?q=${encodeURIComponent('t.me ' + query)}&per_page=5`);
@@ -451,7 +555,6 @@
                         const ghData = await ghRes.json();
                         const tgChannels = new Set();
                         for (const item of (ghData.items || [])) {
-                            // Fetch raw file to extract t.me links
                             try {
                                 const fileRes = await fetch(item.url, { headers: { 'Accept': 'application/vnd.github.v3.raw' } });
                                 if (fileRes.ok) {
@@ -469,13 +572,16 @@
                             foundCount++;
                         });
                     }
-                } catch (e) { console.error('GitHub Search error', e); }
+                } catch (e) { 
+                    console.error('GitHub Search error', e); 
+                    resultsDiv.innerHTML += `<p style="color: var(--danger); width: 100%; font-size: 0.85em;">[API GitHub: 401 Unauthorized]. Поиск по коду требует авторизации. Пропущено.</p>`;
+                }
             }
 
             progressBar.style.width = '100%';
             setTimeout(() => progressDiv.style.display = 'none', 500);
 
-            if (foundCount === 0) {
+            if (foundCount === 0 && !resultsDiv.innerHTML.includes('401')) {
                 resultsDiv.innerHTML = `<p style="color: var(--text-secondary); width: 100%;">По запросу "${query}" ничего не найдено.</p>`;
             }
         }
@@ -522,8 +628,6 @@
         function removeKeyword(kw) { keywords = keywords.filter(k => k !== kw); saveState(); renderUI(); }
 
         // --- ПАРСИНГ ИСТОЧНИКОВ ---
-
-        // 1. Telegram (через t.me/s/)
         async function parseTelegram(channelName) {
             try {
                 const html = await fetchWithFallback(`https://t.me/s/${channelName}`);
@@ -539,7 +643,7 @@
                             source: `Telegram: @${channelName}`,
                             text: text,
                             url: `https://t.me/${postId}`,
-                            date: new Date().toISOString() // Approximate for TG web
+                            date: new Date().toISOString()
                         });
                     }
                 });
@@ -550,7 +654,6 @@
             }
         }
 
-        // 2. Hacker News (Live RSS/API search)
         async function parseHackerNews() {
             let messages = [];
             for (const kw of keywords) {
@@ -573,10 +676,8 @@
             return messages;
         }
 
-        // 3. Dev.to (Live API)
         async function parseDevTo() {
             let messages = [];
-            // Dev.to works best by fetching latest and filtering, or specific keyword search
             for (const kw of keywords) {
                 try {
                     const res = await fetch(`https://dev.to/api/articles?q=${encodeURIComponent(kw)}&per_page=3`);
@@ -608,20 +709,12 @@
                 const matchedKws = keywords.filter(kw => lowerText.includes(kw));
 
                 if (matchedKws.length > 0) {
-                    results.unshift({
-                        ...msg,
-                        keywords: matchedKws,
-                        foundAt: new Date().toISOString()
-                    });
+                    results.unshift({ ...msg, keywords: matchedKws, foundAt: new Date().toISOString() });
                     newResults++;
                 }
             });
 
-            if (newResults > 0) {
-                saveState();
-                renderResults();
-                triggerHaptic('heavy');
-            }
+            if (newResults > 0) { saveState(); renderResults(); triggerHaptic('heavy'); }
             return newResults;
         }
 
@@ -664,22 +757,32 @@
             document.getElementById('statusDot').classList.add('active');
             document.getElementById('statusText').textContent = 'Активный перехват';
 
-            logConsole('Запуск сканирования...', 'info');
-            
-            // First run immediately
-            await monitorCycle();
-
             const interval = Math.max(30, parseInt(document.getElementById('intervalInput').value) || 60);
+            const autoStopMins = Math.max(1, parseInt(document.getElementById('autoStopInput').value) || 15);
+
+            logConsole(`Запуск сканирования... Kill Switch сработает через ${autoStopMins} мин.`, 'info');
+            
+            // Запуск таймера автостопа
+            killSwitchTimeout = setTimeout(() => {
+                if (isRunning) {
+                    stopMonitoring();
+                    alert(`Stealth Mode: Автостоп сработал (лимит ${autoStopMins} мин). Батарея и анонимность в безопасности.`);
+                }
+            }, autoStopMins * 60 * 1000);
+
+            // Первый прогон
+            await monitorCycle();
             monitoringInterval = setInterval(monitorCycle, interval * 1000);
         }
 
         function stopMonitoring() {
             isRunning = false;
             clearInterval(monitoringInterval);
+            clearTimeout(killSwitchTimeout);
             document.getElementById('startBtn').disabled = false;
             document.getElementById('stopBtn').disabled = true;
             document.getElementById('statusDot').classList.remove('active');
-            document.getElementById('statusText').textContent = 'Режим ожидания';
+            document.getElementById('statusText').textContent = 'Режим ожидания (Спячка)';
             logConsole('Мониторинг остановлен.', 'info');
         }
 
