@@ -101,7 +101,7 @@
             box-shadow: 5px 0 10px var(--bg-secondary); text-transform: uppercase; letter-spacing: 1px;
         }
         .ticker {
-            display: inline-block; white-space: nowrap; padding-left: 120px; animation: ticker 240s linear infinite; will-change: transform;
+            display: inline-block; white-space: nowrap; padding-left: 120px; animation: ticker 480s linear infinite; will-change: transform;
         }
         .ticker:hover { animation-play-state: paused; }
         @keyframes ticker { 0% { transform: translate3d(100%, 0, 0); } 100% { transform: translate3d(-100%, 0, 0); } }
@@ -286,7 +286,20 @@
                     <div class="tags" id="channelTags"></div>
                 </div>
             </div>
+			
+			<div class="panel">
+				<h2>➕ Управление Reddit Сабреддитами</h2>
+				<div class="input-group">
+					<input type="text" id="manualRedditInput" placeholder="Имя сабреддита (например: netsec, crypto)">
+					<button onclick="addManualReddit()">Добавить Reddit</button>
+				</div>
+				<div style="margin-top: 15px; border-top: 1px solid var(--border); padding-top: 15px;">
+					<h3 style="font-size: 1em; margin-bottom: 10px;">Цели для мониторинга (<span id="redditCount">0</span>)</h3>
+					<div class="tags" id="redditTags"></div>
+				</div>
+			</div>
         </div>
+				
 
         <!-- ВКЛАДКА: МОНИТОРИНГ -->
         <div id="monitor-tab" class="tab-content">
@@ -448,6 +461,7 @@
 
         // --- СОСТОЯНИЕ ДАННЫХ ---
         let channels = JSON.parse(localStorage.getItem('amigo_channels') || '[]');
+		let reddits = JSON.parse(localStorage.getItem('amigo_reddits') || '[]');
         let keywords = JSON.parse(localStorage.getItem('amigo_keywords') || '[]');
         let results = JSON.parse(localStorage.getItem('amigo_results') || '[]');
         let seenMessages = new Set(JSON.parse(localStorage.getItem('amigo_seen') || '[]'));
@@ -664,6 +678,21 @@
                 input.value = '';
             }
         }
+		
+		function addManualReddit() {
+			const input = document.getElementById('manualRedditInput');
+			const name = input.value.replace('r/', '').trim().toLowerCase();
+			if (name && !reddits.includes(name)) {
+				reddits.push(name);
+				saveState(); renderUI();
+				input.value = '';
+			}
+		}
+
+		function removeReddit(name) {
+			reddits = reddits.filter(r => r !== name);
+			saveState(); renderUI();
+		}
 
         function removeChannel(name) { channels = channels.filter(c => c.name !== name); saveState(); renderUI(); }
         function removeKeyword(kw) { keywords = keywords.filter(k => k !== kw); saveState(); renderUI(); }
@@ -775,6 +804,19 @@
                     allFound += checkAndSaveMessages(msgs);
                 }
             }
+			
+			// ... внутри функции monitorCycle() ...
+
+			// Добавляем этот блок:
+			if (doReddit && reddits.length > 0) {
+				for (const r of reddits) {
+					if (!isRunning) break;
+					const redditMsgs = await parseReddit(r); // Передаем имя сабреддита
+					allFound += checkAndSaveMessages(redditMsgs);
+				}
+			}
+
+			// ... дальше идут остальные проверки ...
 
             if (doHN && keywords.length > 0) {
                 const hnMsgs = await parseHackerNews();
@@ -868,10 +910,17 @@
             document.getElementById('keywordTags').innerHTML = keywords.map(k => `
                 <div class="tag">${k} <span class="remove" onclick="removeKeyword('${k}')">×</span></div>
             `).join('');
+			
+			// Внутри renderUI()
+			document.getElementById('redditTags').innerHTML = reddits.map(r => `
+				<div class="tag">r/${r} <span class="remove" onclick="removeReddit('${r}')">×</span></div>
+			`).join('');
+			document.getElementById('redditCount').textContent = reddits.length;
         }
 
         function saveState() {
             localStorage.setItem('amigo_channels', JSON.stringify(channels));
+			localStorage.setItem('amigo_reddits', JSON.stringify(reddits));
             localStorage.setItem('amigo_keywords', JSON.stringify(keywords));
             localStorage.setItem('amigo_results', JSON.stringify(results));
             localStorage.setItem('amigo_seen', JSON.stringify(Array.from(seenMessages)));
