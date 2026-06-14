@@ -1253,44 +1253,154 @@
 					console.log('GitHub API error:', githubError);
 				}
 				
-				// --- МЕТОД 2: Публичные каталоги (fallback) ---
+				// --- МЕТОД 2: Raw JSON файлы с GitHub (без CORS прокси!) ---
 				progressBar.style.width = '60%';
 				try {
-					const catalogUrls = [
-						`https://telegramchannels.me/search?q=${encodeURIComponent(query)}`,
-						`https://tgchannels.org/search?q=${encodeURIComponent(query)}`
-					];
+					// Ищем JSON файлы с базами каналов
+					const jsonSearchUrl = `https://api.github.com/search/code?q=telegram+channels+json+${encodeURIComponent(query)}&per_page=5`;
+					const jsonResponse = await fetch(jsonSearchUrl, {
+						headers: {
+							'Accept': 'application/vnd.github.v3+json'
+						}
+					});
 					
-					for (const catalogUrl of catalogUrls) {
-						try {
-							const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(catalogUrl)}`;
-							const response = await fetch(proxyUrl);
-							
-							if (response.ok) {
-								const html = await response.text();
-								const parser = new DOMParser();
-								const doc = parser.parseFromString(html, 'text/html');
+					if (jsonResponse.ok) {
+						const jsonData = await jsonResponse.json();
+						
+						// Парсим найденные JSON файлы
+						for (const item of jsonData.items.slice(0, 3)) {
+							try {
+								// Получаем raw URL файла
+								const rawUrl = item.url.replace('api.github.com/repos', 'raw.githubusercontent.com').replace('/contents/', '/');
+								const rawResponse = await fetch(rawUrl);
 								
-								// Ищем ссылки на каналы
-								const links = doc.querySelectorAll('a[href*="t.me/"]');
-								links.forEach(link => {
-									const href = link.getAttribute('href');
-									const match = href.match(/t\.me\/([a-zA-Z0-9_]{3,})/);
-									if (match) {
-										const channelName = match[1].toLowerCase();
+								if (rawResponse.ok) {
+									const text = await rawResponse.text();
+									
+									// Ищем ссылки на каналы
+									const tmeMatches = text.match(/t\.me\/([a-zA-Z0-9_]{3,})/g) || [];
+									tmeMatches.forEach(match => {
+										const channelName = match.replace('t.me/', '').toLowerCase();
 										if (!['s', 'joinchat', 'addtheme', 'share', 'c', 'addstickers'].includes(channelName)) {
 											foundChannels.add(channelName);
 										}
-									}
-								});
+									});
+								}
+							} catch (e) {
+								console.log('Error parsing JSON file:', item.name, e);
 							}
-						} catch (e) {
-							console.log('Catalog error:', catalogUrl, e);
+							await delay(500);
 						}
-						await delay(1000);
 					}
-				} catch (catalogError) {
-					console.log('Catalog search error:', catalogError);
+				} catch (jsonError) {
+					console.log('JSON search error:', jsonError);
+				}
+				
+				// --- МЕТОД 3: TGStat API (если работает) ---
+				try {
+					const tgstatUrl = `https://api.tgstat.ru/channels/search?q=${encodeURIComponent(query)}&limit=20`;
+					const tgstatResponse = await fetch(tgstatUrl);
+					
+					if (tgstatResponse.ok) {
+						const tgstatData = await tgstatResponse.json();
+						if (tgstatData.response) {
+							tgstatData.response.items.forEach(channel => {
+								if (channel.username) {
+									foundChannels.add(channel.username.toLowerCase());
+								}
+							});
+						}
+					}
+				} catch (tgstatError) {
+					console.log('TGStat API error:', tgstatError);
+				}
+				
+				// --- МЕТОД 4: Reddit API (резервный, очень надежный) ---
+				progressBar.style.width = '80%';
+				try {
+					const subreddits = ['telegram', 'CryptoCurrency', 'ethtrader', 'Bitcoin', 'defi', 'altcoin', 'CryptoMarkets'];
+					const redditHeaders = {
+						'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+					};
+					
+					for (const subreddit of subreddits) {
+						try {
+							// Ищем в каждом сабреддите по запросу
+							const redditUrl = `https://www.reddit.com/r/${subreddit}/search.json?q=${encodeURIComponent(query + ' telegram')}&sort=relevance&limit=25&restrict_sr=on&t=year`;
+							
+							const redditResponse = await fetch(redditUrl, { headers: redditHeaders });
+							
+							if (redditResponse.ok) {
+								const redditData = await redditResponse.json();
+								
+								if (redditData.data && redditData.data.children) {
+									for (const post of redditData.data.children) {
+										const postData = post.data;
+										
+										// Проверяем текст поста, заголовок и selftext
+										const textsToCheck = [
+											postData.title || '',
+											postData.selftext || '',
+											postData.url || ''
+										];
+										
+										// Если есть media_metadata или gallery — пропускаем (там картинки)
+										textsToCheck.forEach(text => {
+											// Ищем все ссылки t.me/username
+											const tmeMatches = text.match(/(?:t\.me\/|telegram\.me\/|telegram\.dog\/)([a-zA-Z0-9_]{3,})/g) || [];
+											tmeMatches.forEach(match => {
+												const channelName = match.replace(/(?:t\.me\/|telegram\.me\/|telegram\.dog\/)/, '').toLowerCase();
+												// Фильтруем системные пути
+												if (!['s', 'joinchat', 'addtheme', 'share', 'c', 'addstickers', 'proxy', 'socks', 'bg', 'login', 'confirmphone'].includes(channelName)) {
+													foundChannels.add(channelName);
+												}
+											});
+										});
+									}
+								}
+							}
+							
+							// Небольшая задержка чтобы не превысить rate limit Reddit (60 req/min)
+							await delay(800);
+						} catch (redditError) {
+							console.log('Reddit error for', subreddit, ':', redditError.message);
+							continue;
+						}
+					}
+					
+					// Дополнительный поиск по всем Reddit (без ограничения сабреддита)
+					try {
+						const globalRedditUrl = `https://www.reddit.com/search.json?q=${encodeURIComponent('site:t.me ' + query)}&sort=relevance&limit=25&t=year`;
+						const globalResponse = await fetch(globalRedditUrl, { headers: redditHeaders });
+						
+						if (globalResponse.ok) {
+							const globalData = await globalResponse.json();
+							if (globalData.data && globalData.data.children) {
+								for (const post of globalData.data.children) {
+									const textsToCheck = [
+										post.data.title || '',
+										post.data.selftext || '',
+										post.data.url || ''
+									];
+									
+									textsToCheck.forEach(text => {
+										const tmeMatches = text.match(/(?:t\.me\/|telegram\.me\/|telegram\.dog\/)([a-zA-Z0-9_]{3,})/g) || [];
+										tmeMatches.forEach(match => {
+											const channelName = match.replace(/(?:t\.me\/|telegram\.me\/|telegram\.dog\/)/, '').toLowerCase();
+											if (!['s', 'joinchat', 'addtheme', 'share', 'c', 'addstickers', 'proxy', 'socks', 'bg', 'login', 'confirmphone'].includes(channelName)) {
+												foundChannels.add(channelName);
+											}
+										});
+									});
+								}
+							}
+						}
+					} catch (globalRedditError) {
+						console.log('Global Reddit search error:', globalRedditError.message);
+					}
+					
+				} catch (redditError) {
+					console.log('Reddit search error:', redditError);
 				}
 				
 				progressBar.style.width = '100%';
