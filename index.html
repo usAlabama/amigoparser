@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Amigo Recon Tool | OSINT Dashboard</title>
+    <title>Amigo Recon</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root {
@@ -234,10 +234,10 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>🅰️ Amigo Recon <span class="badge">vv STEALTH</span></h1>
+            <h1>🅰️ Amigo Recon <span class="badge">v. STEALTH</span></h1>
             <button class="theme-toggle" onclick="toggleTheme()" id="themeIcon">🌙</button>
         </div>
-        <p class="subtitle">Мульти-источниковый поиск инсайтов. Анонимно. Эффективно.</p>
+        <p class="subtitle">Мульти-источниковый поиск</p>
 
         <!-- БЕГУЩАЯ СТРОКА RSS -->
         <div class="ticker-wrap">
@@ -263,6 +263,7 @@
                     <label class="source-toggle"><input type="checkbox" id="srcTG" checked> Telegram (через GitHub)</label>
                     <label class="source-toggle"><input type="checkbox" id="srcHN" checked> Hacker News</label>
                     <label class="source-toggle"><input type="checkbox" id="srcDev"> Dev.to</label>
+					<label class="source-toggle"><input type="checkbox" id="monReddit" checked> Reddit</label>
                 </div>
                 <div class="input-group">
                     <input type="text" id="googleSearchInput" placeholder="Запрос (например: automation bypass, airdrop script)">
@@ -307,11 +308,17 @@
                     <label class="source-toggle"><input type="checkbox" id="monDev" checked> Dev.to (Live)</label>
                 </div>
                 <div class="input-group">
-                    <input type="number" id="intervalInput" placeholder="Шаг (сек)" value="60" min="30" title="Интервал проверки">
-                    <input type="number" id="autoStopInput" placeholder="Kill Switch (мин)" value="15" min="1" title="Автоматическая остановка через N минут">
-                    <button id="startBtn" onclick="startMonitoring()">▶️ Запуск скрипта</button>
-                    <button id="stopBtn" class="danger" onclick="stopMonitoring()" disabled>⏹️ Стоп</button>
-                </div>
+				<div style="flex: 1; min-width: 200px;">
+					<input type="number" id="intervalInput" value="60" min="30">
+					<small style="display:block; color:var(--text-secondary); margin-top:4px;">Интервал (сек)</small>
+				</div>
+				<div style="flex: 1; min-width: 200px;">
+					<input type="number" id="autoStopInput" value="15" min="1">
+					<small style="display:block; color:var(--text-secondary); margin-top:4px;">Автостоп (мин)</small>
+				</div>
+				<button id="startBtn" onclick="startMonitoring()">▶️ Запуск</button>
+				<button id="stopBtn" class="danger" onclick="stopMonitoring()" disabled>⏹️ Стоп</button>
+			</div>
                 <div class="status-bar">
                     <div class="status-indicator">
                         <div class="status-dot" id="statusDot"></div>
@@ -547,6 +554,22 @@
                 } catch (e) { console.error('Dev.to Search error', e); }
                 progressBar.style.width = '70%';
             }
+			
+			// Внутри функции globalSearch(), после блока с Dev.to:
+			if (document.getElementById('srcReddit').checked) {
+				try {
+					// Используем открытый JSON-API Реддита (без ключей, работает быстро)
+					const redditRes = await fetch(`https://www.reddit.com/search.json?q=${encodeURIComponent(query)}&limit=5`);
+					if (redditRes.ok) {
+						const redditData = await redditRes.json();
+						redditData.data.children.forEach(post => {
+							resultsDiv.innerHTML += renderSearchCard('Reddit', post.data.title, `Upvotes: ${post.data.ups}`, `https://www.reddit.com${post.data.permalink}`, '🟧');
+							foundCount++;
+						});
+					}
+				} catch (e) { console.error('Reddit Search error', e); }
+				progressBar.style.width = '90%';
+			}
 
             if (srcTG) {
                 try {
