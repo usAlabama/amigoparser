@@ -3,582 +3,243 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Telegram Recon Tool</title>
+    <title>Amigo Recon Tool | OSINT Dashboard</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root {
-            --bg-primary: #f5f5f7;
+            --bg-primary: #f0f2f5;
             --bg-secondary: #ffffff;
-            --bg-tertiary: #f0f0f2;
-            --text-primary: #1d1d1f;
-            --text-secondary: #86868b;
-            --border: #d2d2d7;
-            --accent: #0071e3;
-            --accent-hover: #0077ed;
-            --danger: #ff3b30;
-            --success: #34c759;
-            --warning: #ffd60a;
-            --card-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
-            --card-shadow-hover: 0 4px 12px rgba(0, 0, 0, 0.08);
+            --bg-tertiary: #e4e6eb;
+            --text-primary: #1c1e21;
+            --text-secondary: #606770;
+            --border: #dadde1;
+            --accent: #0056b3;
+            --accent-hover: #004494;
+            --accent-glow: rgba(0, 86, 179, 0.2);
+            --danger: #dc3545;
+            --success: #28a745;
+            --warning: #ffc107;
+            --highlight: #ffeeba;
+            --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --font-main: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto, sans-serif;
+            --font-mono: 'Fira Code', 'JetBrains Mono', 'Consolas', monospace;
+            --radius: 8px;
         }
 
         [data-theme="dark"] {
-            --bg-primary: #0a1929;
-            --bg-secondary: #1b2838;
-            --bg-tertiary: #243447;
-            --text-primary: #e0f2f1;
-            --text-secondary: #80cbc4;
-            --border: #2d4a5e;
-            --accent: #00b4d8;
-            --accent-hover: #48cae4;
-            --danger: #ff6b6b;
-            --success: #51cf66;
-            --warning: #ffd43b;
-            --card-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
-            --card-shadow-hover: 0 4px 12px rgba(0, 180, 216, 0.2);
+            --bg-primary: #0b0f19;
+            --bg-secondary: #151b2b;
+            --bg-tertiary: #1e2638;
+            --text-primary: #e2e8f0;
+            --text-secondary: #94a3b8;
+            --border: #2d3748;
+            --accent: #0ea5e9;
+            --accent-hover: #38bdf8;
+            --accent-glow: rgba(14, 165, 233, 0.25);
+            --danger: #ef4444;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --highlight: rgba(245, 158, 11, 0.3);
+            --card-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            font-family: var(--font-main);
             background: var(--bg-primary);
             color: var(--text-primary);
             min-height: 100vh;
             padding: 20px;
             padding-top: calc(20px + env(safe-area-inset-top));
-            padding-bottom: calc(20px + env(safe-area-inset-bottom));
-            padding-left: calc(20px + env(safe-area-inset-left));
-            padding-right: calc(20px + env(safe-area-inset-right));
             line-height: 1.6;
             transition: background 0.3s, color 0.3s;
         }
 
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-        }
+        .container { max-width: 1400px; margin: 0 auto; }
 
         .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-            flex-wrap: wrap;
-            gap: 10px;
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 10px; flex-wrap: wrap; gap: 10px;
         }
 
-        h1 {
-            color: var(--text-primary);
-            font-size: 1.8em;
-            font-weight: 600;
-        }
+        h1 { font-size: 1.8em; font-weight: 700; letter-spacing: -0.5px; display: flex; align-items: center; gap: 10px;}
+        h1 .badge { font-size: 0.4em; background: var(--accent); color: #fff; padding: 2px 8px; border-radius: 12px; vertical-align: middle; }
 
         .theme-toggle {
-            background: var(--bg-secondary);
-            border: 1px solid var(--border);
-            border-radius: 20px;
-            padding: 8px 16px;
-            cursor: pointer;
-            font-size: 1.2em;
-            transition: all 0.2s;
+            background: var(--bg-secondary); border: 1px solid var(--border);
+            border-radius: 50%; width: 40px; height: 40px;
+            cursor: pointer; font-size: 1.2em; transition: all 0.2s;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: var(--card-shadow);
         }
+        .theme-toggle:hover { background: var(--bg-tertiary); transform: scale(1.05); }
 
-        .theme-toggle:hover {
-            background: var(--bg-tertiary);
-        }
-
-        .subtitle {
-            color: var(--text-secondary);
-            margin-bottom: 20px;
-            font-size: 0.95em;
-        }
+        .subtitle { color: var(--text-secondary); margin-bottom: 25px; font-size: 0.95em; }
 
         .panel {
-            background: var(--bg-secondary);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: var(--card-shadow);
-            transition: all 0.2s;
+            background: var(--bg-secondary); border: 1px solid var(--border);
+            border-radius: var(--radius); padding: 20px; margin-bottom: 20px;
+            box-shadow: var(--card-shadow); transition: all 0.2s;
         }
 
-        .panel h2 {
-            color: var(--text-primary);
-            margin-bottom: 15px;
-            font-size: 1.1em;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
+        .panel h2 { margin-bottom: 15px; font-size: 1.1em; font-weight: 600; display: flex; align-items: center; gap: 8px; }
 
-        .input-group {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 15px;
-            flex-wrap: wrap;
-        }
+        .input-group { display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap; }
 
         input[type="text"], select, textarea {
-            flex: 1;
-            min-width: 200px;
-            padding: 10px 14px;
-            background: var(--bg-primary);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            color: var(--text-primary);
-            font-size: 14px;
-            transition: all 0.2s;
-            font-family: inherit;
+            flex: 1; min-width: 200px; padding: 10px 14px;
+            background: var(--bg-primary); border: 1px solid var(--border);
+            border-radius: var(--radius); color: var(--text-primary);
+            font-size: 14px; transition: all 0.2s; font-family: inherit;
         }
 
         input[type="text"]:focus, select:focus, textarea:focus {
-            outline: none;
-            border-color: var(--accent);
-            box-shadow: 0 0 0 3px rgba(0, 180, 216, 0.1);
+            outline: none; border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-glow);
         }
 
         button {
-            padding: 10px 20px;
-            background: var(--accent);
-            color: #ffffff;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 500;
-            font-size: 14px;
-            transition: all 0.2s;
-            white-space: nowrap;
+            padding: 10px 20px; background: var(--accent); color: #ffffff;
+            border: none; border-radius: var(--radius); cursor: pointer;
+            font-weight: 600; font-size: 14px; transition: all 0.2s;
+            display: inline-flex; align-items: center; gap: 6px; white-space: nowrap;
         }
 
-        button:hover {
-            background: var(--accent-hover);
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(0, 180, 216, 0.3);
-        }
+        button:hover { background: var(--accent-hover); transform: translateY(-1px); box-shadow: 0 4px 12px var(--accent-glow); }
+        button:active { transform: translateY(0); }
+        button:disabled { background: var(--border); color: var(--text-secondary); cursor: not-allowed; transform: none; box-shadow: none; }
+        
+        button.secondary { background: var(--bg-tertiary); color: var(--text-primary); border: 1px solid var(--border); }
+        button.secondary:hover { background: var(--border); }
+        button.danger { background: var(--danger); color: white; }
+        button.danger:hover { background: #b02a37; }
 
-        button:active {
-            transform: translateY(0);
-        }
-
-        button:disabled {
-            background: var(--border);
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        button.secondary {
-            background: var(--bg-secondary);
-            color: var(--accent);
-            border: 1px solid var(--accent);
-        }
-
-        button.secondary:hover {
-            background: var(--bg-tertiary);
-        }
-
-        button.danger {
-            background: var(--danger);
-        }
-
-        button.danger:hover {
-            background: #ff4539;
-        }
-
-        .tags {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            margin-top: 10px;
-        }
-
+        .tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
         .tag {
-            background: var(--bg-tertiary);
-            border: 1px solid var(--border);
-            padding: 6px 12px;
-            border-radius: 16px;
-            font-size: 13px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            color: var(--text-primary);
+            background: var(--bg-primary); border: 1px solid var(--border);
+            padding: 6px 12px; border-radius: 16px; font-size: 13px;
+            display: flex; align-items: center; gap: 8px; color: var(--text-primary);
         }
+        .tag .remove { cursor: pointer; color: var(--danger); font-weight: bold; font-size: 16px; }
 
-        .tag .remove {
-            cursor: pointer;
-            color: var(--danger);
-            font-weight: bold;
-            font-size: 16px;
-        }
-
-        .tag .remove:hover {
-            color: #ff4539;
-        }
-
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 15px;
-            margin-top: 15px;
-        }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px; margin-top: 15px; }
 
         .card {
-            background: var(--bg-secondary);
-            border: 1px solid var(--border);
-            border-radius: 10px;
-            padding: 15px;
-            transition: all 0.2s;
-            cursor: pointer;
+            background: var(--bg-primary); border: 1px solid var(--border);
+            border-radius: var(--radius); padding: 15px; cursor: pointer;
+            transition: all 0.2s; border-left: 3px solid var(--accent);
         }
-
-        .card:hover {
-            box-shadow: var(--card-shadow-hover);
-            transform: translateY(-2px);
-        }
-
-        .card h3 {
-            color: var(--accent);
-            font-size: 1em;
-            margin-bottom: 8px;
-            word-break: break-word;
-        }
-
-        .card p {
-            color: var(--text-secondary);
-            font-size: 0.85em;
-            margin-bottom: 10px;
-        }
-
-        .card .stats {
-            display: flex;
-            gap: 15px;
-            font-size: 0.8em;
-            color: var(--text-secondary);
-            margin-bottom: 10px;
-            flex-wrap: wrap;
-        }
-
-        .card .stats span {
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
+        .card:hover { transform: translateY(-2px); box-shadow: var(--card-shadow); border-left-color: var(--accent-hover); }
+        .card h3 { color: var(--text-primary); font-size: 1em; margin-bottom: 8px; word-break: break-word; }
+        .card p { color: var(--text-secondary); font-size: 0.85em; margin-bottom: 10px; }
+        .card .stats { font-size: 0.8em; color: var(--accent); font-weight: 500; }
 
         .log {
-            background: var(--bg-secondary);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 15px;
-            max-height: 500px;
-            overflow-y: auto;
-            font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Fira Code', monospace;
-            font-size: 13px;
-            line-height: 1.5;
+            background: var(--bg-primary); border: 1px solid var(--border);
+            border-radius: var(--radius); padding: 15px; max-height: 600px;
+            overflow-y: auto; font-family: var(--font-mono); font-size: 13px;
         }
 
         .log-entry {
-            margin-bottom: 12px;
-            padding: 12px;
-            border-left: 3px solid var(--accent);
-            background: var(--bg-tertiary);
-            border-radius: 6px;
+            margin-bottom: 12px; padding: 15px; border-left: 3px solid var(--accent);
+            background: var(--bg-secondary); border-radius: 4px; border: 1px solid var(--border);
+            border-left-width: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);
         }
+        .log-entry.alert { border-left-color: var(--warning); }
+        
+        .log-entry .header-log { display: flex; justify-content: space-between; margin-bottom: 8px; border-bottom: 1px solid var(--border); padding-bottom: 5px;}
+        .log-entry .time { color: var(--text-secondary); font-size: 11px; }
+        .log-entry .source { font-weight: 700; font-size: 0.95em; color: var(--accent); }
+        
+        .log-entry .text { margin: 10px 0; color: var(--text-primary); white-space: pre-wrap; word-break: break-word; }
+        .log-entry .keywords { color: var(--warning); font-size: 0.85em; font-weight: bold; }
+        .log-entry .link-btn { display: inline-block; margin-top: 10px; color: var(--accent); text-decoration: none; font-weight: bold; }
+        .log-entry .link-btn:hover { text-decoration: underline; }
 
-        .log-entry.alert {
-            border-left-color: var(--danger);
-            background: rgba(255, 107, 107, 0.1);
-        }
-
-        .log-entry.success {
-            border-left-color: var(--success);
-            background: rgba(81, 207, 102, 0.1);
-        }
-
-        .log-entry .time {
-            color: var(--text-secondary);
-            font-size: 11px;
-            margin-bottom: 4px;
-        }
-
-        .log-entry .channel {
-            color: var(--accent);
-            font-weight: 600;
-            font-size: 0.95em;
-        }
-
-        .log-entry .keywords {
-            color: var(--warning);
-            font-size: 0.85em;
-            margin: 4px 0;
-        }
-
-        .log-entry .text {
-            color: var(--text-primary);
-            font-size: 0.9em;
-            margin: 8px 0;
-            line-height: 1.5;
-        }
-
-        .log-entry a {
-            color: var(--accent);
-            text-decoration: none;
-            font-size: 0.85em;
-        }
-
-        .log-entry a:hover {
-            text-decoration: underline;
-        }
+        .highlight { background-color: var(--highlight); padding: 0 2px; border-radius: 2px; font-weight: bold; color: var(--warning);}
 
         .status-bar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 12px 15px;
-            background: var(--bg-secondary);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            margin-bottom: 15px;
-            flex-wrap: wrap;
-            gap: 10px;
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 12px 15px; background: var(--bg-primary); border: 1px solid var(--border);
+            border-radius: var(--radius); margin-bottom: 15px; flex-wrap: wrap; gap: 10px;
         }
 
-        .status-indicator {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-weight: 500;
-        }
+        .status-indicator { display: flex; align-items: center; gap: 8px; font-weight: 600; }
+        .status-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--text-secondary); }
+        .status-dot.active { background: var(--success); box-shadow: 0 0 10px var(--success); animation: pulse 1.5s infinite; }
 
-        .status-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: var(--border);
-        }
+        @keyframes pulse { 0% { opacity: 1; transform: scale(1); } 50% { opacity: 0.6; transform: scale(1.2); } 100% { opacity: 1; transform: scale(1); } }
 
-        .status-dot.active {
-            background: var(--success);
-            box-shadow: 0 0 8px rgba(81, 207, 102, 0.5);
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-
-        .export-buttons {
-            display: flex;
-            gap: 10px;
-            margin-top: 15px;
-            flex-wrap: wrap;
-        }
-
-        .warning {
-            background: rgba(255, 212, 59, 0.1);
-            border: 1px solid var(--warning);
-            padding: 12px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            font-size: 13px;
-            color: var(--text-primary);
-        }
-
-        .tabs {
-            display: flex;
-            gap: 5px;
-            margin-bottom: 20px;
-            border-bottom: 1px solid var(--border);
-            overflow-x: auto;
-        }
-
+        .tabs { display: flex; gap: 5px; margin-bottom: 20px; border-bottom: 1px solid var(--border); overflow-x: auto; padding-bottom: 2px;}
         .tab {
-            padding: 10px 20px;
-            cursor: pointer;
-            border-bottom: 2px solid transparent;
-            color: var(--text-secondary);
-            font-weight: 500;
-            transition: all 0.2s;
-            white-space: nowrap;
+            padding: 10px 20px; cursor: pointer; border-bottom: 2px solid transparent;
+            color: var(--text-secondary); font-weight: 600; transition: all 0.2s; white-space: nowrap;
         }
+        .tab:hover { color: var(--accent); }
+        .tab.active { color: var(--accent); border-bottom: 2px solid var(--accent); }
 
-        .tab:hover {
-            color: var(--accent);
-        }
+        .tab-content { display: none; animation: fadeIn 0.3s; }
+        .tab-content.active { display: block; }
 
-        .tab.active {
-            color: var(--accent);
-            border-bottom-color: var(--accent);
-        }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
-        .tab-content {
-            display: none;
-        }
+        .progress { width: 100%; height: 6px; background: var(--bg-primary); border-radius: 3px; overflow: hidden; margin-top: 10px; }
+        .progress-bar { height: 100%; background: var(--accent); transition: width 0.3s; width: 0%; }
 
-        .tab-content.active {
-            display: block;
-        }
-
-        .progress {
-            width: 100%;
-            height: 4px;
-            background: var(--border);
-            border-radius: 2px;
-            overflow: hidden;
-            margin-top: 10px;
-        }
-
-        .progress-bar {
-            height: 100%;
-            background: var(--accent);
-            transition: width 0.3s;
-            width: 0%;
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: 40px 20px;
-            color: var(--text-secondary);
-        }
-
-        .empty-state .icon {
-            font-size: 48px;
-            margin-bottom: 15px;
-        }
+        .empty-state { text-align: center; padding: 40px 20px; color: var(--text-secondary); }
+        .empty-state .icon { font-size: 48px; margin-bottom: 15px; opacity: 0.5; }
 
         .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 1000;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(4px); z-index: 1000;
+            align-items: center; justify-content: center; padding: 20px;
         }
-
-        .modal.active {
-            display: flex;
-        }
-
+        .modal.active { display: flex; }
         .modal-content {
-            background: var(--bg-secondary);
-            border-radius: 12px;
-            padding: 25px;
-            max-width: 500px;
-            width: 100%;
-            max-height: 80vh;
-            overflow-y: auto;
+            background: var(--bg-secondary); border-radius: var(--radius); padding: 25px;
+            max-width: 500px; width: 100%; box-shadow: 0 10px 25px rgba(0,0,0,0.2);
         }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .modal-close { background: none; border: none; font-size: 24px; cursor: pointer; color: var(--text-secondary); }
 
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
+        .source-toggles { display: flex; gap: 15px; margin-bottom: 15px; flex-wrap: wrap; }
+        .source-toggle { display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 0.9em; font-weight: 500;}
+        .source-toggle input { width: 16px; height: 16px; accent-color: var(--accent); }
 
-        .modal-header h2 {
-            margin: 0;
-        }
-
-        .modal-close {
-            background: none;
-            border: none;
-            font-size: 24px;
-            cursor: pointer;
-            color: var(--text-secondary);
-            padding: 0;
-            width: 30px;
-            height: 30px;
-        }
-
-        .modal-close:hover {
-            color: var(--text-primary);
-            background: none;
-            transform: none;
-            box-shadow: none;
-        }
-
-        @media (max-width: 768px) {
-            h1 {
-                font-size: 1.4em;
-            }
-
-            .panel {
-                padding: 15px;
-            }
-
-            .grid {
-                grid-template-columns: 1fr;
-            }
-
-            .input-group {
-                flex-direction: column;
-            }
-
-            input[type="text"], select, button {
-                width: 100%;
-            }
-        }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>🔍 <span data-i18n="title">Telegram Recon Tool</span></h1>
-            <button class="theme-toggle" onclick="toggleTheme()">🌙</button>
+            <h1>🌐 Amigo Recon <span class="badge">v2.0 OSINT</span></h1>
+            <button class="theme-toggle" onclick="toggleTheme()" id="themeIcon">🌙</button>
         </div>
-        <p class="subtitle" data-i18n="subtitle">Автоматический поиск и мониторинг каналов по ключевым словам</p>
+        <p class="subtitle" data-i18n="subtitle">Мульти-источниковый поиск инсайтов: Telegram, Hacker News, Dev.to, GitHub</p>
 
-        <div class="warning">
-            ⚠️ <strong data-i18n="warning_title">Важно:</strong> <span data-i18n="warning_text">Этот инструмент работает только пока открыта вкладка браузера. Результаты сохраняются локально и могут быть экспортированы в JSON/CSV.</span>
+        <div class="panel" style="background: rgba(245, 158, 11, 0.1); border-color: var(--warning);">
+            <strong style="color: var(--warning);">⚠️ OPSEC Notice:</strong> <span style="font-size: 0.9em;">Все данные обрабатываются исключительно в браузере (Client-Side). Для обхода блокировок Telegram используется пул CORS-прокси. Hacker News и Dev.to опрашиваются напрямую.</span>
         </div>
 
         <div class="tabs">
-            <div class="tab active" onclick="switchTab('recon')">🎯 <span data-i18n="tab_recon">Разведка</span></div>
-            <div class="tab" onclick="switchTab('monitor')">📡 <span data-i18n="tab_monitor">Мониторинг</span></div>
-            <div class="tab" onclick="switchTab('results')">📊 <span data-i18n="tab_results">Результаты</span></div>
-            <div class="tab" onclick="switchTab('settings')">⚙️ <span data-i18n="tab_settings">Настройки</span></div>
+            <div class="tab active" onclick="switchTab('recon')">🎯 Разведка</div>
+            <div class="tab" onclick="switchTab('monitor')">📡 Мониторинг</div>
+            <div class="tab" onclick="switchTab('results')">📊 База Инсайтов</div>
+            <div class="tab" onclick="switchTab('settings')">⚙️ Система</div>
         </div>
 
-        <!-- ВКЛАДКА: РАЗВЕДКА -->
         <div id="recon-tab" class="tab-content active">
             <div class="panel">
-                <h2>🎯 <span data-i18n="search_by_category">Поиск каналов по категориям</span></h2>
-                <p style="color: var(--text-secondary); font-size: 0.9em; margin-bottom: 15px;" data-i18n="search_by_category_desc">
-                    Автоматический поиск каналов из публичных каталогов по выбранным тематикам
-                </p>
-                <div class="input-group">
-                    <select id="categorySelect">
-                        <option value="" data-i18n="select_category">Выберите категорию...</option>
-                    </select>
-                    <button onclick="manageCategories()">➕ <span data-i18n="manage_categories">Управление категориями</span></button>
-                    <button onclick="discoverChannels()">🔍 <span data-i18n="find_channels">Найти каналы</span></button>
+                <h2>🔎 Умный OSINT Поиск (Глобальный)</h2>
+                <p style="color: var(--text-secondary); font-size: 0.9em; margin-bottom: 15px;">Поиск каналов в Telegram (через GitHub API) и мгновенный поиск инсайтов по внешним базам.</p>
+                <div class="source-toggles">
+                    <label class="source-toggle"><input type="checkbox" id="srcTG" checked> Telegram (через GitHub)</label>
+                    <label class="source-toggle"><input type="checkbox" id="srcHN" checked> Hacker News</label>
+                    <label class="source-toggle"><input type="checkbox" id="srcDev"> Dev.to</label>
                 </div>
-                <div class="progress" id="reconProgress" style="display: none;">
-                    <div class="progress-bar" id="reconProgressBar"></div>
-                </div>
-                <div id="discoveredChannels" class="grid"></div>
-            </div>
-
-            <div class="panel">
-                <h2>🔎 <span data-i18n="smart_search">Умный поиск каналов</span></h2>
-                <p style="color: var(--text-secondary); font-size: 0.9em; margin-bottom: 15px;" data-i18n="smart_search_desc">
-                    Поиск каналов через DuckDuckGo по ключевым словам
-                </p>
                 <div class="input-group">
-                    <input type="text" id="googleSearchInput" placeholder="Ключевые слова (например: crypto airdrop 2024)" data-i18n-placeholder="search_placeholder">
-                    <button onclick="googleSearch()">🔍 <span data-i18n="search">Искать</span></button>
+                    <input type="text" id="googleSearchInput" placeholder="Запрос (например: automation bypass, airdrop script)">
+                    <button onclick="globalSearch()">🔍 Искать везде</button>
                 </div>
                 <div class="progress" id="googleProgress" style="display: none;">
                     <div class="progress-bar" id="googleProgressBar"></div>
@@ -587,1239 +248,541 @@
             </div>
 
             <div class="panel">
-                <h2>➕ <span data-i18n="add_manual">Добавить канал вручную</span></h2>
+                <h2>➕ Управление Telegram Таргетами</h2>
                 <div class="input-group">
-                    <input type="text" id="manualChannelInput" placeholder="Имя канала (без @, например: durov)" data-i18n-placeholder="channel_placeholder">
-                    <button onclick="addManualChannel()"><span data-i18n="add">Добавить</span></button>
+                    <input type="text" id="manualChannelInput" placeholder="Имя канала (без @, например: durov)">
+                    <button onclick="addManualChannel()">Добавить ТГ канал</button>
                 </div>
-            </div>
-
-            <div class="panel">
-                <h2>📋 <span data-i18n="found_channels">Найденные каналы</span> (<span id="channelCount">0</span>)</h2>
-                <div class="tags" id="channelTags"></div>
-                <div class="export-buttons">
-                    <button class="secondary" onclick="exportChannels()">💾 <span data-i18n="export_channels">Экспорт списка каналов</span></button>
-                    <button class="danger" onclick="clearChannels()">🗑️ <span data-i18n="clear_all">Очистить все</span></button>
+                <div style="margin-top: 15px; border-top: 1px solid var(--border); padding-top: 15px;">
+                    <h3 style="font-size: 1em; margin-bottom: 10px;">Цели для мониторинга (<span id="channelCount">0</span>)</h3>
+                    <div class="tags" id="channelTags"></div>
                 </div>
             </div>
         </div>
 
-        <!-- ВКЛАДКА: МОНИТОРИНГ -->
         <div id="monitor-tab" class="tab-content">
             <div class="panel">
-                <h2>🔑 <span data-i18n="keywords">Ключевые слова для поиска</span></h2>
+                <h2>🔑 Ключевые слова / Триггеры</h2>
                 <div class="input-group">
-                    <input type="text" id="keywordInput" placeholder="Ключевое слово или фраза (например: airdrop 2024)" data-i18n-placeholder="keyword_placeholder">
-                    <button onclick="addKeyword()"><span data-i18n="add">Добавить</span></button>
+                    <input type="text" id="keywordInput" placeholder="Что ищем? (например: exploit, 0day, airdrop)">
+                    <button onclick="addKeyword()">Добавить триггер</button>
                 </div>
                 <div class="tags" id="keywordTags"></div>
             </div>
 
             <div class="panel">
-                <h2>⚙️ <span data-i18n="monitoring_control">Управление мониторингом</span></h2>
+                <h2>⚙️ Панель управления мониторингом</h2>
+                <div class="source-toggles" style="background: var(--bg-primary); padding: 10px; border-radius: var(--radius); margin-bottom: 15px;">
+                    <strong style="font-size: 0.9em; margin-right: 10px;">Активные источники:</strong>
+                    <label class="source-toggle"><input type="checkbox" id="monTG" checked> Telegram Каналы</label>
+                    <label class="source-toggle"><input type="checkbox" id="monHN" checked> Hacker News (Live)</label>
+                    <label class="source-toggle"><input type="checkbox" id="monDev" checked> Dev.to (Live)</label>
+                </div>
                 <div class="input-group">
-                    <input type="text" id="intervalInput" placeholder="Интервал проверки (сек)" value="60" data-i18n-placeholder="interval_placeholder">
-                    <select id="sortBy">
-                        <option value="date" data-i18n="sort_date">Сортировка: по дате</option>
-                        <option value="views" data-i18n="sort_views">Сортировка: по просмотрам</option>
-                    </select>
-                    <button id="startBtn" onclick="startMonitoring()">▶️ <span data-i18n="start">Запустить</span></button>
-                    <button id="stopBtn" class="danger" onclick="stopMonitoring()" disabled>⏹️ <span data-i18n="stop">Остановить</span></button>
+                    <input type="number" id="intervalInput" placeholder="Интервал проверки (сек)" value="60" min="30">
+                    <button id="startBtn" onclick="startMonitoring()">▶️ Запуск скрипта</button>
+                    <button id="stopBtn" class="danger" onclick="stopMonitoring()" disabled>⏹️ Стоп</button>
                 </div>
                 <div class="status-bar">
                     <div class="status-indicator">
                         <div class="status-dot" id="statusDot"></div>
-                        <span id="statusText" data-i18n="stopped">Остановлено</span>
+                        <span id="statusText">Режим ожидания</span>
                     </div>
-                    <div style="color: var(--text-secondary); font-size: 0.85em;">
-                        <span data-i18n="found_matches">Найдено совпадений:</span> <strong id="matchCount">0</strong>
+                    <div style="color: var(--text-secondary); font-size: 0.9em;">
+                        Перехвачено инсайтов: <strong id="matchCount" style="color: var(--accent);">0</strong>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- ВКЛАДКА: РЕЗУЛЬТАТЫ -->
         <div id="results-tab" class="tab-content">
             <div class="panel">
-                <h2>📊 <span data-i18n="found_matches_title">Найденные совпадения</span></h2>
-                <div class="export-buttons" style="margin-bottom: 15px;">
-                    <button class="secondary" onclick="exportResults('json')">💾 <span data-i18n="export_json">Экспорт в JSON</span></button>
-                    <button class="secondary" onclick="exportResults('csv')">📄 <span data-i18n="export_csv">Экспорт в CSV</span></button>
-                    <button class="danger" onclick="clearResults()">🗑️ <span data-i18n="clear_results">Очистить результаты</span></button>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
+                    <h2>📊 База перехваченных данных</h2>
+                    <div>
+                        <button class="secondary" onclick="exportResults('json')">💾 JSON</button>
+                        <button class="secondary" onclick="exportResults('csv')">📄 CSV</button>
+                        <button class="danger" onclick="clearResults()">🗑️ Очистить</button>
+                    </div>
                 </div>
                 <div class="log" id="resultsLog">
                     <div class="empty-state">
                         <div class="icon">📭</div>
-                        <p data-i18n="no_results">Пока нет результатов. Запустите мониторинг во вкладке "Мониторинг".</p>
+                        <p>Лог пуст. Настройте триггеры и запустите мониторинг.</p>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- ВКЛАДКА: НАСТРОЙКИ -->
         <div id="settings-tab" class="tab-content">
             <div class="panel">
-                <h2>💾 <span data-i18n="export_import">Экспорт / Импорт данных</span></h2>
-                <p style="color: var(--text-secondary); font-size: 0.9em; margin-bottom: 15px;" data-i18n="export_import_desc">
-                    Полный бэкап всех настроек, каналов и результатов
+                <h2>💾 Экспорт / Импорт конфигурации</h2>
+                <p style="color: var(--text-secondary); font-size: 0.9em; margin-bottom: 15px;">
+                    Полный бэкап всех таргетов, триггеров и собранной базы.
                 </p>
-                <div class="export-buttons">
-                    <button class="secondary" onclick="exportAllData()">📤 <span data-i18n="export_all">Экспорт всех данных</span></button>
-                    <button class="secondary" onclick="document.getElementById('importFile').click()">📥 <span data-i18n="import_data">Импорт данных</span></button>
+                <div class="input-group">
+                    <button class="secondary" onclick="exportAllData()">📤 Скачать бэкап</button>
+                    <button class="secondary" onclick="document.getElementById('importFile').click()">📥 Загрузить бэкап</button>
                     <input type="file" id="importFile" style="display: none;" accept=".json" onchange="importAllData(event)">
                 </div>
             </div>
 
             <div class="panel">
-                <h2>🗑️ <span data-i18n="clear_data">Очистка данных</span></h2>
-                <p style="color: var(--text-secondary); font-size: 0.9em; margin-bottom: 15px;" data-i18n="clear_data_desc">
-                    Удалить все сохраненные данные
-                </p>
-                <button class="danger" onclick="clearAllData()"><span data-i18n="clear_all_data">Очистить все данные</span></button>
-            </div>
-        </div>
-    </div>
-
-    <!-- МОДАЛЬНОЕ ОКНО: УПРАВЛЕНИЕ КАТЕГОРИЯМИ -->
-    <div class="modal" id="categoriesModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>➕ <span data-i18n="manage_categories">Управление категориями</span></h2>
-                <button class="modal-close" onclick="closeModal('categoriesModal')">×</button>
-            </div>
-            <div class="input-group">
-                <input type="text" id="newCategoryName" placeholder="Название категории (например: Крипта)" data-i18n-placeholder="category_name_placeholder">
-                <input type="text" id="newCategoryEmoji" placeholder="Эмодзи (например: 💰)" maxlength="2" data-i18n-placeholder="category_emoji_placeholder">
-            </div>
-            <div class="input-group">
-                <textarea id="newCategoryChannels" placeholder="Каналы (каждый с новой строки, формат: имя|описание)" rows="5" data-i18n-placeholder="category_channels_placeholder"></textarea>
-            </div>
-            <button onclick="addCategory()"><span data-i18n="add_category">Добавить категорию</span></button>
-            <div style="margin-top: 20px;">
-                <h3 style="margin-bottom: 10px; font-size: 1em;" data-i18n="existing_categories">Существующие категории:</h3>
-                <div class="tags" id="categoriesList"></div>
+                <h2>🗑️ Хард Ресет</h2>
+                <button class="danger" onclick="clearAllData()">⚠️ Уничтожить все локальные данные</button>
             </div>
         </div>
     </div>
 
     <script>
-        // --- МУЛЬТИЯЗЫЧНОСТЬ ---
-        const translations = {
-            ru: {
-                title: 'Telegram Recon Tool',
-                subtitle: 'Автоматический поиск и мониторинг каналов по ключевым словам',
-                warning_title: 'Важно:',
-                warning_text: 'Этот инструмент работает только пока открыта вкладка браузера. Результаты сохраняются локально и могут быть экспортированы в JSON/CSV.',
-                tab_recon: 'Разведка',
-                tab_monitor: 'Мониторинг',
-                tab_results: 'Результаты',
-                tab_settings: 'Настройки',
-                search_by_category: 'Поиск каналов по категориям',
-                search_by_category_desc: 'Автоматический поиск каналов из публичных каталогов по выбранным тематикам',
-                select_category: 'Выберите категорию...',
-                manage_categories: 'Управление категориями',
-                find_channels: 'Найти каналы',
-                smart_search: 'Умный поиск каналов',
-                smart_search_desc: 'Поиск каналов через DuckDuckGo по ключевым словам',
-                search_placeholder: 'Ключевые слова (например: crypto airdrop 2024)',
-                search: 'Искать',
-                add_manual: 'Добавить канал вручную',
-                channel_placeholder: 'Имя канала (без @, например: durov)',
-                add: 'Добавить',
-                found_channels: 'Найденные каналы',
-                export_channels: 'Экспорт списка каналов',
-                clear_all: 'Очистить все',
-                keywords: 'Ключевые слова для поиска',
-                keyword_placeholder: 'Ключевое слово или фраза (например: airdrop 2024)',
-                monitoring_control: 'Управление мониторингом',
-                interval_placeholder: 'Интервал проверки (сек)',
-                sort_date: 'Сортировка: по дате',
-                sort_views: 'Сортировка: по просмотрам',
-                start: 'Запустить',
-                stop: 'Остановить',
-                stopped: 'Остановлено',
-                running: 'Мониторинг активен',
-                found_matches: 'Найдено совпадений:',
-                found_matches_title: 'Найденные совпадения',
-                export_json: 'Экспорт в JSON',
-                export_csv: 'Экспорт в CSV',
-                clear_results: 'Очистить результаты',
-                no_results: 'Пока нет результатов. Запустите мониторинг во вкладке "Мониторинг".',
-                export_import: 'Экспорт / Импорт данных',
-                export_import_desc: 'Полный бэкап всех настроек, каналов и результатов',
-                export_all: 'Экспорт всех данных',
-                import_data: 'Импорт данных',
-                clear_data: 'Очистка данных',
-                clear_data_desc: 'Удалить все сохраненные данные',
-                clear_all_data: 'Очистить все данные',
-                category_name_placeholder: 'Название категории (например: Крипта)',
-                category_emoji_placeholder: 'Эмодзи (например: 💰)',
-                category_channels_placeholder: 'Каналы (каждый с новой строки, формат: имя|описание)',
-                add_category: 'Добавить категорию',
-                existing_categories: 'Существующие категории:',
-                subscribers: 'подписчиков',
-                avg_views: 'средние просмотры',
-                er: 'ER'
-            },
-            en: {
-                title: 'Telegram Recon Tool',
-                subtitle: 'Automatic channel search and monitoring by keywords',
-                warning_title: 'Important:',
-                warning_text: 'This tool only works while the browser tab is open. Results are saved locally and can be exported to JSON/CSV.',
-                tab_recon: 'Recon',
-                tab_monitor: 'Monitoring',
-                tab_results: 'Results',
-                tab_settings: 'Settings',
-                search_by_category: 'Search channels by categories',
-                search_by_category_desc: 'Automatic channel search from public directories by selected topics',
-                select_category: 'Select category...',
-                manage_categories: 'Manage categories',
-                find_channels: 'Find channels',
-                smart_search: 'Smart channel search',
-                smart_search_desc: 'Search channels via DuckDuckGo by keywords',
-                search_placeholder: 'Keywords (e.g.: crypto airdrop 2024)',
-                search: 'Search',
-                add_manual: 'Add channel manually',
-                channel_placeholder: 'Channel name (without @, e.g.: durov)',
-                add: 'Add',
-                found_channels: 'Found channels',
-                export_channels: 'Export channel list',
-                clear_all: 'Clear all',
-                keywords: 'Keywords for search',
-                keyword_placeholder: 'Keyword or phrase (e.g.: airdrop 2024)',
-                monitoring_control: 'Monitoring control',
-                interval_placeholder: 'Check interval (sec)',
-                sort_date: 'Sort: by date',
-                sort_views: 'Sort: by views',
-                start: 'Start',
-                stop: 'Stop',
-                stopped: 'Stopped',
-                running: 'Monitoring active',
-                found_matches: 'Found matches:',
-                found_matches_title: 'Found matches',
-                export_json: 'Export to JSON',
-                export_csv: 'Export to CSV',
-                clear_results: 'Clear results',
-                no_results: 'No results yet. Start monitoring in the "Monitoring" tab.',
-                export_import: 'Export / Import data',
-                export_import_desc: 'Full backup of all settings, channels and results',
-                export_all: 'Export all data',
-                import_data: 'Import data',
-                clear_data: 'Clear data',
-                clear_data_desc: 'Delete all saved data',
-                clear_all_data: 'Clear all data',
-                category_name_placeholder: 'Category name (e.g.: Crypto)',
-                category_emoji_placeholder: 'Emoji (e.g.: 💰)',
-                category_channels_placeholder: 'Channels (each on new line, format: name|description)',
-                add_category: 'Add category',
-                existing_categories: 'Existing categories:',
-                subscribers: 'subscribers',
-                avg_views: 'avg views',
-                er: 'ER'
-            },
-            uk: {
-                title: 'Telegram Recon Tool',
-                subtitle: 'Автоматичний пошук та моніторинг каналів за ключовими словами',
-                warning_title: 'Важливо:',
-                warning_text: 'Цей інструмент працює тільки поки відкрита вкладка браузера. Результати зберігаються локально і можуть бути експортовані в JSON/CSV.',
-                tab_recon: 'Розвідка',
-                tab_monitor: 'Моніторинг',
-                tab_results: 'Результати',
-                tab_settings: 'Налаштування',
-                search_by_category: 'Пошук каналів за категоріями',
-                search_by_category_desc: 'Автоматичний пошук каналів з публічних каталогів за обраними тематиками',
-                select_category: 'Оберіть категорію...',
-                manage_categories: 'Управління категоріями',
-                find_channels: 'Знайти канали',
-                smart_search: 'Розумний пошук каналів',
-                smart_search_desc: 'Пошук каналів через DuckDuckGo за ключовими словами',
-                search_placeholder: 'Ключові слова (наприклад: crypto airdrop 2024)',
-                search: 'Шукати',
-                add_manual: 'Додати канал вручну',
-                channel_placeholder: "Ім'я каналу (без @, наприклад: durov)",
-                add: 'Додати',
-                found_channels: 'Знайдені канали',
-                export_channels: 'Експорт списку каналів',
-                clear_all: 'Очистити все',
-                keywords: 'Ключові слова для пошуку',
-                keyword_placeholder: 'Ключове слово або фраза (наприклад: airdrop 2024)',
-                monitoring_control: 'Управління моніторингом',
-                interval_placeholder: 'Інтервал перевірки (сек)',
-                sort_date: 'Сортування: за датою',
-                sort_views: 'Сортування: за переглядами',
-                start: 'Запустити',
-                stop: 'Зупинити',
-                stopped: 'Зупинено',
-                running: 'Моніторинг активний',
-                found_matches: 'Знайдено збігів:',
-                found_matches_title: 'Знайдені збіги',
-                export_json: 'Експорт в JSON',
-                export_csv: 'Експорт в CSV',
-                clear_results: 'Очистити результати',
-                no_results: 'Поки немає результатів. Запустіть моніторинг у вкладці "Моніторинг".',
-                export_import: 'Експорт / Імпорт даних',
-                export_import_desc: 'Повний бекап всіх налаштувань, каналів та результатів',
-                export_all: 'Експорт всіх даних',
-                import_data: 'Імпорт даних',
-                clear_data: 'Очистка даних',
-                clear_data_desc: 'Видалити всі збережені дані',
-                clear_all_data: 'Очистити всі дані',
-                category_name_placeholder: 'Назва категорії (наприклад: Крипта)',
-                category_emoji_placeholder: 'Емодзі (наприклад: 💰)',
-                category_channels_placeholder: 'Канали (кожен з нового рядка, формат: ім\'я|опис)',
-                add_category: 'Додати категорію',
-                existing_categories: 'Існуючі категорії:',
-                subscribers: 'підписників',
-                avg_views: 'середні перегляди',
-                er: 'ER'
-            }
-        };
-
-        let currentLang = 'ru';
-
-        function detectLanguage() {
-            const lang = navigator.language || navigator.userLanguage;
-            const langCode = lang.split('-')[0];
-            if (translations[langCode]) {
-                currentLang = langCode;
-            }
-        }
-
-        function applyTranslations() {
-            document.querySelectorAll('[data-i18n]').forEach(el => {
-                const key = el.getAttribute('data-i18n');
-                if (translations[currentLang][key]) {
-                    el.textContent = translations[currentLang][key];
-                }
-            });
-
-            document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
-                const key = el.getAttribute('data-i18n-placeholder');
-                if (translations[currentLang][key]) {
-                    el.placeholder = translations[currentLang][key];
-                }
-            });
-        }
-
-        // --- TELEGRAM WEBAPP INIT ---
+        // --- ИНИЦИАЛИЗАЦИЯ И ТЕМА ---
         let tg = window.Telegram?.WebApp;
-        if (tg) {
-            tg.ready();
-            tg.expand();
-            
-            if (tg.colorScheme === 'dark') {
-                document.documentElement.setAttribute('data-theme', 'dark');
-                document.querySelector('.theme-toggle').textContent = '☀️';
-            }
-        }
+        if (tg) { tg.ready(); tg.expand(); }
 
-        // --- СОСТОЯНИЕ ПРИЛОЖЕНИЯ ---
-        let channels = JSON.parse(localStorage.getItem('tg_channels') || '[]');
-        let keywords = JSON.parse(localStorage.getItem('tg_keywords') || '[]');
-        let results = JSON.parse(localStorage.getItem('tg_results') || '[]');
-        let seenMessages = new Set(JSON.parse(localStorage.getItem('tg_seen') || '[]'));
-        let customCategories = JSON.parse(localStorage.getItem('tg_custom_categories') || '{}');
-        let monitoringInterval = null;
-        let isRunning = false;
-
-        const CORS_PROXY = 'https://corsproxy.io/?';
-
-        // --- БАЗА КАНАЛОВ ПО КАТЕГОРИЯМ ---
-        const CHANNEL_DATABASE = {
-            crypto: [
-                { name: 'crypto', desc: 'Криптовалюты и блокчейн' },
-                { name: 'binance', desc: 'Binance новости' },
-                { name: 'coinmarketcap', desc: 'CoinMarketCap' },
-                { name: 'defi', desc: 'DeFi и DeFi протоколы' },
-                { name: 'airdrop_alert', desc: 'Airdrop уведомления' },
-                { name: 'crypto_signals', desc: 'Крипто сигналы' }
-            ],
-            ai: [
-                { name: 'ai_news', desc: 'ИИ новости' },
-                { name: 'machinelearning', desc: 'Machine Learning' },
-                { name: 'prompt_engineering', desc: 'Промпт инжиниринг' },
-                { name: 'chatgpt', desc: 'ChatGPT и LLM' },
-                { name: 'artificial_intelligence', desc: 'Искусственный интеллект' }
-            ],
-            dev: [
-                { name: 'programming', desc: 'Программирование' },
-                { name: 'javascript', desc: 'JavaScript разработка' },
-                { name: 'python', desc: 'Python разработка' },
-                { name: 'devops', desc: 'DevOps и инфраструктура' },
-                { name: 'github', desc: 'GitHub проекты' }
-            ],
-            news: [
-                { name: 'breaking_news', desc: 'Срочные новости' },
-                { name: 'world_news', desc: 'Мировые новости' },
-                { name: 'politics', desc: 'Политика' }
-            ],
-            tech: [
-                { name: 'tech_news', desc: 'Технологические новости' },
-                { name: 'gadgets', desc: 'Гаджеты и устройства' },
-                { name: 'apple', desc: 'Apple новости' },
-                { name: 'google', desc: 'Google новости' }
-            ],
-            business: [
-                { name: 'startup', desc: 'Стартапы' },
-                { name: 'business_news', desc: 'Бизнес новости' },
-                { name: 'entrepreneur', desc: 'Предпринимательство' }
-            ],
-            education: [
-                { name: 'science', desc: 'Наука' },
-                { name: 'education', desc: 'Образование' },
-                { name: 'learning', desc: 'Обучение' }
-            ],
-            entertainment: [
-                { name: 'movies', desc: 'Кино и сериалы' },
-                { name: 'music', desc: 'Музыка' },
-                { name: 'gaming', desc: 'Игры' }
-            ]
-        };
-
-        const CATEGORY_NAMES = {
-            crypto: '💰 Криптовалюты / Airdrop',
-            ai: '🤖 ИИ / Промпты / ML',
-            dev: '💻 Разработка / Код / CLI',
-            news: '📰 Новости / Политика',
-            tech: '🔧 Технологии / Гаджеты',
-            business: '💼 Бизнес / Стартапы',
-            education: '📚 Образование / Наука',
-            entertainment: '🎬 Развлечения / Кино'
-        };
-
-        // --- ИНИЦИАЛИЗАЦИЯ ---
-        function init() {
-            detectLanguage();
-            applyTranslations();
-            renderTags();
-            renderResults();
-            updateChannelCount();
-            updateMatchCount();
-            populateCategorySelect();
-            log('🚀 Инструмент готов к работе. Начните с вкладки "Разведка".', 'info');
-        }
-
-        // --- ТЕМА ---
         function toggleTheme() {
-            const currentTheme = document.documentElement.getAttribute('data-theme');
-            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+            const newTheme = isDark ? 'light' : 'dark';
             document.documentElement.setAttribute('data-theme', newTheme);
-            document.querySelector('.theme-toggle').textContent = newTheme === 'dark' ? '☀️' : '🌙';
-            localStorage.setItem('tg_theme', newTheme);
-            
+            document.getElementById('themeIcon').textContent = newTheme === 'dark' ? '☀️' : '🌙';
+            localStorage.setItem('amigo_theme', newTheme);
             triggerHaptic('light');
         }
 
-        const savedTheme = localStorage.getItem('tg_theme');
-        if (savedTheme) {
-            document.documentElement.setAttribute('data-theme', savedTheme);
-            document.querySelector('.theme-toggle').textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+        if (localStorage.getItem('amigo_theme') === 'dark' || (!localStorage.getItem('amigo_theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.setAttribute('data-theme', 'dark');
+            document.getElementById('themeIcon').textContent = '☀️';
         }
 
-        // --- HAPTIC FEEDBACK ---
         function triggerHaptic(type) {
-            if (tg && tg.HapticFeedback) {
-                try {
-                    const version = parseInt(tg.version);
-                    if (version >= 6.1) {
-                        tg.HapticFeedback.impactOccurred(type);
-                    }
-                } catch (e) {
-                    console.log('Haptic feedback not supported');
-                }
+            if (tg && tg.HapticFeedback && parseFloat(tg.version) >= 6.1) {
+                try { tg.HapticFeedback.impactOccurred(type); } catch (e) {}
             }
         }
 
-        // --- ПЕРЕКЛЮЧЕНИЕ ВКЛАДОК ---
         function switchTab(tabName) {
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-            
             event.target.classList.add('active');
             document.getElementById(`${tabName}-tab`).classList.add('active');
-            
             triggerHaptic('light');
         }
 
-        // --- ЗАПОЛНЕНИЕ СПИСКА КАТЕГОРИЙ ---
-        function populateCategorySelect() {
-            const select = document.getElementById('categorySelect');
-            select.innerHTML = `<option value="">${translations[currentLang].select_category}</option>`;
-            
-            Object.keys(CHANNEL_DATABASE).forEach(key => {
-                const option = document.createElement('option');
-                option.value = key;
-                option.textContent = CATEGORY_NAMES[key];
-                select.appendChild(option);
-            });
-            
-            Object.keys(customCategories).forEach(key => {
-                const option = document.createElement('option');
-                option.value = key;
-                option.textContent = customCategories[key].name;
-                select.appendChild(option);
-            });
-        }
+        // --- СОСТОЯНИЕ ДАННЫХ ---
+        let channels = JSON.parse(localStorage.getItem('amigo_channels') || '[]');
+        let keywords = JSON.parse(localStorage.getItem('amigo_keywords') || '[]');
+        let results = JSON.parse(localStorage.getItem('amigo_results') || '[]');
+        let seenMessages = new Set(JSON.parse(localStorage.getItem('amigo_seen') || '[]'));
+        let monitoringInterval = null;
+        let isRunning = false;
 
-        // --- МОДАЛЬНЫЕ ОКНА ---
-        function manageCategories() {
-            document.getElementById('categoriesModal').classList.add('active');
-            renderCategoriesList();
-        }
+        // ПУЛ ПРОКСИ (Борьба с CORS для Telegram)
+        const PROXIES = [
+            url => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
+            url => `https://corsproxy.io/?${encodeURIComponent(url)}`,
+            url => `https://api.codetabs.com/v1/proxy/?quest=${encodeURIComponent(url)}`
+        ];
 
-        function closeModal(modalId) {
-            document.getElementById(modalId).classList.remove('active');
-        }
-
-        function renderCategoriesList() {
-            const list = document.getElementById('categoriesList');
-            list.innerHTML = Object.keys(customCategories).map(key => `
-                <div class="tag">
-                    ${customCategories[key].name}
-                    <span class="remove" onclick="removeCategory('${key}')">×</span>
-                </div>
-            `).join('') || `<p style="color: var(--text-secondary);">${currentLang === 'ru' ? 'Нет пользовательских категорий' : currentLang === 'uk' ? 'Немає користувацьких категорій' : 'No custom categories'}</p>`;
-        }
-
-        function addCategory() {
-            const name = document.getElementById('newCategoryName').value.trim();
-            const emoji = document.getElementById('newCategoryEmoji').value.trim() || '📁';
-            const channelsText = document.getElementById('newCategoryChannels').value.trim();
-            
-            if (!name) {
-                alert(currentLang === 'ru' ? 'Введите название категории!' : currentLang === 'uk' ? 'Введіть назву категорії!' : 'Enter category name!');
-                return;
+        async function fetchWithFallback(url) {
+            for (let i = 0; i < PROXIES.length; i++) {
+                try {
+                    const proxyUrl = PROXIES[i](url);
+                    const response = await fetch(proxyUrl, { timeout: 15000 });
+                    if (response.ok) return await response.text();
+                } catch (e) {
+                    console.warn(`Proxy ${i + 1} failed for ${url}`);
+                }
             }
-            
-            const key = 'custom_' + Date.now();
-            const channels = channelsText.split('\n').filter(l => l.trim()).map(line => {
-                const [chName, chDesc] = line.split('|').map(s => s.trim());
-                return { name: chName, desc: chDesc || (currentLang === 'ru' ? 'Пользовательский канал' : currentLang === 'uk' ? 'Користувацький канал' : 'Custom channel') };
-            });
-            
-            customCategories[key] = {
-                name: `${emoji} ${name}`,
-                channels: channels
-            };
-            
-            localStorage.setItem('tg_custom_categories', JSON.stringify(customCategories));
-            populateCategorySelect();
-            renderCategoriesList();
-            
-            document.getElementById('newCategoryName').value = '';
-            document.getElementById('newCategoryEmoji').value = '';
-            document.getElementById('newCategoryChannels').value = '';
-            
-            alert((currentLang === 'ru' ? 'Категория' : currentLang === 'uk' ? 'Категорія' : 'Category') + ` "${name}" ` + (currentLang === 'ru' ? 'добавлена!' : currentLang === 'uk' ? 'додана!' : 'added!'));
+            throw new Error(`All CORS proxies failed for ${url}`);
         }
 
-        function removeCategory(key) {
-            if (confirm(currentLang === 'ru' ? 'Удалить эту категорию?' : currentLang === 'uk' ? 'Видалити цю категорію?' : 'Delete this category?')) {
-                delete customCategories[key];
-                localStorage.setItem('tg_custom_categories', JSON.stringify(customCategories));
-                populateCategorySelect();
-                renderCategoriesList();
-            }
-        }
+        // --- ГЛОБАЛЬНЫЙ OSINT ПОИСК ---
+        async function globalSearch() {
+            const query = document.getElementById('googleSearchInput').value.trim();
+            if (!query) return alert('Введите запрос!');
 
-        // --- РАЗВЕДКА: ПОИСК КАНАЛОВ ---
-        async function discoverChannels() {
-            const category = document.getElementById('categorySelect').value;
-            if (!category) {
-                alert(currentLang === 'ru' ? 'Выберите категорию!' : currentLang === 'uk' ? 'Оберіть категорію!' : 'Select category!');
-                return;
-            }
+            const srcTG = document.getElementById('srcTG').checked;
+            const srcHN = document.getElementById('srcHN').checked;
+            const srcDev = document.getElementById('srcDev').checked;
 
-            const progressDiv = document.getElementById('reconProgress');
-            const progressBar = document.getElementById('reconProgressBar');
-            const channelsDiv = document.getElementById('discoveredChannels');
+            const progressDiv = document.getElementById('googleProgress');
+            const progressBar = document.getElementById('googleProgressBar');
+            const resultsDiv = document.getElementById('googleResults');
             
             progressDiv.style.display = 'block';
-            progressBar.style.width = '0%';
-            channelsDiv.innerHTML = '';
+            progressBar.style.width = '10%';
+            resultsDiv.innerHTML = '';
+            let foundCount = 0;
 
-            let categoryChannels = [];
-            if (CHANNEL_DATABASE[category]) {
-                categoryChannels = CHANNEL_DATABASE[category];
-            } else if (customCategories[category]) {
-                categoryChannels = customCategories[category].channels;
+            // 1. Hacker News API (No CORS issues)
+            if (srcHN) {
+                try {
+                    const hnRes = await fetch(`https://hn.algolia.com/api/v1/search?query=${encodeURIComponent(query)}&tags=story&hitsPerPage=5`);
+                    if (hnRes.ok) {
+                        const hnData = await hnRes.json();
+                        hnData.hits.forEach(hit => {
+                            resultsDiv.innerHTML += renderSearchCard('Hacker News', hit.title, `Points: ${hit.points}`, hit.story_url || `https://news.ycombinator.com/item?id=${hit.objectID}`, '🟧');
+                            foundCount++;
+                        });
+                    }
+                } catch (e) { console.error('HN Search error', e); }
+                progressBar.style.width = '40%';
             }
 
-            let addedCount = 0;
-
-            for (let i = 0; i < categoryChannels.length; i++) {
-                const channel = categoryChannels[i];
-                
-                if (!channels.find(c => c.name === channel.name)) {
-                    channels.push({
-                        name: channel.name,
-                        category: category,
-                        description: channel.desc,
-                        addedAt: new Date().toISOString()
-                    });
-                    addedCount++;
-                }
-
-                const progress = ((i + 1) / categoryChannels.length) * 100;
-                progressBar.style.width = `${progress}%`;
-                
-                channelsDiv.innerHTML += `
-                    <div class="card">
-                        <h3>@${channel.name}</h3>
-                        <p>${channel.desc}</p>
-                        <div class="stats">
-                            <span>📁 ${category}</span>
-                        </div>
-                    </div>
-                `;
-
-                await delay(200);
+            // 2. Dev.to API (No CORS issues)
+            if (srcDev) {
+                try {
+                    const devRes = await fetch(`https://dev.to/api/articles?q=${encodeURIComponent(query)}&per_page=5`);
+                    if (devRes.ok) {
+                        const devData = await devRes.json();
+                        devData.forEach(article => {
+                            resultsDiv.innerHTML += renderSearchCard('Dev.to', article.title, `Reactions: ${article.public_reactions_count}`, article.url, '⬛');
+                            foundCount++;
+                        });
+                    }
+                } catch (e) { console.error('Dev.to Search error', e); }
+                progressBar.style.width = '70%';
             }
 
-            saveState();
-            renderTags();
-            updateChannelCount();
-            
-            progressDiv.style.display = 'none';
-            log(`✅ ${currentLang === 'ru' ? 'Найдено и добавлено' : currentLang === 'uk' ? 'Знайдено та додано' : 'Found and added'} ${addedCount} ${currentLang === 'ru' ? 'каналов' : currentLang === 'uk' ? 'каналів' : 'channels'}`, 'success');
-            
-            triggerHaptic('medium');
+            // 3. Telegram via GitHub API
+            if (srcTG) {
+                try {
+                    const ghRes = await fetch(`https://api.github.com/search/code?q=${encodeURIComponent('t.me ' + query)}&per_page=5`);
+                    if (ghRes.ok) {
+                        const ghData = await ghRes.json();
+                        const tgChannels = new Set();
+                        for (const item of (ghData.items || [])) {
+                            // Fetch raw file to extract t.me links
+                            try {
+                                const fileRes = await fetch(item.url, { headers: { 'Accept': 'application/vnd.github.v3.raw' } });
+                                if (fileRes.ok) {
+                                    const content = await fileRes.text();
+                                    const matches = content.match(/t\.me\/([a-zA-Z0-9_]{4,})/g) || [];
+                                    matches.forEach(m => {
+                                        const ch = m.replace('t.me/', '').toLowerCase();
+                                        if (!['joinchat', 'addtheme', 'share', 'socks'].includes(ch)) tgChannels.add(ch);
+                                    });
+                                }
+                            } catch (e) {}
+                        }
+                        tgChannels.forEach(ch => {
+                            resultsDiv.innerHTML += renderSearchCard('Telegram Канал', `@${ch}`, 'Найдено на GitHub', `javascript:addManualChannelByName('${ch}')`, '✈️');
+                            foundCount++;
+                        });
+                    }
+                } catch (e) { console.error('GitHub Search error', e); }
+            }
+
+            progressBar.style.width = '100%';
+            setTimeout(() => progressDiv.style.display = 'none', 500);
+
+            if (foundCount === 0) {
+                resultsDiv.innerHTML = `<p style="color: var(--text-secondary); width: 100%;">По запросу "${query}" ничего не найдено.</p>`;
+            }
         }
 
-        // --- УМНЫЙ ПОИСК КАНАЛОВ (GitHub API + Каталоги) ---
-		async function googleSearch() {
-			const query = document.getElementById('googleSearchInput').value.trim();
-			if (!query) {
-				alert(currentLang === 'ru' ? 'Введите ключевые слова!' : currentLang === 'uk' ? 'Введіть ключові слова!' : 'Enter keywords!');
-				return;
-			}
+        function renderSearchCard(source, title, subtitle, link, icon) {
+            const isFunction = link.startsWith('javascript:');
+            return `
+                <div class="card" onclick="${isFunction ? link.replace('javascript:', '') : `window.open('${link}', '_blank')`}">
+                    <div class="stats">${icon} ${source}</div>
+                    <h3 style="margin-top: 5px;">${title}</h3>
+                    <p>${subtitle}</p>
+                    ${isFunction ? '<span style="color:var(--accent); font-size:12px;">+ Добавить в таргеты</span>' : ''}
+                </div>
+            `;
+        }
 
-			const progressDiv = document.getElementById('googleProgress');
-			const progressBar = document.getElementById('googleProgressBar');
-			const resultsDiv = document.getElementById('googleResults');
-			
-			progressDiv.style.display = 'block';
-			progressBar.style.width = '0%';
-			resultsDiv.innerHTML = `<p style="color: var(--text-secondary);">${currentLang === 'ru' ? 'Поиск...' : currentLang === 'uk' ? 'Пошук...' : 'Searching...'}</p>`;
+        // --- УПРАВЛЕНИЕ ТАРГЕТАМИ И ТРИГГЕРАМИ ---
+        function addManualChannelByName(name) {
+            name = name.replace('@', '').trim().toLowerCase();
+            if (name && !channels.find(c => c.name === name)) {
+                channels.push({ name, addedAt: new Date().toISOString() });
+                saveState(); renderUI();
+                logConsole(`Таргет добавлен: @${name}`, 'success');
+            }
+        }
 
-			try {
-				const foundChannels = new Set();
-				
-				// --- МЕТОД 1: GitHub API (самый надежный) ---
-				progressBar.style.width = '20%';
-				try {
-					const githubQuery = `telegram channels ${query} list`;
-					const githubUrl = `https://api.github.com/search/repositories?q=${encodeURIComponent(githubQuery)}&sort=stars&order=desc&per_page=10`;
-					
-					const githubResponse = await fetch(githubUrl, {
-						headers: {
-							'Accept': 'application/vnd.github.v3+json'
-						}
-					});
-					
-					if (githubResponse.ok) {
-						const githubData = await githubResponse.json();
-						progressBar.style.width = '40%';
-						
-						// Парсим README топ-репозиториев
-						for (const repo of githubData.items.slice(0, 5)) {
-							try {
-								const readmeUrl = `https://api.github.com/repos/${repo.full_name}/readme`;
-								const readmeResponse = await fetch(readmeUrl, {
-									headers: {
-										'Accept': 'application/vnd.github.v3.raw'
-									}
-								});
-								
-								if (readmeResponse.ok) {
-									const readmeText = await readmeResponse.text();
-									
-									// Ищем ссылки на Telegram каналы
-									const tmeMatches = readmeText.match(/t\.me\/([a-zA-Z0-9_]{3,})/g) || [];
-									tmeMatches.forEach(match => {
-										const channelName = match.replace('t.me/', '').toLowerCase();
-										if (!['s', 'joinchat', 'addtheme', 'share', 'c', 'addstickers'].includes(channelName)) {
-											foundChannels.add(channelName);
-										}
-									});
-								}
-							} catch (e) {
-								console.log('Error parsing repo:', repo.full_name, e);
-							}
-							await delay(500); // Rate limit
-						}
-					}
-				} catch (githubError) {
-					console.log('GitHub API error:', githubError);
-				}
-				
-				// --- МЕТОД 2: Raw JSON файлы с GitHub (без CORS прокси!) ---
-				progressBar.style.width = '60%';
-				try {
-					// Ищем JSON файлы с базами каналов
-					const jsonSearchUrl = `https://api.github.com/search/code?q=telegram+channels+json+${encodeURIComponent(query)}&per_page=5`;
-					const jsonResponse = await fetch(jsonSearchUrl, {
-						headers: {
-							'Accept': 'application/vnd.github.v3+json'
-						}
-					});
-					
-					if (jsonResponse.ok) {
-						const jsonData = await jsonResponse.json();
-						
-						// Парсим найденные JSON файлы
-						for (const item of jsonData.items.slice(0, 3)) {
-							try {
-								// Получаем raw URL файла
-								const rawUrl = item.url.replace('api.github.com/repos', 'raw.githubusercontent.com').replace('/contents/', '/');
-								const rawResponse = await fetch(rawUrl);
-								
-								if (rawResponse.ok) {
-									const text = await rawResponse.text();
-									
-									// Ищем ссылки на каналы
-									const tmeMatches = text.match(/t\.me\/([a-zA-Z0-9_]{3,})/g) || [];
-									tmeMatches.forEach(match => {
-										const channelName = match.replace('t.me/', '').toLowerCase();
-										if (!['s', 'joinchat', 'addtheme', 'share', 'c', 'addstickers'].includes(channelName)) {
-											foundChannels.add(channelName);
-										}
-									});
-								}
-							} catch (e) {
-								console.log('Error parsing JSON file:', item.name, e);
-							}
-							await delay(500);
-						}
-					}
-				} catch (jsonError) {
-					console.log('JSON search error:', jsonError);
-				}
-				
-				// --- МЕТОД 3: TGStat API (если работает) ---
-				try {
-					const tgstatUrl = `https://api.tgstat.ru/channels/search?q=${encodeURIComponent(query)}&limit=20`;
-					const tgstatResponse = await fetch(tgstatUrl);
-					
-					if (tgstatResponse.ok) {
-						const tgstatData = await tgstatResponse.json();
-						if (tgstatData.response) {
-							tgstatData.response.items.forEach(channel => {
-								if (channel.username) {
-									foundChannels.add(channel.username.toLowerCase());
-								}
-							});
-						}
-					}
-				} catch (tgstatError) {
-					console.log('TGStat API error:', tgstatError);
-				}
-				
-				// --- МЕТОД 4: Reddit API (резервный, очень надежный) ---
-				progressBar.style.width = '80%';
-				try {
-					const subreddits = ['telegram', 'CryptoCurrency', 'ethtrader', 'Bitcoin', 'defi', 'altcoin', 'CryptoMarkets'];
-					const redditHeaders = {
-						'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
-					};
-					
-					for (const subreddit of subreddits) {
-						try {
-							// Ищем в каждом сабреддите по запросу
-							const redditUrl = `https://www.reddit.com/r/${subreddit}/search.json?q=${encodeURIComponent(query + ' telegram')}&sort=relevance&limit=25&restrict_sr=on&t=year`;
-							
-							const redditResponse = await fetch(redditUrl, { headers: redditHeaders });
-							
-							if (redditResponse.ok) {
-								const redditData = await redditResponse.json();
-								
-								if (redditData.data && redditData.data.children) {
-									for (const post of redditData.data.children) {
-										const postData = post.data;
-										
-										// Проверяем текст поста, заголовок и selftext
-										const textsToCheck = [
-											postData.title || '',
-											postData.selftext || '',
-											postData.url || ''
-										];
-										
-										// Если есть media_metadata или gallery — пропускаем (там картинки)
-										textsToCheck.forEach(text => {
-											// Ищем все ссылки t.me/username
-											const tmeMatches = text.match(/(?:t\.me\/|telegram\.me\/|telegram\.dog\/)([a-zA-Z0-9_]{3,})/g) || [];
-											tmeMatches.forEach(match => {
-												const channelName = match.replace(/(?:t\.me\/|telegram\.me\/|telegram\.dog\/)/, '').toLowerCase();
-												// Фильтруем системные пути
-												if (!['s', 'joinchat', 'addtheme', 'share', 'c', 'addstickers', 'proxy', 'socks', 'bg', 'login', 'confirmphone'].includes(channelName)) {
-													foundChannels.add(channelName);
-												}
-											});
-										});
-									}
-								}
-							}
-							
-							// Небольшая задержка чтобы не превысить rate limit Reddit (60 req/min)
-							await delay(800);
-						} catch (redditError) {
-							console.log('Reddit error for', subreddit, ':', redditError.message);
-							continue;
-						}
-					}
-					
-					// Дополнительный поиск по всем Reddit (без ограничения сабреддита)
-					try {
-						const globalRedditUrl = `https://www.reddit.com/search.json?q=${encodeURIComponent('site:t.me ' + query)}&sort=relevance&limit=25&t=year`;
-						const globalResponse = await fetch(globalRedditUrl, { headers: redditHeaders });
-						
-						if (globalResponse.ok) {
-							const globalData = await globalResponse.json();
-							if (globalData.data && globalData.data.children) {
-								for (const post of globalData.data.children) {
-									const textsToCheck = [
-										post.data.title || '',
-										post.data.selftext || '',
-										post.data.url || ''
-									];
-									
-									textsToCheck.forEach(text => {
-										const tmeMatches = text.match(/(?:t\.me\/|telegram\.me\/|telegram\.dog\/)([a-zA-Z0-9_]{3,})/g) || [];
-										tmeMatches.forEach(match => {
-											const channelName = match.replace(/(?:t\.me\/|telegram\.me\/|telegram\.dog\/)/, '').toLowerCase();
-											if (!['s', 'joinchat', 'addtheme', 'share', 'c', 'addstickers', 'proxy', 'socks', 'bg', 'login', 'confirmphone'].includes(channelName)) {
-												foundChannels.add(channelName);
-											}
-										});
-									});
-								}
-							}
-						}
-					} catch (globalRedditError) {
-						console.log('Global Reddit search error:', globalRedditError.message);
-					}
-					
-				} catch (redditError) {
-					console.log('Reddit search error:', redditError);
-				}
-				
-				progressBar.style.width = '100%';
-				
-				// --- РЕНДЕРИНГ РЕЗУЛЬТАТОВ ---
-				resultsDiv.innerHTML = '';
-				
-				foundChannels.forEach(channelName => {
-					if (!channels.find(c => c.name === channelName)) {
-						channels.push({
-							name: channelName,
-							category: 'search',
-							description: `${currentLang === 'ru' ? 'Найдено по запросу' : currentLang === 'uk' ? 'Знайдено за запитом' : 'Found by query'}: ${query}`,
-							addedAt: new Date().toISOString()
-						});
-					}
-					
-					resultsDiv.innerHTML += `
-						<div class="card" onclick="addManualChannelByName('${channelName}')">
-							<h3>@${channelName}</h3>
-							<p>${currentLang === 'ru' ? 'Найдено через поиск' : currentLang === 'uk' ? 'Знайдено через пошук' : 'Found via search'}</p>
-							<div class="stats">
-								<span>🔍 ${query}</span>
-							</div>
-						</div>
-					`;
-				});
+        function addManualChannel() {
+            const input = document.getElementById('manualChannelInput');
+            addManualChannelByName(input.value);
+            input.value = '';
+        }
 
-				if (foundChannels.size === 0) {
-					resultsDiv.innerHTML = `<p style="color: var(--text-secondary);">${currentLang === 'ru' ? 'Ничего не найдено. Попробуйте другие ключевые слова.' : currentLang === 'uk' ? 'Нічого не знайдено. Спробуйте інші ключові слова.' : 'Nothing found. Try different keywords.'}</p>`;
-				} else {
-					saveState();
-					renderTags();
-					updateChannelCount();
-					log(`✅ ${currentLang === 'ru' ? 'Найдено' : currentLang === 'uk' ? 'Знайдено' : 'Found'} ${foundChannels.size} ${currentLang === 'ru' ? 'каналов' : currentLang === 'uk' ? 'каналів' : 'channels'}`, 'success');
-				}
-			} catch (error) {
-				resultsDiv.innerHTML = `<p style="color: var(--danger);">${currentLang === 'ru' ? 'Ошибка поиска' : currentLang === 'uk' ? 'Помилка пошуку' : 'Search error'}: ${error.message}</p>`;
-				log(`❌ ${currentLang === 'ru' ? 'Ошибка поиска' : currentLang === 'uk' ? 'Помилка пошуку' : 'Search error'}: ${error.message}`, 'error');
-			}
-
-			progressDiv.style.display = 'none';
-		}
-
-        // --- УПРАВЛЕНИЕ КЛЮЧЕВЫМИ СЛОВАМИ ---
         function addKeyword() {
             const input = document.getElementById('keywordInput');
-            const keyword = input.value.trim().toLowerCase();
-            
-            if (keyword && !keywords.includes(keyword)) {
-                keywords.push(keyword);
-                saveState();
-                renderTags();
+            const kw = input.value.trim().toLowerCase();
+            if (kw && !keywords.includes(kw)) {
+                keywords.push(kw);
+                saveState(); renderUI();
                 input.value = '';
-                log(`✅ ${currentLang === 'ru' ? 'Добавлено ключевое слово' : currentLang === 'uk' ? 'Додано ключове слово' : 'Added keyword'}: "${keyword}"`, 'success');
             }
         }
 
-        function removeKeyword(keyword) {
-            keywords = keywords.filter(k => k !== keyword);
-            saveState();
-            renderTags();
-        }
+        function removeChannel(name) { channels = channels.filter(c => c.name !== name); saveState(); renderUI(); }
+        function removeKeyword(kw) { keywords = keywords.filter(k => k !== kw); saveState(); renderUI(); }
 
-        function removeChannel(name) {
-            channels = channels.filter(c => c.name !== name);
-            saveState();
-            renderTags();
-            updateChannelCount();
-        }
+        // --- ПАРСИНГ ИСТОЧНИКОВ ---
 
-        // --- РЕНДЕРИНГ ТЕГОВ ---
-        function renderTags() {
-            const channelTags = document.getElementById('channelTags');
-            channelTags.innerHTML = channels.map(c => `
-                <div class="tag">
-                    @${c.name}
-                    <span class="remove" onclick="removeChannel('${c.name}')">×</span>
-                </div>
-            `).join('');
-
-            const keywordTags = document.getElementById('keywordTags');
-            keywordTags.innerHTML = keywords.map(k => `
-                <div class="tag">
-                    ${k}
-                    <span class="remove" onclick="removeKeyword('${k}')">×</span>
-                </div>
-            `).join('');
-        }
-
-        // --- СОХРАНЕНИЕ СОСТОЯНИЯ ---
-        function saveState() {
-            localStorage.setItem('tg_channels', JSON.stringify(channels));
-            localStorage.setItem('tg_keywords', JSON.stringify(keywords));
-            localStorage.setItem('tg_results', JSON.stringify(results));
-            localStorage.setItem('tg_seen', JSON.stringify(Array.from(seenMessages)));
-        }
-
-        // --- ЛОГИРОВАНИЕ ---
-        function log(message, type = 'info') {
-            console.log(`[${type.toUpperCase()}] ${message}`);
-        }
-
-        // --- ОБНОВЛЕНИЕ СЧЕТЧИКОВ ---
-        function updateChannelCount() {
-            document.getElementById('channelCount').textContent = channels.length;
-        }
-
-        function updateMatchCount() {
-            document.getElementById('matchCount').textContent = results.length;
-        }
-
-        // --- ПАРСИНГ КАНАЛА ---
-        async function parseChannel(channelName) {
-            const url = `https://t.me/s/${channelName}`;
-            const proxyUrl = CORS_PROXY + encodeURIComponent(url);
-            
+        // 1. Telegram (через t.me/s/)
+        async function parseTelegram(channelName) {
             try {
-                const response = await fetch(proxyUrl);
-                if (!response.ok) throw new Error(`HTTP ${response.status}`);
-                
-                const html = await response.text();
-                const parser = new DOMParser();
-                const doc = parser.parseFromString(html, 'text/html');
+                const html = await fetchWithFallback(`https://t.me/s/${channelName}`);
+                const doc = new DOMParser().parseFromString(html, 'text/html');
                 const messages = [];
-
                 doc.querySelectorAll('.tgme_widget_message').forEach(el => {
                     const textEl = el.querySelector('.tgme_widget_message_text');
                     const text = textEl ? textEl.textContent.trim() : '';
                     const postId = el.getAttribute('data-post');
-                    const dateEl = el.querySelector('.tgme_widget_message_date time');
-                    const date = dateEl ? dateEl.getAttribute('datetime') : 'Неизвестно';
-                    const viewsEl = el.querySelector('.tgme_widget_message_views');
-                    const views = viewsEl ? viewsEl.textContent.trim() : '0';
-                    
                     if (text && postId) {
                         messages.push({
-                            text,
-                            postId,
-                            date,
-                            views,
-                            url: `https://t.me/${postId}`
+                            id: `tg_${postId}`,
+                            source: `Telegram: @${channelName}`,
+                            text: text,
+                            url: `https://t.me/${postId}`,
+                            date: new Date().toISOString() // Approximate for TG web
                         });
                     }
                 });
-
-                return messages.reverse();
-            } catch (error) {
-                log(`❌ ${currentLang === 'ru' ? 'Ошибка парсинга' : currentLang === 'uk' ? 'Помилка парсингу' : 'Parsing error'} @${channelName}: ${error.message}`, 'error');
+                return messages;
+            } catch (e) {
+                console.error(`TG Parse Error [${channelName}]:`, e);
                 return [];
             }
         }
 
-        // --- ПРОВЕРКА КЛЮЧЕВЫХ СЛОВ ---
-        function checkKeywords(messages, channelName) {
-            const sortBy = document.getElementById('sortBy').value;
-            let newResults = [];
-
-            for (const msg of messages) {
-                if (seenMessages.has(msg.postId)) continue;
-
-                const lowerText = msg.text.toLowerCase();
-                const foundKeywords = keywords.filter(kw => lowerText.includes(kw));
-
-                if (foundKeywords.length > 0) {
-                    newResults.push({
-                        channel: channelName,
-                        text: msg.text,
-                        date: msg.date,
-                        views: msg.views,
-                        url: msg.url,
-                        keywords: foundKeywords,
-                        foundAt: new Date().toISOString()
-                    });
-                }
-                
-                seenMessages.add(msg.postId);
+        // 2. Hacker News (Live RSS/API search)
+        async function parseHackerNews() {
+            let messages = [];
+            for (const kw of keywords) {
+                try {
+                    const res = await fetch(`https://hn.algolia.com/api/v1/search_by_date?query=${encodeURIComponent(kw)}&hitsPerPage=3`);
+                    if (res.ok) {
+                        const data = await res.json();
+                        data.hits.forEach(h => {
+                            messages.push({
+                                id: `hn_${h.objectID}`,
+                                source: 'Hacker News',
+                                text: `${h.title}\n${h.story_text ? h.story_text.substring(0, 200) + '...' : ''}`,
+                                url: h.story_url || `https://news.ycombinator.com/item?id=${h.objectID}`,
+                                date: h.created_at
+                            });
+                        });
+                    }
+                } catch (e) {}
             }
-
-            if (sortBy === 'views') {
-                newResults.sort((a, b) => {
-                    const viewsA = parseInt(a.views.replace(/\s|K|M/g, '')) || 0;
-                    const viewsB = parseInt(b.views.replace(/\s|K|M/g, '')) || 0;
-                    return viewsB - viewsA;
-                });
-            } else {
-                newResults.sort((a, b) => new Date(b.date) - new Date(a.date));
-            }
-
-            results = [...newResults, ...results];
-            saveState();
-            renderResults();
-            updateMatchCount();
-
-            return newResults.length;
+            return messages;
         }
 
-        // --- РЕНДЕРИНГ РЕЗУЛЬТАТОВ ---
+        // 3. Dev.to (Live API)
+        async function parseDevTo() {
+            let messages = [];
+            // Dev.to works best by fetching latest and filtering, or specific keyword search
+            for (const kw of keywords) {
+                try {
+                    const res = await fetch(`https://dev.to/api/articles?q=${encodeURIComponent(kw)}&per_page=3`);
+                    if (res.ok) {
+                        const data = await res.json();
+                        data.forEach(art => {
+                            messages.push({
+                                id: `dev_${art.id}`,
+                                source: 'Dev.to',
+                                text: `${art.title}\n${art.description}`,
+                                url: art.url,
+                                date: art.created_at
+                            });
+                        });
+                    }
+                } catch (e) {}
+            }
+            return messages;
+        }
+
+        // --- ЯДРО МОНИТОРИНГА ---
+        function checkAndSaveMessages(messages) {
+            let newResults = 0;
+            messages.forEach(msg => {
+                if (seenMessages.has(msg.id)) return;
+                seenMessages.add(msg.id);
+
+                const lowerText = msg.text.toLowerCase();
+                const matchedKws = keywords.filter(kw => lowerText.includes(kw));
+
+                if (matchedKws.length > 0) {
+                    results.unshift({
+                        ...msg,
+                        keywords: matchedKws,
+                        foundAt: new Date().toISOString()
+                    });
+                    newResults++;
+                }
+            });
+
+            if (newResults > 0) {
+                saveState();
+                renderResults();
+                triggerHaptic('heavy');
+            }
+            return newResults;
+        }
+
+        async function monitorCycle() {
+            if (!isRunning) return;
+            
+            const doTG = document.getElementById('monTG').checked;
+            const doHN = document.getElementById('monHN').checked;
+            const doDev = document.getElementById('monDev').checked;
+
+            let allFound = 0;
+
+            if (doTG && channels.length > 0) {
+                for (const ch of channels) {
+                    if (!isRunning) break;
+                    const msgs = await parseTelegram(ch.name);
+                    allFound += checkAndSaveMessages(msgs);
+                }
+            }
+
+            if (doHN && keywords.length > 0) {
+                const hnMsgs = await parseHackerNews();
+                allFound += checkAndSaveMessages(hnMsgs);
+            }
+
+            if (doDev && keywords.length > 0) {
+                const devMsgs = await parseDevTo();
+                allFound += checkAndSaveMessages(devMsgs);
+            }
+
+            if (allFound > 0) logConsole(`Перехвачено ${allFound} новых совпадений.`, 'success');
+        }
+
+        async function startMonitoring() {
+            if (keywords.length === 0) return alert('Добавьте хотя бы одно ключевое слово для триггера!');
+            
+            isRunning = true;
+            document.getElementById('startBtn').disabled = true;
+            document.getElementById('stopBtn').disabled = false;
+            document.getElementById('statusDot').classList.add('active');
+            document.getElementById('statusText').textContent = 'Активный перехват';
+
+            logConsole('Запуск сканирования...', 'info');
+            
+            // First run immediately
+            await monitorCycle();
+
+            const interval = Math.max(30, parseInt(document.getElementById('intervalInput').value) || 60);
+            monitoringInterval = setInterval(monitorCycle, interval * 1000);
+        }
+
+        function stopMonitoring() {
+            isRunning = false;
+            clearInterval(monitoringInterval);
+            document.getElementById('startBtn').disabled = false;
+            document.getElementById('stopBtn').disabled = true;
+            document.getElementById('statusDot').classList.remove('active');
+            document.getElementById('statusText').textContent = 'Режим ожидания';
+            logConsole('Мониторинг остановлен.', 'info');
+        }
+
+        // --- UI РЕНДЕРИНГ ---
+        function highlightText(text, kws) {
+            let highlighted = text;
+            kws.forEach(kw => {
+                const regex = new RegExp(`(${kw})`, 'gi');
+                highlighted = highlighted.replace(regex, '<span class="highlight">$1</span>');
+            });
+            return highlighted;
+        }
+
         function renderResults() {
             const logDiv = document.getElementById('resultsLog');
-            
+            document.getElementById('matchCount').textContent = results.length;
+
             if (results.length === 0) {
-                logDiv.innerHTML = `
-                    <div class="empty-state">
-                        <div class="icon">📭</div>
-                        <p data-i18n="no_results">${translations[currentLang].no_results}</p>
-                    </div>
-                `;
+                logDiv.innerHTML = `<div class="empty-state"><div class="icon">📭</div><p>База пуста.</p></div>`;
                 return;
             }
 
             logDiv.innerHTML = results.map(r => `
                 <div class="log-entry alert">
-                    <div class="time">${new Date(r.foundAt).toLocaleString(currentLang === 'ru' ? 'ru-RU' : currentLang === 'uk' ? 'uk-UA' : 'en-US')}</div>
-                    <div class="channel">📡 ${currentLang === 'ru' ? 'Канал' : currentLang === 'uk' ? 'Канал' : 'Channel'}: @${r.channel}</div>
-                    <div class="keywords">🔑 ${currentLang === 'ru' ? 'Ключевые слова' : currentLang === 'uk' ? 'Ключові слова' : 'Keywords'}: ${r.keywords.join(', ')}</div>
-                    <div class="text">${r.text.substring(0, 300)}${r.text.length > 300 ? '...' : ''}</div>
-                    <div style="display: flex; gap: 15px; font-size: 0.8em; color: var(--text-secondary); margin-top: 8px; flex-wrap: wrap;">
-                        <span>📅 ${new Date(r.date).toLocaleString(currentLang === 'ru' ? 'ru-RU' : currentLang === 'uk' ? 'uk-UA' : 'en-US')}</span>
-                        <span>👁️ ${r.views} ${translations[currentLang].avg_views}</span>
+                    <div class="header-log">
+                        <span class="source">${r.source.includes('Telegram') ? '✈️' : '🌐'} ${r.source}</span>
+                        <span class="time">${new Date(r.foundAt).toLocaleTimeString()}</span>
                     </div>
-                    <a href="${r.url}" target="_blank">🔗 ${currentLang === 'ru' ? 'Открыть сообщение' : currentLang === 'uk' ? 'Відкрити повідомлення' : 'Open message'}</a>
+                    <div class="keywords">Триггеры: ${r.keywords.join(', ')}</div>
+                    <div class="text">${highlightText(r.text, r.keywords)}</div>
+                    <a href="${r.url}" target="_blank" class="link-btn">Перейти к источнику ↗</a>
                 </div>
             `).join('');
         }
 
-        // --- ЗАПУСК МОНИТОРИНГА ---
-        async function startMonitoring() {
-            if (channels.length === 0) {
-                alert(currentLang === 'ru' ? 'Добавьте каналы во вкладке "Разведка"!' : currentLang === 'uk' ? 'Додайте канали у вкладці "Розвідка"!' : 'Add channels in the "Recon" tab!');
-                return;
-            }
-            if (keywords.length === 0) {
-                alert(currentLang === 'ru' ? 'Добавьте ключевые слова во вкладке "Мониторинг"!' : currentLang === 'uk' ? 'Додайте ключові слова у вкладці "Моніторинг"!' : 'Add keywords in the "Monitoring" tab!');
-                return;
-            }
+        function renderUI() {
+            document.getElementById('channelTags').innerHTML = channels.map(c => `
+                <div class="tag">@${c.name} <span class="remove" onclick="removeChannel('${c.name}')">×</span></div>
+            `).join('');
+            document.getElementById('channelCount').textContent = channels.length;
 
-            isRunning = true;
-            document.getElementById('startBtn').disabled = true;
-            document.getElementById('stopBtn').disabled = false;
-            document.getElementById('statusDot').classList.add('active');
-            document.getElementById('statusText').textContent = translations[currentLang].running;
-
-            log('🚀 ' + (currentLang === 'ru' ? 'Начинаю мониторинг...' : currentLang === 'uk' ? 'Починаю моніторинг...' : 'Starting monitoring...'), 'info');
-
-            log('⏳ ' + (currentLang === 'ru' ? 'Выполняю первичный сбор данных...' : currentLang === 'uk' ? 'Виконую первинний збір даних...' : 'Performing initial data collection...'), 'info');
-            for (const channel of channels) {
-                const messages = await parseChannel(channel.name);
-                messages.forEach(msg => seenMessages.add(msg.postId));
-                await delay(1000);
-            }
-            saveState();
-            log('✅ ' + (currentLang === 'ru' ? 'Калибровка завершена. Активный мониторинг начат.' : currentLang === 'uk' ? 'Калібрування завершено. Активний моніторинг розпочато.' : 'Calibration completed. Active monitoring started.'), 'success');
-
-            const intervalSec = parseInt(document.getElementById('intervalInput').value) || 60;
-            monitoringInterval = setInterval(async () => {
-                if (!isRunning) return;
-                
-                for (const channel of channels) {
-                    if (!isRunning) break;
-                    const messages = await parseChannel(channel.name);
-                    const found = checkKeywords(messages, channel.name);
-                    if (found > 0) {
-                        log(`🚨 ${currentLang === 'ru' ? 'Найдено' : currentLang === 'uk' ? 'Знайдено' : 'Found'} ${found} ${currentLang === 'ru' ? 'совпадений в' : currentLang === 'uk' ? 'збігів у' : 'matches in'} @${channel.name}`, 'alert');
-                    }
-                    await delay(1500);
-                }
-            }, intervalSec * 1000);
+            document.getElementById('keywordTags').innerHTML = keywords.map(k => `
+                <div class="tag">${k} <span class="remove" onclick="removeKeyword('${k}')">×</span></div>
+            `).join('');
         }
 
-        // --- ОСТАНОВКА МОНИТОРИНГА ---
-        function stopMonitoring() {
-            isRunning = false;
-            if (monitoringInterval) {
-                clearInterval(monitoringInterval);
-                monitoringInterval = null;
-            }
-            document.getElementById('startBtn').disabled = false;
-            document.getElementById('stopBtn').disabled = true;
-            document.getElementById('statusDot').classList.remove('active');
-            document.getElementById('statusText').textContent = translations[currentLang].stopped;
-            log('⏹️ ' + (currentLang === 'ru' ? 'Мониторинг остановлен.' : currentLang === 'uk' ? 'Моніторинг зупинено.' : 'Monitoring stopped.'), 'info');
+        function saveState() {
+            localStorage.setItem('amigo_channels', JSON.stringify(channels));
+            localStorage.setItem('amigo_keywords', JSON.stringify(keywords));
+            localStorage.setItem('amigo_results', JSON.stringify(results));
+            localStorage.setItem('amigo_seen', JSON.stringify(Array.from(seenMessages)));
         }
 
-        // --- ЭКСПОРТ ---
-        function exportChannels() {
-            const data = JSON.stringify(channels, null, 2);
-            downloadFile(data, 'channels.json', 'application/json');
-        }
+        function logConsole(msg) { console.log(`[OSINT] ${msg}`); }
 
-        function exportResults(format) {
-            if (format === 'json') {
-                const data = JSON.stringify(results, null, 2);
-                downloadFile(data, 'results.json', 'application/json');
-            } else if (format === 'csv') {
-                const csv = [
-                    ['Дата находки', 'Канал', 'Дата сообщения', 'Просмотры', 'Ключевые слова', 'Текст', 'Ссылка'],
-                    ...results.map(r => [
-                        r.foundAt,
-                        r.channel,
-                        r.date,
-                        r.views,
-                        r.keywords.join('; '),
-                        r.text.replace(/,/g, ';'),
-                        r.url
-                    ])
-                ].map(row => row.join(',')).join('\n');
-                downloadFile(csv, 'results.csv', 'text/csv');
-            }
-        }
-
-        function downloadFile(content, filename, mimeType) {
-            const blob = new Blob([content], { type: mimeType });
+        // --- ЭКСПОРТ / УТИЛИТЫ ---
+        function downloadFile(content, filename, type) {
+            const blob = new Blob([content], { type });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
-            a.href = url;
-            a.download = filename;
-            a.click();
+            a.href = url; a.download = filename; a.click();
             URL.revokeObjectURL(url);
         }
 
-        // --- ЭКСПОРТ / ИМПОРТ ВСЕХ ДАННЫХ ---
-        function exportAllData() {
-            const data = {
-                channels,
-                keywords,
-                results,
-                seenMessages: Array.from(seenMessages),
-                customCategories,
-                theme: localStorage.getItem('tg_theme') || 'light',
-                exportedAt: new Date().toISOString()
-            };
-            downloadFile(JSON.stringify(data, null, 2), 'telegram_recon_backup.json', 'application/json');
+        function exportResults(fmt) {
+            if (fmt === 'json') downloadFile(JSON.stringify(results, null, 2), 'osint_intel.json', 'application/json');
+            if (fmt === 'csv') {
+                const csv = ['Source,Time,Link,Text'].concat(results.map(r => `"${r.source}","${r.foundAt}","${r.url}","${r.text.replace(/"/g, '""')}"`)).join('\n');
+                downloadFile(csv, 'osint_intel.csv', 'text/csv');
+            }
         }
 
-        function importAllData(event) {
-            const file = event.target.files[0];
+        function exportAllData() {
+            downloadFile(JSON.stringify({ channels, keywords, results, seen: Array.from(seenMessages) }, null, 2), 'amigo_backup.json', 'application/json');
+        }
+
+        function importAllData(e) {
+            const file = e.target.files[0];
             if (!file) return;
-            
             const reader = new FileReader();
-            reader.onload = (e) => {
+            reader.onload = ev => {
                 try {
-                    const data = JSON.parse(e.target.result);
-                    channels = data.channels || [];
-                    keywords = data.keywords || [];
-                    results = data.results || [];
-                    seenMessages = new Set(data.seenMessages || []);
-                    customCategories = data.customCategories || {};
-                    
-                    localStorage.setItem('tg_channels', JSON.stringify(channels));
-                    localStorage.setItem('tg_keywords', JSON.stringify(keywords));
-                    localStorage.setItem('tg_results', JSON.stringify(results));
-                    localStorage.setItem('tg_seen', JSON.stringify(Array.from(seenMessages)));
-                    localStorage.setItem('tg_custom_categories', JSON.stringify(customCategories));
-                    
-                    if (data.theme) {
-                        localStorage.setItem('tg_theme', data.theme);
-                        document.documentElement.setAttribute('data-theme', data.theme);
-                        document.querySelector('.theme-toggle').textContent = data.theme === 'dark' ? '☀️' : '🌙';
-                    }
-                    
-                    renderTags();
-                    renderResults();
-                    updateChannelCount();
-                    updateMatchCount();
-                    populateCategorySelect();
-                    
-                    alert(currentLang === 'ru' ? 'Данные успешно импортированы!' : currentLang === 'uk' ? 'Дані успішно імпортовано!' : 'Data successfully imported!');
-                } catch (error) {
-                    alert((currentLang === 'ru' ? 'Ошибка импорта' : currentLang === 'uk' ? 'Помилка імпорту' : 'Import error') + ': ' + error.message);
-                }
+                    const d = JSON.parse(ev.target.result);
+                    channels = d.channels || []; keywords = d.keywords || [];
+                    results = d.results || []; seenMessages = new Set(d.seen || []);
+                    saveState(); renderUI(); renderResults();
+                    alert('Бэкап загружен!');
+                } catch(err) { alert('Ошибка импорта.'); }
             };
             reader.readAsText(file);
         }
 
-        // --- ОЧИСТКА ---
-        function clearChannels() {
-            if (confirm(currentLang === 'ru' ? 'Удалить все каналы?' : currentLang === 'uk' ? 'Видалити всі канали?' : 'Delete all channels?')) {
-                channels = [];
-                saveState();
-                renderTags();
-                updateChannelCount();
-                document.getElementById('discoveredChannels').innerHTML = '';
-            }
-        }
-
-        function clearResults() {
-            if (confirm(currentLang === 'ru' ? 'Удалить все результаты?' : currentLang === 'uk' ? 'Видалити всі результати?' : 'Delete all results?')) {
-                results = [];
-                saveState();
-                renderResults();
-                updateMatchCount();
-            }
-        }
-
+        function clearResults() { if(confirm('Очистить базу найденного?')) { results = []; saveState(); renderResults(); } }
         function clearAllData() {
-            if (confirm(currentLang === 'ru' ? 'Удалить ВСЕ данные? Это действие нельзя отменить!' : currentLang === 'uk' ? 'Видалити ВСІ дані? Цю дію не можна скасувати!' : 'Delete ALL data? This action cannot be undone!')) {
-                localStorage.clear();
-                channels = [];
-                keywords = [];
-                results = [];
-                seenMessages = new Set();
-                customCategories = {};
-                renderTags();
-                renderResults();
-                updateChannelCount();
-                updateMatchCount();
-                populateCategorySelect();
-                alert(currentLang === 'ru' ? 'Все данные удалены!' : currentLang === 'uk' ? 'Всі дані видалено!' : 'All data deleted!');
+            if(confirm('Удалить ВСЕ настройки и данные?')) {
+                localStorage.clear(); channels=[]; keywords=[]; results=[]; seenMessages=new Set();
+                renderUI(); renderResults();
             }
         }
 
-        // --- УТИЛИТЫ ---
-        function delay(ms) {
-            return new Promise(resolve => setTimeout(resolve, ms));
-        }
-
-        // --- СТАРТ ---
-        init();
+        // Init
+        renderUI();
+        renderResults();
     </script>
 </body>
 </html>
