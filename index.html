@@ -101,7 +101,7 @@
             box-shadow: 5px 0 10px var(--bg-secondary); text-transform: uppercase; letter-spacing: 1px;
         }
         .ticker {
-            display: inline-block; white-space: nowrap; padding-left: 120px; animation: ticker 80s linear infinite; will-change: transform;
+            display: inline-block; white-space: nowrap; padding-left: 120px; animation: ticker 240s linear infinite; will-change: transform;
         }
         .ticker:hover { animation-play-state: paused; }
         @keyframes ticker { 0% { transform: translate3d(100%, 0, 0); } 100% { transform: translate3d(-100%, 0, 0); } }
@@ -509,13 +509,20 @@
         
         function saveRssSettings() {
 			const val = document.getElementById('customRssInput').value.trim();
+			if (!val) return; // Если пусто, ничего не делаем
+
+			// Получаем текущие или создаем пустой массив
+			let currentFeeds = JSON.parse(localStorage.getItem('amigo_rssFeeds') || '[]');
 			
-			// Если поле пустое, берем массив с дефолтной ссылкой, иначе разбиваем ввод
-			const rssList = val ? val.split(',').map(s => s.trim()) : ['https://hnrss.org/frontpage'];
+			// Добавляем новые (если ввели через запятую - split и concat)
+			const newItems = val.split(',').map(s => s.trim());
+			const updatedFeeds = [...new Set([...currentFeeds, ...newItems])]; // Set убирает дубли
 			
-			localStorage.setItem('amigo_rssFeeds', JSON.stringify(rssList));
+			localStorage.setItem('amigo_rssFeeds', JSON.stringify(updatedFeeds));
+			document.getElementById('customRssInput').value = ''; // Чистим поле ввода
 			loadTicker();
-			alert('RSS-источники обновлены!');
+			renderRssTags();
+			alert('Источник добавлен!');
 		}
         
         loadTicker();
