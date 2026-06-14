@@ -547,6 +547,7 @@
             if (!query) return alert('Введите запрос!');
 
             const srcTG = document.getElementById('srcTG').checked;
+			const srcReddit = document.getElementById('srcReddit').checked;
             const srcHN = document.getElementById('srcHN').checked;
             const srcDev = document.getElementById('srcDev').checked;
 
@@ -792,6 +793,7 @@
             if (!isRunning) return;
             
             const doTG = document.getElementById('monTG').checked;
+			const doReddit = document.getElementById('monReddit').checked;
             const doHN = document.getElementById('monHN').checked;
             const doDev = document.getElementById('monDev').checked;
 
