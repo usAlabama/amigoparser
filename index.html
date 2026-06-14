@@ -477,6 +477,8 @@
 
         // --- TICKER LOGIC (RSS) ---
         async function loadTicker() {
+		    // 1. СНАЧАЛА объявляем элемент (DOM-элемент должен существовать)
+			const tickerEl = document.getElementById('tickerContent');
 			// Берем из localStorage, если пусто или массив пуст — дефолт HN
 			const saved = localStorage.getItem('amigo_rssFeeds');
 			const parsed = saved ? JSON.parse(saved) : [];
