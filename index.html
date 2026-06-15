@@ -1,701 +1,1050 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <meta name="description" content="Amigo Recon - Multi-source OSINT monitoring tool">
-    <title>Amigo Recon</title>
-    <script src="https://telegram.org/js/telegram-web-app.js" crossorigin="anonymous"></script>
-    <style>
-        :root {
-            --bg-primary: #f0f2f5;
-            --bg-secondary: #ffffff;
-            --bg-tertiary: #e4e6eb;
-            --text-primary: #1c1e21;
-            --text-secondary: #606770;
-            --border: #dadde1;
-            --accent: #0056b3;
-            --accent-hover: #004494;
-            --accent-glow: rgba(0, 86, 179, 0.2);
-            --danger: #dc3545;
-            --success: #28a745;
-            --warning: #ffc107;
-            --highlight: #ffeeba;
-            --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-            --font-main: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto, sans-serif;
-            --font-mono: 'Fira Code', 'JetBrains Mono', 'Consolas', monospace;
-            --radius: 8px;
-            --transition: all 0.2s ease;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="description" content="Amigo Recon - Multi-source OSINT monitoring tool">
+<title>Amigo Recon</title>
+<script src="https://telegram.org/js/telegram-web-app.js" crossorigin="anonymous"></script>
+<style>
+:root {
+--bg-primary: #f0f2f5;
+--bg-secondary: #ffffff;
+--bg-tertiary: #e4e6eb;
+--text-primary: #1c1e21;
+--text-secondary: #606770;
+--border: #dadde1;
+--accent: #0056b3;
+--accent-hover: #004494;
+--accent-glow: rgba(0, 86, 179, 0.2);
+--danger: #dc3545;
+--success: #28a745;
+--warning: #ffc107;
+--highlight: #ffeeba;
+--card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+--font-main: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto, sans-serif;
+--font-mono: 'Fira Code', 'JetBrains Mono', 'Consolas', monospace;
+--radius: 8px;
+--transition: all 0.2s ease;
+}
 
-        [data-theme="dark"] {
-            --bg-primary: #0b0f19;
-            --bg-secondary: #151b2b;
-            --bg-tertiary: #1e2638;
-            --text-primary: #e2e8f0;
-            --text-secondary: #94a3b8;
-            --border: #2d3748;
-            --accent: #0ea5e9;
-            --accent-hover: #38bdf8;
-            --accent-glow: rgba(14, 165, 233, 0.25);
-            --danger: #ef4444;
-            --success: #10b981;
-            --warning: #f59e0b;
-            --highlight: rgba(245, 158, 11, 0.3);
-            --card-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
-        }
+[data-theme="dark"] {
+--bg-primary: #0b0f19;
+--bg-secondary: #151b2b;
+--bg-tertiary: #1e2638;
+--text-primary: #e2e8f0;
+--text-secondary: #94a3b8;
+--border: #2d3748;
+--accent: #0ea5e9;
+--accent-hover: #38bdf8;
+--accent-glow: rgba(14, 165, 233, 0.25);
+--danger: #ef4444;
+--success: #10b981;
+--warning: #f59e0b;
+--highlight: rgba(245, 158, 11, 0.3);
+--card-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+}
 
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
-        ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
-        * { scrollbar-width: thin; scrollbar-color: var(--border) transparent; }
+* { margin: 0; padding: 0; box-sizing: border-box; }
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+* { scrollbar-width: thin; scrollbar-color: var(--border) transparent; }
 
-        .drag-scroll { cursor: grab; overflow: auto; user-select: none; -webkit-user-select: none; }
-        .drag-scroll:active { cursor: grabbing; }
-        .drag-scroll button, .drag-scroll a, .drag-scroll input { user-select: text; -webkit-user-select: text; }
+.drag-scroll { cursor: grab; overflow: auto; user-select: none; -webkit-user-select: none; }
+.drag-scroll:active { cursor: grabbing; }
+.drag-scroll button, .drag-scroll a, .drag-scroll input { user-select: text; -webkit-user-select: text; }
 
-        body {
-            font-family: var(--font-main);
-            background: var(--bg-primary);
-            color: var(--text-primary);
-            min-height: 100vh;
-            padding: 20px;
-            padding-top: calc(20px + env(safe-area-inset-top));
-            line-height: 1.6;
-            transition: background 0.3s, color 0.3s;
-        }
+body {
+font-family: var(--font-main);
+background: var(--bg-primary);
+color: var(--text-primary);
+min-height: 100vh;
+padding: 20px;
+padding-top: calc(20px + env(safe-area-inset-top));
+line-height: 1.6;
+transition: background 0.3s, color 0.3s;
+}
 
-        .container { max-width: 1400px; margin: 0 auto; }
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 10px; }
-        h1 { font-size: 1.8em; font-weight: 700; letter-spacing: -0.5px; display: flex; align-items: center; gap: 10px; }
-        h1 .badge { font-size: 0.4em; background: var(--accent); color: #fff; padding: 2px 8px; border-radius: 12px; vertical-align: middle; }
+.container { max-width: 1400px; margin: 0 auto; }
+.header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 10px; }
+h1 { font-size: 1.8em; font-weight: 700; letter-spacing: -0.5px; display: flex; align-items: center; gap: 10px; }
+h1 .badge { font-size: 0.4em; background: var(--accent); color: #fff; padding: 2px 8px; border-radius: 12px; vertical-align: middle; }
 
-        .theme-toggle { background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 50%; width: 40px; height: 40px; cursor: pointer; font-size: 1.2em; transition: var(--transition); display: flex; align-items: center; justify-content: center; box-shadow: var(--card-shadow); }
-        .theme-toggle:hover { background: var(--bg-tertiary); transform: scale(1.05); }
+.theme-toggle { background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 50%; width: 40px; height: 40px; cursor: pointer; font-size: 1.2em; transition: var(--transition); display: flex; align-items: center; justify-content: center; box-shadow: var(--card-shadow); }
+.theme-toggle:hover { background: var(--bg-tertiary); transform: scale(1.05); }
 
-        .subtitle { color: var(--text-secondary); margin-bottom: 15px; font-size: 0.95em; }
+.subtitle { color: var(--text-secondary); margin-bottom: 15px; font-size: 0.95em; }
 
-        .ticker-wrap { width: 100%; overflow: hidden; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: var(--radius); padding: 8px 0; margin-bottom: 20px; display: flex; align-items: center; white-space: nowrap; position: relative; }
-        .ticker-label { background: var(--accent); color: white; padding: 0 15px; font-weight: bold; font-size: 0.85em; height: 100%; display: flex; align-items: center; position: absolute; left: 0; z-index: 2; box-shadow: 5px 0 10px var(--bg-secondary); text-transform: uppercase; letter-spacing: 1px; }
-        .ticker { display: inline-block; white-space: nowrap; padding-left: 120px; animation: ticker 60s linear infinite; will-change: transform; }
-        .ticker:hover { animation-play-state: paused; }
-        @keyframes ticker { 0% { transform: translate3d(0, 0, 0); } 100% { transform: translate3d(-50%, 0, 0); } }
-        .ticker-item { display: inline-block; padding: 0 2rem; font-family: var(--font-mono); font-size: 0.85em; color: var(--text-primary); text-decoration: none; cursor: pointer; transition: color 0.2s; }
-        .ticker-item:hover { color: var(--accent); text-decoration: underline; }
-        .ticker-item::after { content: " | "; color: var(--border); margin-left: 2rem; }
+.ticker-wrap { width: 100%; overflow: hidden; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: var(--radius); padding: 8px 0; margin-bottom: 20px; display: flex; align-items: center; white-space: nowrap; position: relative; }
+.ticker-label { background: var(--accent); color: white; padding: 0 15px; font-weight: bold; font-size: 0.85em; height: 100%; display: flex; align-items: center; position: absolute; left: 0; z-index: 2; box-shadow: 5px 0 10px var(--bg-secondary); text-transform: uppercase; letter-spacing: 1px; }
+.ticker { display: inline-block; white-space: nowrap; padding-left: 120px; animation: ticker 60s linear infinite; will-change: transform; }
+.ticker:hover { animation-play-state: paused; }
+@keyframes ticker { 0% { transform: translate3d(0, 0, 0); } 100% { transform: translate3d(-50%, 0, 0); } }
+.ticker-item { display: inline-block; padding: 0 2rem; font-family: var(--font-mono); font-size: 0.85em; color: var(--text-primary); text-decoration: none; cursor: pointer; transition: color 0.2s; }
+.ticker-item:hover { color: var(--accent); text-decoration: underline; }
+.ticker-item::after { content: " | "; color: var(--border); margin-left: 2rem; }
 
-        .panel { background: var(--bg-secondary); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; margin-bottom: 20px; box-shadow: var(--card-shadow); transition: var(--transition); }
-        .panel h2 { margin-bottom: 15px; font-size: 1.1em; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+.panel { background: var(--bg-secondary); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; margin-bottom: 20px; box-shadow: var(--card-shadow); transition: var(--transition); }
+.panel h2 { margin-bottom: 15px; font-size: 1.1em; font-weight: 600; display: flex; align-items: center; gap: 8px; }
 
-        .input-group { display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap; }
-        input[type="text"], input[type="number"], input[type="url"], select, textarea { flex: 1; min-width: 200px; padding: 10px 14px; background: var(--bg-primary); border: 1px solid var(--border); border-radius: var(--radius); color: var(--text-primary); font-size: 14px; transition: var(--transition); font-family: inherit; }
-        input:focus, select:focus, textarea:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
+.input-group { display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap; }
+input[type="text"], input[type="number"], input[type="url"], select, textarea { flex: 1; min-width: 200px; padding: 10px 14px; background: var(--bg-primary); border: 1px solid var(--border); border-radius: var(--radius); color: var(--text-primary); font-size: 14px; transition: var(--transition); font-family: inherit; }
+input:focus, select:focus, textarea:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
 
-        button { padding: 10px 20px; background: var(--accent); color: #ffffff; border: none; border-radius: var(--radius); cursor: pointer; font-weight: 600; font-size: 14px; transition: var(--transition); display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
-        button:hover { background: var(--accent-hover); transform: translateY(-1px); box-shadow: 0 4px 12px var(--accent-glow); }
-        button:active { transform: translateY(0); }
-        button:disabled { background: var(--border); color: var(--text-secondary); cursor: not-allowed; transform: none; box-shadow: none; }
-        button.secondary { background: var(--bg-tertiary); color: var(--text-primary); border: 1px solid var(--border); }
-        button.secondary:hover { background: var(--border); }
-        button.danger { background: var(--danger); color: white; }
-        button.danger:hover { background: #b02a37; }
+button { padding: 10px 20px; background: var(--accent); color: #ffffff; border: none; border-radius: var(--radius); cursor: pointer; font-weight: 600; font-size: 14px; transition: var(--transition); display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+button:hover { background: var(--accent-hover); transform: translateY(-1px); box-shadow: 0 4px 12px var(--accent-glow); }
+button:active { transform: translateY(0); }
+button:disabled { background: var(--border); color: var(--text-secondary); cursor: not-allowed; transform: none; box-shadow: none; }
+button.secondary { background: var(--bg-tertiary); color: var(--text-primary); border: 1px solid var(--border); }
+button.secondary:hover { background: var(--border); }
+button.danger { background: var(--danger); color: white; }
+button.danger:hover { background: #b02a37; }
 
-        .tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
-        .tag { background: var(--bg-primary); border: 1px solid var(--border); padding: 6px 12px; border-radius: 16px; font-size: 13px; display: flex; align-items: center; gap: 8px; color: var(--text-primary); animation: tagIn 0.2s ease; }
-        @keyframes tagIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
-        .tag .remove { cursor: pointer; color: var(--danger); font-weight: bold; font-size: 16px; transition: transform 0.2s; }
-        .tag .remove:hover { transform: scale(1.2); }
+.tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+.tag { background: var(--bg-primary); border: 1px solid var(--border); padding: 6px 12px; border-radius: 16px; font-size: 13px; display: flex; align-items: center; gap: 8px; color: var(--text-primary); animation: tagIn 0.2s ease; }
+@keyframes tagIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+.tag .remove { cursor: pointer; color: var(--danger); font-weight: bold; font-size: 16px; transition: transform 0.2s; }
+.tag .remove:hover { transform: scale(1.2); }
 
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px; margin-top: 15px; }
-        .card { background: var(--bg-primary); border: 1px solid var(--border); border-radius: var(--radius); padding: 15px; cursor: pointer; transition: var(--transition); border-left: 3px solid var(--accent); display: flex; flex-direction: column; justify-content: space-between; }
-        .card:hover { transform: translateY(-2px); box-shadow: var(--card-shadow); border-left-color: var(--accent-hover); }
-        .card h3 { color: var(--text-primary); font-size: 1em; margin-bottom: 8px; word-break: break-word; }
-        .card p { color: var(--text-secondary); font-size: 0.85em; margin-bottom: 10px; }
-        .card .stats { font-size: 0.8em; color: var(--accent); font-weight: 500; margin-bottom: 5px;}
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px; margin-top: 15px; }
+.card { background: var(--bg-primary); border: 1px solid var(--border); border-radius: var(--radius); padding: 15px; cursor: pointer; transition: var(--transition); border-left: 3px solid var(--accent); display: flex; flex-direction: column; justify-content: space-between; }
+.card:hover { transform: translateY(-2px); box-shadow: var(--card-shadow); border-left-color: var(--accent-hover); }
+.card h3 { color: var(--text-primary); font-size: 1em; margin-bottom: 8px; word-break: break-word; }
+.card p { color: var(--text-secondary); font-size: 0.85em; margin-bottom: 10px; word-break: break-word; }
+.card .stats { font-size: 0.8em; color: var(--accent); font-weight: 500; margin-bottom: 5px; }
 
-        .log { background: var(--bg-primary); border: 1px solid var(--border); border-radius: var(--radius); padding: 15px; max-height: 600px; font-family: var(--font-mono); font-size: 13px; overflow-y: auto; }
-        .log-entry { margin-bottom: 12px; padding: 15px; border-left: 3px solid var(--accent); background: var(--bg-secondary); border-radius: 4px; border: 1px solid var(--border); border-left-width: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); animation: entryIn 0.3s ease; }
-        @keyframes entryIn { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: translateX(0); } }
-        .log-entry .header-log { display: flex; justify-content: space-between; margin-bottom: 8px; border-bottom: 1px solid var(--border); padding-bottom: 5px; flex-wrap: wrap; gap: 5px; }
-        .log-entry .time { color: var(--text-secondary); font-size: 11px; }
-        .log-entry .source { font-weight: 700; font-size: 0.95em; color: var(--accent); }
-        .log-entry .text { margin: 10px 0; color: var(--text-primary); white-space: pre-wrap; word-break: break-word; max-height: 200px; overflow-y: auto; }
-        .log-entry .keywords { color: var(--warning); font-size: 0.85em; font-weight: bold; }
-        .log-entry .link-btn { display: inline-block; margin-top: 10px; color: var(--accent); text-decoration: none; font-weight: bold; }
-        .log-entry .link-btn:hover { text-decoration: underline; }
+.log { background: var(--bg-primary); border: 1px solid var(--border); border-radius: var(--radius); padding: 15px; max-height: 600px; font-family: var(--font-mono); font-size: 13px; overflow-y: auto; }
+.log-entry { margin-bottom: 12px; padding: 15px; border-left: 3px solid var(--accent); background: var(--bg-secondary); border-radius: 4px; border: 1px solid var(--border); border-left-width: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); animation: entryIn 0.3s ease; }
+@keyframes entryIn { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: translateX(0); } }
+.log-entry .header-log { display: flex; justify-content: space-between; margin-bottom: 8px; border-bottom: 1px solid var(--border); padding-bottom: 5px; flex-wrap: wrap; gap: 5px; }
+.log-entry .time { color: var(--text-secondary); font-size: 11px; }
+.log-entry .source { font-weight: 700; font-size: 0.95em; color: var(--accent); }
+.log-entry .text { margin: 10px 0; color: var(--text-primary); white-space: pre-wrap; word-break: break-word; max-height: 200px; overflow-y: auto; }
+.log-entry .keywords { color: var(--warning); font-size: 0.85em; font-weight: bold; }
+.log-entry .link-btn { display: inline-block; margin-top: 10px; color: var(--accent); text-decoration: none; font-weight: bold; }
+.log-entry .link-btn:hover { text-decoration: underline; }
 
-        .highlight { background-color: var(--highlight); padding: 0 2px; border-radius: 2px; font-weight: bold; color: var(--warning);}
+.highlight { background-color: var(--highlight); padding: 0 2px; border-radius: 2px; font-weight: bold; color: var(--warning); }
 
-        .status-bar { display: flex; justify-content: space-between; align-items: center; padding: 12px 15px; background: var(--bg-primary); border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 15px; flex-wrap: wrap; gap: 10px; }
-        .status-indicator { display: flex; align-items: center; gap: 8px; font-weight: 600; }
-        .status-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--text-secondary); transition: background 0.3s; }
-        .status-dot.active { background: var(--success); box-shadow: 0 0 10px var(--success); animation: pulse 1.5s infinite; }
-        @keyframes pulse { 0% { opacity: 1; transform: scale(1); } 50% { opacity: 0.6; transform: scale(1.2); } 100% { opacity: 1; transform: scale(1); } }
+.status-bar { display: flex; justify-content: space-between; align-items: center; padding: 12px 15px; background: var(--bg-primary); border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 15px; flex-wrap: wrap; gap: 10px; }
+.status-indicator { display: flex; align-items: center; gap: 8px; font-weight: 600; }
+.status-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--text-secondary); transition: background 0.3s; }
+.status-dot.active { background: var(--success); box-shadow: 0 0 10px var(--success); animation: pulse 1.5s infinite; }
+@keyframes pulse { 0% { opacity: 1; transform: scale(1); } 50% { opacity: 0.6; transform: scale(1.2); } 100% { opacity: 1; transform: scale(1); } }
 
-        .tabs { display: flex; gap: 5px; margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 2px; overflow-x: auto; }
-        .tab { padding: 10px 20px; cursor: pointer; border-bottom: 2px solid transparent; color: var(--text-secondary); font-weight: 600; transition: var(--transition); white-space: nowrap; border-radius: var(--radius) var(--radius) 0 0; }
-        .tab:hover { color: var(--accent); background: var(--bg-primary); }
-        .tab.active { color: var(--accent); border-bottom: 2px solid var(--accent); background: var(--bg-primary); }
-        .tab-content { display: none; animation: fadeIn 0.3s; }
-        .tab-content.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+.tabs { display: flex; gap: 5px; margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 2px; overflow-x: auto; }
+.tab { padding: 10px 20px; cursor: pointer; border-bottom: 2px solid transparent; color: var(--text-secondary); font-weight: 600; transition: var(--transition); white-space: nowrap; border-radius: var(--radius) var(--radius) 0 0; }
+.tab:hover { color: var(--accent); background: var(--bg-primary); }
+.tab.active { color: var(--accent); border-bottom: 2px solid var(--accent); background: var(--bg-primary); }
+.tab-content { display: none; animation: fadeIn 0.3s; }
+.tab-content.active { display: block; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
-        .progress { width: 100%; height: 6px; background: var(--bg-primary); border-radius: 3px; overflow: hidden; margin-top: 10px; }
-        .progress-bar { height: 100%; background: var(--accent); transition: width 0.3s; width: 0%; }
-        .empty-state { text-align: center; padding: 40px 20px; color: var(--text-secondary); }
-        .empty-state .icon { font-size: 48px; margin-bottom: 15px; opacity: 0.5; }
+.progress { width: 100%; height: 6px; background: var(--bg-primary); border-radius: 3px; overflow: hidden; margin-top: 10px; }
+.progress-bar { height: 100%; background: var(--accent); transition: width 0.3s; width: 0%; }
+.empty-state { text-align: center; padding: 40px 20px; color: var(--text-secondary); }
+.empty-state .icon { font-size: 48px; margin-bottom: 15px; opacity: 0.5; }
 
-        .source-toggles { display: flex; gap: 15px; margin-bottom: 15px; flex-wrap: wrap; }
-        .source-toggle { display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 0.9em; font-weight: 500; }
-        .source-toggle input { width: 16px; height: 16px; accent-color: var(--accent); }
+.source-toggles { display: flex; gap: 15px; margin-bottom: 15px; flex-wrap: wrap; }
+.source-toggle { display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 0.9em; font-weight: 500; }
+.source-toggle input { width: 16px; height: 16px; accent-color: var(--accent); }
 
-        .toast-container { position: fixed; top: 20px; right: 20px; z-index: 1000; display: flex; flex-direction: column; gap: 8px; pointer-events: none; }
-        .toast { background: var(--bg-secondary); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px 16px; box-shadow: var(--card-shadow); font-size: 0.9em; display: flex; align-items: center; gap: 8px; animation: toastIn 0.3s ease; pointer-events: auto; max-width: 320px; word-break: break-word; }
-        @keyframes toastIn { from { opacity: 0; transform: translateX(100%); } to { opacity: 1; transform: translateX(0); } }
-        @keyframes toastOut { from { opacity: 1; transform: translateX(0); } to { opacity: 0; transform: translateX(100%); } }
-        .toast.success { border-left: 3px solid var(--success); }
-        .toast.error { border-left: 3px solid var(--danger); }
-        .toast.warning { border-left: 3px solid var(--warning); }
-        .toast.info { border-left: 3px solid var(--accent); }
+.toast-container { position: fixed; top: 20px; right: 20px; z-index: 1000; display: flex; flex-direction: column; gap: 8px; pointer-events: none; }
+.toast { background: var(--bg-secondary); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px 16px; box-shadow: var(--card-shadow); font-size: 0.9em; display: flex; align-items: center; gap: 8px; animation: toastIn 0.3s ease; pointer-events: auto; max-width: 320px; word-break: break-word; }
+@keyframes toastIn { from { opacity: 0; transform: translateX(100%); } to { opacity: 1; transform: translateX(0); } }
+@keyframes toastOut { from { opacity: 1; transform: translateX(0); } to { opacity: 0; transform: translateX(100%); } }
+.toast.success { border-left: 3px solid var(--success); }
+.toast.error { border-left: 3px solid var(--danger); }
+.toast.warning { border-left: 3px solid var(--warning); }
+.toast.info { border-left: 3px solid var(--accent); }
 
-        .skeleton { background: linear-gradient(90deg, var(--bg-primary) 25%, var(--bg-tertiary) 50%, var(--bg-primary) 75%); background-size: 200% 100%; animation: skeleton 1.5s infinite; border-radius: var(--radius); height: 100px; }
-        @keyframes skeleton { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+.skeleton { background: linear-gradient(90deg, var(--bg-primary) 25%, var(--bg-tertiary) 50%, var(--bg-primary) 75%); background-size: 200% 100%; animation: skeleton 1.5s infinite; border-radius: var(--radius); height: 100px; }
+@keyframes skeleton { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
 
-        @media (max-width: 768px) { body { padding: 10px; } h1 { font-size: 1.4em; } .panel { padding: 15px; } .input-group { flex-direction: column; } input, button { width: 100%; } }
-    </style>
+@media (max-width: 768px) { body { padding: 10px; } h1 { font-size: 1.4em; } .panel { padding: 15px; } .input-group { flex-direction: column; } input, button { width: 100%; } }
+</style>
 </head>
 <body>
-    <div class="toast-container" id="toastContainer"></div>
-    <div class="container">
-        <div class="header">
-            <h1>🅰️ Amigo Recon <span class="badge">v2.5.1 STABLE</span></h1>
-            <button class="theme-toggle" id="themeIcon" aria-label="Toggle theme">🌙</button>
-        </div>
-        <p class="subtitle">Мульти-источниковый OSINT поиск и мониторинг</p>
+<div class="toast-container" id="toastContainer"></div>
+<div class="container">
+<div class="header">
+<h1>🅰️ Amigo Recon <span class="badge">v2.6.0 STABLE</span></h1>
+<button class="theme-toggle" id="themeIcon" aria-label="Toggle theme">🌙</button>
+</div>
+<p class="subtitle">Мульти-источниковый OSINT поиск и мониторинг</p>
 
-        <div class="ticker-wrap">
-            <div class="ticker-label">INTEL</div>
-            <div class="ticker" id="tickerContent">
-                <span class="ticker-item">Загрузка данных канала связи...</span>
-            </div>
-        </div>
+<div class="ticker-wrap">
+<div class="ticker-label">INTEL</div>
+<div class="ticker" id="tickerContent">
+<span class="ticker-item">Загрузка данных канала связи...</span>
+</div>
+</div>
 
-        <div class="tabs drag-scroll" id="tabsContainer">
-            <div class="tab active" data-tab="recon">🔍 Разведка</div>
-            <div class="tab" data-tab="monitor">Ⓜ️ Мониторинг</div>
-            <div class="tab" data-tab="results">🗜 База Инфо</div>
-            <div class="tab" data-tab="settings">⚙️ Система</div>
-        </div>
+<div class="tabs drag-scroll" id="tabsContainer">
+<div class="tab active" data-tab="recon">🔍 Разведка</div>
+<div class="tab" data-tab="monitor">Ⓜ️ Мониторинг</div>
+<div class="tab" data-tab="results">🗜 База Инфо</div>
+<div class="tab" data-tab="settings">⚙️ Система</div>
+</div>
 
-        <div id="recon-tab" class="tab-content active">
-            <div class="panel">
-                <h2>🔎 Умный Поиск (Глобальный)</h2>
-                <div class="source-toggles">
-                    <label class="source-toggle"><input type="checkbox" id="srcDDG" checked> 🌐 Web (DDG)</label>
-                    <label class="source-toggle"><input type="checkbox" id="srcMastodon" checked> 🐘 Mastodon</label>
-                    <label class="source-toggle"><input type="checkbox" id="srcTG" checked> ✈️ Telegram (GH)</label>
-                    <label class="source-toggle"><input type="checkbox" id="srcHN" checked> 🟧 Hacker News</label>
-                    <label class="source-toggle"><input type="checkbox" id="srcReddit" checked> 🟥 Reddit</label>
-                    <label class="source-toggle"><input type="checkbox" id="srcDev"> ⬛ Dev.to</label>
-                    <label class="source-toggle"><input type="checkbox" id="srcLobsters"> 🦞 Lobste.rs</label>
-                    <label class="source-toggle"><input type="checkbox" id="srcHabr"> 📘 Habr</label>
-                </div>
-                <div class="input-group">
-                    <input type="text" id="globalSearchInput" placeholder="Запрос (например: automation bypass, airdrop)">
-                    <button id="globalSearchBtn">🔍 Искать везде</button>
-                </div>
-                <div class="progress" id="searchProgress" style="display: none;">
-                    <div class="progress-bar" id="searchProgressBar"></div>
-                </div>
-                <div id="searchResults" class="grid drag-scroll"></div>
-            </div>
+<div id="recon-tab" class="tab-content active">
+<div class="panel">
+<h2>🔎 Умный Поиск (Глобальный)</h2>
+<div class="source-toggles">
+<label class="source-toggle"><input type="checkbox" id="srcDDG" checked> 🌐 Web (DDG)</label>
+<label class="source-toggle"><input type="checkbox" id="srcMastodon" checked> 🐘 Mastodon</label>
+<label class="source-toggle"><input type="checkbox" id="srcTG" checked> ✈️ Telegram</label>
+<label class="source-toggle"><input type="checkbox" id="srcHN" checked> 🟧 Hacker News</label>
+<label class="source-toggle"><input type="checkbox" id="srcReddit" checked> 🟥 Reddit</label>
+<label class="source-toggle"><input type="checkbox" id="srcDev"> ⬛ Dev.to</label>
+<label class="source-toggle"><input type="checkbox" id="srcLobsters"> 🦞 Lobste.rs</label>
+<label class="source-toggle"><input type="checkbox" id="srcHabr"> 📘 Habr</label>
+</div>
+<div class="input-group">
+<input type="text" id="globalSearchInput" placeholder="Запрос (например: automation, airdrop)">
+<button id="globalSearchBtn">🔍 Искать везде</button>
+</div>
+<div class="progress" id="searchProgress" style="display: none;">
+<div class="progress-bar" id="searchProgressBar"></div>
+</div>
+<div id="searchResults" class="grid drag-scroll"></div>
+</div>
 
-            <div class="panel">
-                <h2>➕ Управление Telegram Таргетами</h2>
-                <div class="input-group">
-                    <input type="text" id="manualChannelInput" placeholder="Имя канала (без @, например: durov)">
-                    <button id="addChannelBtn">Добавить ТГ канал</button>
-                </div>
-                <div style="margin-top: 15px; border-top: 1px solid var(--border); padding-top: 15px;">
-                    <h3 style="font-size: 1em; margin-bottom: 10px;">Цели для мониторинга (<span id="channelCount">0</span>)</h3>
-                    <div class="tags" id="channelTags"></div>
-                </div>
-            </div>
-            
-            <div class="panel">
-                <h2>➕ Управление Reddit Сабреддитами</h2>
-                <div class="input-group">
-                    <input type="text" id="manualRedditInput" placeholder="Имя сабреддита (например: netsec, crypto)">
-                    <button id="addRedditBtn">Добавить Reddit</button>
-                </div>
-                <div style="margin-top: 15px; border-top: 1px solid var(--border); padding-top: 15px;">
-                    <h3 style="font-size: 1em; margin-bottom: 10px;">Цели для мониторинга (<span id="redditCount">0</span>)</h3>
-                    <div class="tags" id="redditTags"></div>
-                </div>
-            </div>
-        </div>
-                
-        <div id="monitor-tab" class="tab-content">
-            <div class="panel">
-                <h2>🔑 Ключевые слова / Триггеры</h2>
-                <div class="input-group">
-                    <input type="text" id="keywordInput" placeholder="Что ищем? (например: exploit, 0day, airdrop)">
-                    <button id="addKeywordBtn">Добавить триггер</button>
-                </div>
-                <div class="tags" id="keywordTags"></div>
-            </div>
+<div class="panel">
+<h2>➕ Управление Telegram Таргетами</h2>
+<div class="input-group">
+<input type="text" id="manualChannelInput" placeholder="Имя канала (без @, например: durov)">
+<button id="addChannelBtn">Добавить ТГ канал</button>
+</div>
+<div style="margin-top: 15px; border-top: 1px solid var(--border); padding-top: 15px;">
+<h3 style="font-size: 1em; margin-bottom: 10px;">Цели для мониторинга (<span id="channelCount">0</span>)</h3>
+<div class="tags" id="channelTags"></div>
+</div>
+</div>
 
-            <div class="panel">
-                <h2>⚙️ Панель управления</h2>
-                <div class="source-toggles" style="background: var(--bg-primary); padding: 10px; border-radius: var(--radius); margin-bottom: 15px;">
-                    <strong style="font-size: 0.9em; margin-right: 10px;">Активные:</strong>
-                    <label class="source-toggle"><input type="checkbox" id="monTG" checked> Telegram</label>
-                    <label class="source-toggle"><input type="checkbox" id="monHN" checked> Hacker News</label>
-                    <label class="source-toggle"><input type="checkbox" id="monReddit" checked> Reddit</label>
-                    <label class="source-toggle"><input type="checkbox" id="monMastodon"> Mastodon</label>
-                </div>
-                <div class="input-group">
-                    <div style="flex: 1; min-width: 150px;">
-                        <input type="number" id="intervalInput" value="60" min="30" max="3600">
-                        <small style="display:block; color:var(--text-secondary); margin-top:4px;">Интервал (сек)</small>
-                    </div>
-                    <div style="flex: 1; min-width: 150px;">
-                        <input type="number" id="autoStopInput" value="15" min="1" max="1440">
-                        <small style="display:block; color:var(--text-secondary); margin-top:4px;">Автостоп (мин)</small>
-                    </div>
-                    <div style="flex: 1; min-width: 150px;">
-                        <input type="number" id="maxResultsInput" value="300" min="50" max="1000">
-                        <small style="display:block; color:var(--text-secondary); margin-top:4px;">Макс. результатов</small>
-                    </div>
-                    <button id="startBtn">▶️ Запуск</button>
-                    <button id="stopBtn" class="danger" disabled>⏹️ Стоп</button>
-                </div>
-                <div class="status-bar">
-                    <div class="status-indicator">
-                        <div class="status-dot" id="statusDot"></div>
-                        <span id="statusText">Режим ожидания</span>
-                    </div>
-                    <div style="color: var(--text-secondary); font-size: 0.9em;">
-                        Хиты: <strong id="matchCount" style="color: var(--accent);">0</strong> | 
-                        Проверено: <strong id="checkedCount" style="color: var(--text-secondary);">0</strong> | 
-                        RAM: <strong id="memoryCount" style="color: var(--text-secondary);">0</strong>
-                    </div>
-                </div>
-            </div>
-        </div>
+<div class="panel">
+<h2>➕ Управление Reddit Сабреддитами</h2>
+<div class="input-group">
+<input type="text" id="manualRedditInput" placeholder="Имя сабреддита (например: netsec, crypto)">
+<button id="addRedditBtn">Добавить Reddit</button>
+</div>
+<div style="margin-top: 15px; border-top: 1px solid var(--border); padding-top: 15px;">
+<h3 style="font-size: 1em; margin-bottom: 10px;">Цели для мониторинга (<span id="redditCount">0</span>)</h3>
+<div class="tags" id="redditTags"></div>
+</div>
+</div>
+</div>
 
-        <div id="results-tab" class="tab-content">
-            <div class="panel">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
-                    <h2>📊 База данных</h2>
-                    <div>
-                        <button id="exportJsonBtn" class="secondary">💾 JSON</button>
-                        <button id="exportCsvBtn" class="secondary">📄 CSV</button>
-                        <button id="clearResultsBtn" class="danger">🗑️ Очистить</button>
-                    </div>
-                </div>
-                <div class="log drag-scroll" id="resultsLog">
-                    <div class="empty-state">
-                        <div class="icon">📭</div>
-                        <p>Лог пуст. Настройте триггеры и запустите мониторинг.</p>
-                    </div>
-                </div>
-            </div>
-        </div>
+<div id="monitor-tab" class="tab-content">
+<div class="panel">
+<h2>🔑 Ключевые слова / Триггеры</h2>
+<div class="input-group">
+<input type="text" id="keywordInput" placeholder="Что ищем? (например: exploit, airdrop)">
+<button id="addKeywordBtn">Добавить триггер</button>
+</div>
+<div class="tags" id="keywordTags"></div>
+</div>
 
-        <div id="settings-tab" class="tab-content">
-            <div class="panel">
-                <h2>📡 Кастомная RSS Лента</h2>
-                <div class="input-group">
-                    <input type="url" id="customRssInput" placeholder="https://example.com/feed/">
-                    <button id="addRssBtn">💾 Добавить RSS</button>
-                </div>
-                <div class="tags" id="rssTags" style="margin-top: 10px;"></div>
-            </div>
+<div class="panel">
+<h2>⚙️ Панель управления</h2>
+<div class="source-toggles" style="background: var(--bg-primary); padding: 10px; border-radius: var(--radius); margin-bottom: 15px;">
+<strong style="font-size: 0.9em; margin-right: 10px;">Активные:</strong>
+<label class="source-toggle"><input type="checkbox" id="monTG" checked> Telegram</label>
+<label class="source-toggle"><input type="checkbox" id="monHN" checked> Hacker News</label>
+<label class="source-toggle"><input type="checkbox" id="monReddit" checked> Reddit</label>
+<label class="source-toggle"><input type="checkbox" id="monMastodon"> Mastodon</label>
+</div>
+<div class="input-group">
+<div style="flex: 1; min-width: 150px;">
+<input type="number" id="intervalInput" value="60" min="30" max="3600">
+<small style="display:block; color:var(--text-secondary); margin-top:4px;">Интервал (сек)</small>
+</div>
+<div style="flex: 1; min-width: 150px;">
+<input type="number" id="autoStopInput" value="15" min="1" max="1440">
+<small style="display:block; color:var(--text-secondary); margin-top:4px;">Автостоп (мин)</small>
+</div>
+<div style="flex: 1; min-width: 150px;">
+<input type="number" id="maxResultsInput" value="300" min="50" max="1000">
+<small style="display:block; color:var(--text-secondary); margin-top:4px;">Макс. результатов</small>
+</div>
+<button id="startBtn">▶️ Запуск</button>
+<button id="stopBtn" class="danger" disabled>⏹️ Стоп</button>
+</div>
+<div class="status-bar">
+<div class="status-indicator">
+<div class="status-dot" id="statusDot"></div>
+<span id="statusText">Режим ожидания</span>
+</div>
+<div style="color: var(--text-secondary); font-size: 0.9em;">
+Хиты: <strong id="matchCount" style="color: var(--accent);">0</strong> |
+Проверено: <strong id="checkedCount" style="color: var(--text-secondary);">0</strong> |
+RAM: <strong id="memoryCount" style="color: var(--text-secondary);">0</strong>
+</div>
+</div>
+</div>
+</div>
 
-            <div class="panel">
-                <h2>💾 Резервное копирование</h2>
-                <div class="input-group">
-                    <button id="exportBackupBtn" class="secondary">⬇️ Скачать бэкап</button>
-                    <button id="importBackupBtn" class="secondary">⬆️ Загрузить бэкап</button>
-                    <input type="file" id="importFile" style="display: none;" accept=".json">
-                </div>
-            </div>
+<div id="results-tab" class="tab-content">
+<div class="panel">
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
+<h2>📊 База данных</h2>
+<div>
+<button id="exportJsonBtn" class="secondary">💾 JSON</button>
+<button id="exportCsvBtn" class="secondary">📄 CSV</button>
+<button id="clearResultsBtn" class="danger">🗑️ Очистить</button>
+</div>
+</div>
+<div class="log drag-scroll" id="resultsLog">
+<div class="empty-state">
+<div class="icon">📭</div>
+<p>Лог пуст. Настройте триггеры и запустите мониторинг.</p>
+</div>
+</div>
+</div>
+</div>
 
-            <div class="panel">
-                <h2>🗑️ Хард Ресет</h2>
-                <button id="hardResetBtn" class="danger">⚠️ Уничтожить все локальные данные</button>
-            </div>
-        </div>
-    </div>
+<div id="settings-tab" class="tab-content">
+<div class="panel">
+<h2>📡 Кастомная RSS Лента</h2>
+<div class="input-group">
+<input type="url" id="customRssInput" placeholder="https://example.com/feed/">
+<button id="addRssBtn">💾 Добавить RSS</button>
+</div>
+<div class="tags" id="rssTags" style="margin-top: 10px;"></div>
+</div>
 
-    <script>
-    (function() {
-        "use strict";
-        
-        // --- CONFIGURATION ---
-        const CONFIG = {
-            MAX_RESULTS: 300, 
-            MAX_SEEN_MESSAGES: 2000, 
-            PROXY_TIMEOUT: 8000,
-            FETCH_TIMEOUT: 8000,
-            RSS_FEEDS_DEFAULT: ["https://hnrss.org/frontpage"],
-            RSS2JSON_API: "https://api.rss2json.com/v1/api.json",
-            
-            // Cleaned up proxy pool (Removed dead 'thingproxy', added fallbacks)
-            PROXIES: [
-                url => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
-                url => `https://corsproxy.io/?${encodeURIComponent(url)}`,
-                // Yandex/Google translate proxy trick as ultimate fallback for HTML pages
-                url => `https://translate.google.com/translate?hl=en&sl=auto&tl=en&u=${encodeURIComponent(url)}`
-            ]
-        };
+<div class="panel">
+<h2>💾 Резервное копирование</h2>
+<div class="input-group">
+<button id="exportBackupBtn" class="secondary">⬇️ Скачать бэкап</button>
+<button id="importBackupBtn" class="secondary">⬆️ Загрузить бэкап</button>
+<input type="file" id="importFile" style="display: none;" accept=".json,application/json">
+</div>
+</div>
 
-        // --- STATE ---
-        let channels = []; let reddits = []; let keywords = []; let results = [];
-        let seenMessages = new Set(); let rssFeeds = [];
-        let isRunning = false; let monitoringInterval = null; let killSwitchTimeout = null;
-        let checkedCount = 0; let tg = window.Telegram?.WebApp;
+<div class="panel">
+<h2>🗑️ Хард Ресет</h2>
+<button id="hardResetBtn" class="danger">⚠️ Уничтожить все локальные данные</button>
+</div>
+</div>
+</div>
 
-        // --- DOM elements ---
-        const DOM = {
-            themeIcon: document.getElementById('themeIcon'), tickerContent: document.getElementById('tickerContent'),
-            globalSearchInput: document.getElementById('globalSearchInput'), globalSearchBtn: document.getElementById('globalSearchBtn'),
-            searchProgress: document.getElementById('searchProgress'), searchProgressBar: document.getElementById('searchProgressBar'),
-            searchResults: document.getElementById('searchResults'), manualChannelInput: document.getElementById('manualChannelInput'),
-            addChannelBtn: document.getElementById('addChannelBtn'), channelCount: document.getElementById('channelCount'),
-            channelTags: document.getElementById('channelTags'), manualRedditInput: document.getElementById('manualRedditInput'),
-            addRedditBtn: document.getElementById('addRedditBtn'), redditCount: document.getElementById('redditCount'),
-            redditTags: document.getElementById('redditTags'), keywordInput: document.getElementById('keywordInput'),
-            addKeywordBtn: document.getElementById('addKeywordBtn'), keywordTags: document.getElementById('keywordTags'),
-            intervalInput: document.getElementById('intervalInput'), autoStopInput: document.getElementById('autoStopInput'),
-            maxResultsInput: document.getElementById('maxResultsInput'), startBtn: document.getElementById('startBtn'),
-            stopBtn: document.getElementById('stopBtn'), statusDot: document.getElementById('statusDot'),
-            statusText: document.getElementById('statusText'), matchCount: document.getElementById('matchCount'),
-            checkedCountEl: document.getElementById('checkedCount'), memoryCount: document.getElementById('memoryCount'),
-            resultsLog: document.getElementById('resultsLog'), customRssInput: document.getElementById('customRssInput'),
-            addRssBtn: document.getElementById('addRssBtn'), rssTags: document.getElementById('rssTags'),
-            exportJsonBtn: document.getElementById('exportJsonBtn'), exportCsvBtn: document.getElementById('exportCsvBtn'),
-            clearResultsBtn: document.getElementById('clearResultsBtn'), exportBackupBtn: document.getElementById('exportBackupBtn'),
-            importBackupBtn: document.getElementById('importBackupBtn'), importFile: document.getElementById('importFile'),
-            hardResetBtn: document.getElementById('hardResetBtn'), toastContainer: document.getElementById('toastContainer')
-        };
+<script>
+(function() {
+"use strict";
 
-        // --- Helpers ---
-        function saveState() {
-            try {
-                localStorage.setItem('amigo_channels', JSON.stringify(channels));
-                localStorage.setItem('amigo_reddits', JSON.stringify(reddits));
-                localStorage.setItem('amigo_keywords', JSON.stringify(keywords));
-                localStorage.setItem('amigo_results', JSON.stringify(results.slice(0, CONFIG.MAX_RESULTS)));
-                localStorage.setItem('amigo_rssFeeds', JSON.stringify(rssFeeds));
-                localStorage.setItem('amigo_seen', JSON.stringify(Array.from(seenMessages).slice(-CONFIG.MAX_SEEN_MESSAGES)));
-            } catch(e) { 
-                if(e.name === 'QuotaExceededError') {
-                    seenMessages = new Set(Array.from(seenMessages).slice(-500)); results = results.slice(0, 100); saveState(); 
-                } 
-            }
-        }
+// --- CONFIGURATION ---
+const CONFIG = {
+MAX_RESULTS: 300,
+MAX_SEEN_MESSAGES: 2000,
+PROXY_TIMEOUT: 9000,
+FETCH_TIMEOUT: 9000,
+RSS_FEEDS_DEFAULT: ["https://hnrss.org/frontpage"],
+RSS2JSON_API: "https://api.rss2json.com/v1/api.json",
+PROXIES: [
+url => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
+url => `https://corsproxy.io/?url=${encodeURIComponent(url)}`,
+url => `https://api.codetabs.com/v1/proxy/?quest=${encodeURIComponent(url)}`
+]
+};
 
-        function loadState() {
-            try {
-                channels = JSON.parse(localStorage.getItem('amigo_channels') || '[]'); reddits = JSON.parse(localStorage.getItem('amigo_reddits') || '[]');
-                keywords = JSON.parse(localStorage.getItem('amigo_keywords') || '[]'); results = JSON.parse(localStorage.getItem('amigo_results') || '[]');
-                rssFeeds = JSON.parse(localStorage.getItem('amigo_rssFeeds') || '[]'); seenMessages = new Set(JSON.parse(localStorage.getItem('amigo_seen') || '[]'));
-            } catch(e) { }
-        }
+// --- STATE ---
+let channels = []; let reddits = []; let keywords = []; let results = [];
+let seenMessages = new Set(); let rssFeeds = [];
+let isRunning = false; let monitoringInterval = null; let killSwitchTimeout = null;
+let checkedCount = 0; let dragMoved = false;
+const tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
 
-        function showToast(message, type = 'info', duration = 3000) {
-            const toast = document.createElement('div'); toast.className = `toast ${type}`;
-            toast.innerHTML = `<span>${escapeHtml(message)}</span>`; DOM.toastContainer.appendChild(toast);
-            setTimeout(() => { toast.style.animation = 'toastOut 0.3s ease forwards'; setTimeout(() => toast.remove(), 300); }, duration);
-        }
+// --- DOM elements ---
+const DOM = {
+themeIcon: document.getElementById('themeIcon'), tickerContent: document.getElementById('tickerContent'),
+globalSearchInput: document.getElementById('globalSearchInput'), globalSearchBtn: document.getElementById('globalSearchBtn'),
+searchProgress: document.getElementById('searchProgress'), searchProgressBar: document.getElementById('searchProgressBar'),
+searchResults: document.getElementById('searchResults'), manualChannelInput: document.getElementById('manualChannelInput'),
+addChannelBtn: document.getElementById('addChannelBtn'), channelCount: document.getElementById('channelCount'),
+channelTags: document.getElementById('channelTags'), manualRedditInput: document.getElementById('manualRedditInput'),
+addRedditBtn: document.getElementById('addRedditBtn'), redditCount: document.getElementById('redditCount'),
+redditTags: document.getElementById('redditTags'), keywordInput: document.getElementById('keywordInput'),
+addKeywordBtn: document.getElementById('addKeywordBtn'), keywordTags: document.getElementById('keywordTags'),
+intervalInput: document.getElementById('intervalInput'), autoStopInput: document.getElementById('autoStopInput'),
+maxResultsInput: document.getElementById('maxResultsInput'), startBtn: document.getElementById('startBtn'),
+stopBtn: document.getElementById('stopBtn'), statusDot: document.getElementById('statusDot'),
+statusText: document.getElementById('statusText'), matchCount: document.getElementById('matchCount'),
+checkedCountEl: document.getElementById('checkedCount'), memoryCount: document.getElementById('memoryCount'),
+resultsLog: document.getElementById('resultsLog'), customRssInput: document.getElementById('customRssInput'),
+addRssBtn: document.getElementById('addRssBtn'), rssTags: document.getElementById('rssTags'),
+exportJsonBtn: document.getElementById('exportJsonBtn'), exportCsvBtn: document.getElementById('exportCsvBtn'),
+clearResultsBtn: document.getElementById('clearResultsBtn'), exportBackupBtn: document.getElementById('exportBackupBtn'),
+importBackupBtn: document.getElementById('importBackupBtn'), importFile: document.getElementById('importFile'),
+hardResetBtn: document.getElementById('hardResetBtn'), toastContainer: document.getElementById('toastContainer')
+};
 
-        function escapeHtml(str) { return String(str || '').replace(/[&<>]/g, m => m === '&' ? '&amp;' : m === '<' ? '&lt;' : '&gt;'); }
+// --- Helpers ---
+const HTML_ESCAPE = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
+function escapeHtml(str) { return String(str == null ? '' : str).replace(/[&<>"']/g, m => HTML_ESCAPE[m]); }
+function escapeRegex(str) { return String(str).replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
+function stripHtml(html) { try { return new DOMParser().parseFromString(String(html || ''), 'text/html').body.textContent || ''; } catch(e) { return String(html || ''); } }
 
-        // FIX: Telegram Haptic support check
-        function triggerHaptic(type = 'light') {
-            try {
-                if (tg && tg.HapticFeedback && tg.isVersionAtLeast && tg.isVersionAtLeast('6.1')) {
-                    tg.HapticFeedback.impactOccurred(type);
-                }
-            } catch(e) { /* Ignore silently */ }
-        }
+function saveState() {
+try {
+localStorage.setItem('amigo_channels', JSON.stringify(channels));
+localStorage.setItem('amigo_reddits', JSON.stringify(reddits));
+localStorage.setItem('amigo_keywords', JSON.stringify(keywords));
+localStorage.setItem('amigo_results', JSON.stringify(results.slice(0, CONFIG.MAX_RESULTS)));
+localStorage.setItem('amigo_rssFeeds', JSON.stringify(rssFeeds));
+localStorage.setItem('amigo_seen', JSON.stringify(Array.from(seenMessages).slice(-CONFIG.MAX_SEEN_MESSAGES)));
+} catch(e) {
+if (e && e.name === 'QuotaExceededError') {
+seenMessages = new Set(Array.from(seenMessages).slice(-500));
+results = results.slice(0, 100);
+try { saveState(); } catch(_) {}
+}
+}
+}
 
-        function initTheme() {
-            const isDark = localStorage.getItem('amigo_theme') === 'dark' || (!localStorage.getItem('amigo_theme') && window.matchMedia('(prefers-color-scheme: dark)').matches);
-            document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light'); DOM.themeIcon.textContent = isDark ? '☀️' : '🌙';
-        }
-        function toggleTheme() {
-            const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-            document.documentElement.setAttribute('data-theme', isDark ? 'light' : 'dark');
-            DOM.themeIcon.textContent = isDark ? '🌙' : '☀️'; localStorage.setItem('amigo_theme', isDark ? 'light' : 'dark'); triggerHaptic('light');
-        }
+function loadState() {
+try {
+channels = JSON.parse(localStorage.getItem('amigo_channels') || '[]');
+reddits = JSON.parse(localStorage.getItem('amigo_reddits') || '[]');
+keywords = JSON.parse(localStorage.getItem('amigo_keywords') || '[]');
+results = JSON.parse(localStorage.getItem('amigo_results') || '[]');
+rssFeeds = JSON.parse(localStorage.getItem('amigo_rssFeeds') || '[]');
+seenMessages = new Set(JSON.parse(localStorage.getItem('amigo_seen') || '[]'));
+} catch(e) {
+channels = []; reddits = []; keywords = []; results = []; rssFeeds = []; seenMessages = new Set();
+}
+}
 
-        function switchTab(tabName) {
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active')); document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-            document.querySelector(`.tab[data-tab="${tabName}"]`).classList.add('active'); document.getElementById(`${tabName}-tab`).classList.add('active'); triggerHaptic('light');
-        }
+function showToast(message, type = 'info', duration = 3000) {
+const toast = document.createElement('div');
+toast.className = `toast ${type}`;
+const span = document.createElement('span');
+span.textContent = String(message);
+toast.appendChild(span);
+DOM.toastContainer.appendChild(toast);
+setTimeout(() => { toast.style.animation = 'toastOut 0.3s ease forwards'; setTimeout(() => toast.remove(), 300); }, duration);
+}
 
-        function enableDragScroll() {
-            document.querySelectorAll('.drag-scroll').forEach(slider => {
-                let isDown = false, startX, startY, scrollLeft, scrollTop;
-                slider.addEventListener('mousedown', (e) => { if (e.target.closest('button, a, input, .remove')) return; isDown = true; slider.classList.add('active'); startX = e.pageX - slider.offsetLeft; startY = e.pageY - slider.offsetTop; scrollLeft = slider.scrollLeft; scrollTop = slider.scrollTop; });
-                slider.addEventListener('mouseleave', () => { isDown = false; slider.classList.remove('active'); });
-                slider.addEventListener('mouseup', () => { isDown = false; slider.classList.remove('active'); });
-                slider.addEventListener('mousemove', (e) => { if (!isDown) return; e.preventDefault(); slider.scrollLeft = scrollLeft - (e.pageX - slider.offsetLeft - startX) * 1.5; slider.scrollTop = scrollTop - (e.pageY - slider.offsetTop - startY) * 1.5; });
-            });
-        }
+function triggerHaptic(type = 'light') {
+try {
+if (tg && tg.HapticFeedback && tg.isVersionAtLeast && tg.isVersionAtLeast('6.1')) {
+tg.HapticFeedback.impactOccurred(type);
+}
+} catch(e) { /* ignore */ }
+}
 
-        // --- Safe Network Helpers ---
-        async function fetchWithTimeout(url, timeout = CONFIG.FETCH_TIMEOUT, options = {}) {
-            const controller = new AbortController();
-            const id = setTimeout(() => controller.abort(), timeout);
-            try {
-                const response = await fetch(url, { ...options, signal: controller.signal });
-                clearTimeout(id); return response;
-            } catch(e) { clearTimeout(id); throw e; }
-        }
+function initTheme() {
+const isDark = localStorage.getItem('amigo_theme') === 'dark' || (!localStorage.getItem('amigo_theme') && window.matchMedia('(prefers-color-scheme: dark)').matches);
+document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
+DOM.themeIcon.textContent = isDark ? '☀️' : '🌙';
+}
+function toggleTheme() {
+const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+document.documentElement.setAttribute('data-theme', isDark ? 'light' : 'dark');
+DOM.themeIcon.textContent = isDark ? '🌙' : '☀️';
+localStorage.setItem('amigo_theme', isDark ? 'light' : 'dark');
+triggerHaptic('light');
+}
 
-        async function fetchWithProxy(url, expectJson = false) {
-            for (const proxy of CONFIG.PROXIES) {
-                try {
-                    const proxyUrl = proxy(url);
-                    const res = await fetchWithTimeout(proxyUrl, CONFIG.PROXY_TIMEOUT);
-                    if (res.ok) {
-                        const text = await res.text();
-                        if (expectJson) { try { JSON.parse(text); return text; } catch(e) { continue; } }
-                        return text;
-                    }
-                } catch(e) { continue; /* Silent fallback */ }
-            }
-            // Return empty instead of throwing to prevent UI breaking
-            console.warn('[Amigo] All proxies failed for: ' + url);
-            return expectJson ? "{}" : ""; 
-        }
+function switchTab(tabName) {
+document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+const tabEl = document.querySelector(`.tab[data-tab="${tabName}"]`);
+const contentEl = document.getElementById(`${tabName}-tab`);
+if (tabEl) tabEl.classList.add('active');
+if (contentEl) contentEl.classList.add('active');
+triggerHaptic('light');
+}
 
-        async function fetchJSONWithProxy(url) {
-            const text = await fetchWithProxy(url, true);
-            try { return JSON.parse(text); } catch(e) { return {}; }
-        }
+function enableDragScroll() {
+document.querySelectorAll('.drag-scroll').forEach(slider => {
+let isDown = false, startX, startY, scrollLeft, scrollTop;
+slider.addEventListener('mousedown', (e) => {
+if (e.target.closest('button, a, input, .remove')) return;
+isDown = true; dragMoved = false; slider.classList.add('active');
+startX = e.pageX - slider.offsetLeft; startY = e.pageY - slider.offsetTop;
+scrollLeft = slider.scrollLeft; scrollTop = slider.scrollTop;
+});
+slider.addEventListener('mouseleave', () => { isDown = false; slider.classList.remove('active'); });
+slider.addEventListener('mouseup', () => { isDown = false; slider.classList.remove('active'); });
+slider.addEventListener('mousemove', (e) => {
+if (!isDown) return; e.preventDefault();
+const walkX = e.pageX - slider.offsetLeft - startX;
+const walkY = e.pageY - slider.offsetTop - startY;
+if (Math.abs(walkX) > 5 || Math.abs(walkY) > 5) dragMoved = true;
+slider.scrollLeft = scrollLeft - walkX * 1.5;
+slider.scrollTop = scrollTop - walkY * 1.5;
+});
+});
+}
 
-        async function loadTicker() {
-            const feeds = rssFeeds.length ? rssFeeds : CONFIG.RSS_FEEDS_DEFAULT; let allItems = [];
-            for(const url of feeds) {
-                try {
-                    const res = await fetchWithTimeout(`${CONFIG.RSS2JSON_API}?rss_url=${encodeURIComponent(url)}`, 8000);
-                    if(res.ok) { const data = await res.json(); if(data.items) allItems.push(...data.items); }
-                } catch(e) {}
-            }
-            if (allItems.length) {
-                const items = allItems.sort(() => 0.5 - Math.random()).slice(0, 30);
-                const html = items.map(item => `<a href="${escapeHtml(item.link)}" target="_blank" class="ticker-item">⚡ ${escapeHtml(item.title)}</a>`).join('');
-                DOM.tickerContent.innerHTML = html + html;
-            } else { DOM.tickerContent.innerHTML = '<span class="ticker-item">[!] Ожидание данных...</span>'; }
-        }
+// --- Safe Network Helpers ---
+async function fetchWithTimeout(url, timeout = CONFIG.FETCH_TIMEOUT, options = {}) {
+const controller = new AbortController();
+const id = setTimeout(() => controller.abort(), timeout);
+try {
+const response = await fetch(url, { ...options, signal: controller.signal });
+clearTimeout(id);
+return response;
+} catch(e) { clearTimeout(id); throw e; }
+}
 
-        function renderRssTags() {
-            DOM.rssTags.innerHTML = rssFeeds.map(url => `<div class="tag">${escapeHtml(url.substring(0, 30))}... <span class="remove" data-url="${escapeHtml(url)}">×</span></div>`).join('');
-            document.querySelectorAll('#rssTags .remove').forEach(el => el.addEventListener('click', () => { rssFeeds = rssFeeds.filter(f => f !== el.getAttribute('data-url')); saveState(); loadTicker(); renderRssTags(); }));
-        }
+async function fetchWithProxy(url, expectJson = false) {
+for (const proxy of CONFIG.PROXIES) {
+try {
+const proxyUrl = proxy(url);
+const res = await fetchWithTimeout(proxyUrl, CONFIG.PROXY_TIMEOUT);
+if (res.ok) {
+const text = await res.text();
+if (expectJson) { try { JSON.parse(text); return text; } catch(e) { continue; } }
+if (text) return text;
+}
+} catch(e) { continue; }
+}
+console.warn('[Amigo] All proxies failed for: ' + url);
+return expectJson ? "{}" : "";
+}
 
-        function addRssFeed() {
-            const val = DOM.customRssInput.value.trim(); if (!val) return;
-            const urls = val.split(',').map(s => s.trim()).filter(s => s.startsWith('http')); if (!urls.length) return showToast('Некорректный URL', 'error');
-            rssFeeds = [...new Set([...rssFeeds, ...urls])]; saveState(); loadTicker(); renderRssTags(); DOM.customRssInput.value = ''; showToast(`Добавлено RSS`, 'success');
-        }
+async function fetchJSONWithProxy(url) {
+const text = await fetchWithProxy(url, true);
+try { return JSON.parse(text); } catch(e) { return {}; }
+}
 
-        function renderUI() {
-            DOM.channelTags.innerHTML = channels.map(c => `<div class="tag">@${escapeHtml(c.name)} <span class="remove" data-channel="${escapeHtml(c.name)}">×</span></div>`).join('');
-            DOM.redditTags.innerHTML = reddits.map(r => `<div class="tag">r/${escapeHtml(r)} <span class="remove" data-reddit="${escapeHtml(r)}">×</span></div>`).join('');
-            DOM.keywordTags.innerHTML = keywords.map(k => `<div class="tag">${escapeHtml(k)} <span class="remove" data-keyword="${escapeHtml(k)}">×</span></div>`).join('');
-            DOM.channelCount.textContent = channels.length; DOM.redditCount.textContent = reddits.length;
+function ddgRealUrl(href) {
+if (!href) return '';
+try {
+if (href.indexOf('uddg=') !== -1) {
+const u = new URL(href, 'https://duckduckgo.com');
+const real = u.searchParams.get('uddg');
+if (real) return real;
+}
+} catch(e) {}
+if (href.indexOf('//') === 0) return 'https:' + href;
+return href;
+}
 
-            document.querySelectorAll('#channelTags .remove').forEach(el => el.addEventListener('click', () => { channels = channels.filter(c => c.name !== el.getAttribute('data-channel')); saveState(); renderUI(); }));
-            document.querySelectorAll('#redditTags .remove').forEach(el => el.addEventListener('click', () => { reddits = reddits.filter(r => r !== el.getAttribute('data-reddit')); saveState(); renderUI(); }));
-            document.querySelectorAll('#keywordTags .remove').forEach(el => el.addEventListener('click', () => { keywords = keywords.filter(k => k !== el.getAttribute('data-keyword')); saveState(); renderUI(); }));
-        }
+async function loadTicker() {
+const feeds = rssFeeds.length ? rssFeeds : CONFIG.RSS_FEEDS_DEFAULT;
+let allItems = [];
+for (const url of feeds) {
+try {
+const res = await fetchWithTimeout(`${CONFIG.RSS2JSON_API}?rss_url=${encodeURIComponent(url)}`, CONFIG.FETCH_TIMEOUT);
+if (res.ok) { const data = await res.json(); if (data && Array.isArray(data.items)) allItems.push(...data.items); }
+} catch(e) {}
+}
+if (allItems.length) {
+const items = allItems.sort(() => 0.5 - Math.random()).slice(0, 30);
+const html = items.map(item => `<a href="${escapeHtml(item.link)}" target="_blank" rel="noopener" class="ticker-item">⚡ ${escapeHtml(item.title)}</a>`).join('');
+DOM.tickerContent.innerHTML = html + html;
+} else {
+DOM.tickerContent.innerHTML = '<span class="ticker-item">[!] Ожидание данных...</span>';
+}
+}
 
-        function highlightText(text, kws) {
-            let result = escapeHtml(text);
-            kws.forEach(kw => { result = result.replace(new RegExp(`(${escapeHtml(kw)})`, 'gi'), '<span class="highlight">$1</span>'); });
-            return result;
-        }
+function renderRssTags() {
+DOM.rssTags.innerHTML = rssFeeds.map(url => `<div class="tag">${escapeHtml(url.substring(0, 30))}... <span class="remove" data-url="${escapeHtml(url)}">×</span></div>`).join('');
+document.querySelectorAll('#rssTags .remove').forEach(el => el.addEventListener('click', () => {
+rssFeeds = rssFeeds.filter(f => f !== el.getAttribute('data-url'));
+saveState(); loadTicker(); renderRssTags();
+}));
+}
 
-        function renderResults() {
-            DOM.matchCount.textContent = results.length; DOM.checkedCountEl.textContent = checkedCount; DOM.memoryCount.textContent = seenMessages.size;
-            if (!results.length) { DOM.resultsLog.innerHTML = '<div class="empty-state"><div class="icon">📭</div><p>Лог пуст.</p></div>'; return; }
-            DOM.resultsLog.innerHTML = results.map(r => `<div class="log-entry alert"><div class="header-log"><span class="source">${escapeHtml(r.source)}</span><span class="time">${new Date(r.foundAt).toLocaleString()}</span></div><div class="keywords">Триггеры: ${r.keywords.map(escapeHtml).join(', ')}</div><div class="text">${highlightText(r.text, r.keywords)}</div><a href="${escapeHtml(r.url)}" target="_blank" class="link-btn">Источник ↗</a></div>`).join('');
-        }
+function addRssFeed() {
+const val = DOM.customRssInput.value.trim();
+if (!val) return;
+const urls = val.split(',').map(s => s.trim()).filter(s => /^https?:\/\//i.test(s));
+if (!urls.length) return showToast('Некорректный URL', 'error');
+rssFeeds = [...new Set([...rssFeeds, ...urls])];
+saveState(); loadTicker(); renderRssTags();
+DOM.customRssInput.value = '';
+showToast('Добавлено RSS', 'success');
+}
 
-        // --- Safe Search Engine ---
-        async function globalSearch() {
-            const query = DOM.globalSearchInput.value.trim(); if (!query) return showToast('Введите запрос', 'warning');
-            DOM.searchProgress.style.display = 'block'; DOM.searchResults.innerHTML = '<div class="skeleton"></div><div class="skeleton"></div>'; DOM.searchProgressBar.style.width = '0%';
-            let found = 0; let resultsHTML = ''; const updateProgress = (pct) => DOM.searchProgressBar.style.width = pct + '%';
+function renderUI() {
+DOM.channelTags.innerHTML = channels.map(c => `<div class="tag">@${escapeHtml(c.name)} <span class="remove" data-channel="${escapeHtml(c.name)}">×</span></div>`).join('');
+DOM.redditTags.innerHTML = reddits.map(r => `<div class="tag">r/${escapeHtml(r)} <span class="remove" data-reddit="${escapeHtml(r)}">×</span></div>`).join('');
+DOM.keywordTags.innerHTML = keywords.map(k => `<div class="tag">${escapeHtml(k)} <span class="remove" data-keyword="${escapeHtml(k)}">×</span></div>`).join('');
+DOM.channelCount.textContent = channels.length;
+DOM.redditCount.textContent = reddits.length;
 
-            // 1. DuckDuckGo Lite (Wrapped safely)
-            if (document.getElementById('srcDDG')?.checked) {
-                try {
-                    const html = await fetchWithProxy(`https://lite.duckduckgo.com/lite/?q=${encodeURIComponent(query)}`);
-                    if(html) {
-                        const doc = new DOMParser().parseFromString(html, 'text/html');
-                        doc.querySelectorAll('.result-snippet').forEach((el, idx) => {
-                            if(idx > 4) return;
-                            const titleEl = el.parentElement.querySelector('.result-title');
-                            if(titleEl) { resultsHTML += `<div class="card" onclick="window.open('${escapeHtml(titleEl.href)}','_blank')"><div class="stats">🌐 Web (DDG)</div><h3>${escapeHtml(titleEl.textContent)}</h3><p>${escapeHtml(el.textContent.substring(0,100))}...</p></div>`; found++; }
-                        });
-                    }
-                } catch(e) {} updateProgress(15);
-            }
+document.querySelectorAll('#channelTags .remove').forEach(el => el.addEventListener('click', () => { channels = channels.filter(c => c.name !== el.getAttribute('data-channel')); saveState(); renderUI(); }));
+document.querySelectorAll('#redditTags .remove').forEach(el => el.addEventListener('click', () => { reddits = reddits.filter(r => r !== el.getAttribute('data-reddit')); saveState(); renderUI(); }));
+document.querySelectorAll('#keywordTags .remove').forEach(el => el.addEventListener('click', () => { keywords = keywords.filter(k => k !== el.getAttribute('data-keyword')); saveState(); renderUI(); }));
+}
 
-            // 2. Mastodon
-            if (document.getElementById('srcMastodon')?.checked) {
-                try {
-                    const res = await fetchWithTimeout(`https://mastodon.social/api/v2/search?q=${encodeURIComponent(query)}&type=statuses&limit=5`);
-                    if(res.ok) {
-                        const data = await res.json();
-                        data.statuses.forEach(s => {
-                            const cleanText = s.content.replace(/<[^>]*>?/gm, '');
-                            resultsHTML += `<div class="card" onclick="window.open('${escapeHtml(s.url)}','_blank')"><div class="stats">🐘 Mastodon</div><h3>@${escapeHtml(s.account.username)}</h3><p>${escapeHtml(cleanText.substring(0,80))}...</p></div>`; found++;
-                        });
-                    }
-                } catch(e) {} updateProgress(30);
-            }
+function highlightText(text, kws) {
+let result = escapeHtml(text);
+(kws || []).forEach(kw => {
+if (!kw) return;
+const safe = escapeRegex(escapeHtml(kw));
+result = result.replace(new RegExp(`(${safe})`, 'gi'), '<span class="highlight">$1</span>');
+});
+return result;
+}
 
-            // 3. GitHub (Fix: Catching 401/403)
-            if (document.getElementById('srcTG').checked) {
-                try {
-                    const res = await fetchWithTimeout(`https://api.github.com/search/code?q=${encodeURIComponent('t.me ' + query)}&per_page=3`);
-                    if(res.ok) {
-                        const ghData = await res.json(); const tgChannels = new Set();
-                        for (const item of (ghData.items || []).slice(0, 2)) {
-                            try {
-                                const rawData = await fetchWithProxy(item.url, true);
-                                const matches = (typeof rawData === 'string' ? rawData : JSON.stringify(rawData)).match(/t\.me\/([a-zA-Z0-9_]{4,})/g) || [];
-                                matches.forEach(m => { const ch = m.replace('t.me/', '').toLowerCase(); if (!['joinchat', 'addtheme', 'share', 'socks'].includes(ch)) tgChannels.add(ch); });
-                            } catch(e) {}
-                        }
-                        Array.from(tgChannels).slice(0, 4).forEach(ch => { resultsHTML += `<div class="card" onclick="window.open('https://t.me/${ch}','_blank')"><div class="stats">✈️ Telegram (GH)</div><h3>@${escapeHtml(ch)}</h3><p>Упоминается с: ${escapeHtml(query)}</p></div>`; found++; });
-                    } else { console.warn('[Amigo] GitHub API Rate Limited'); }
-                } catch(e) {} updateProgress(45);
-            }
+function renderResults() {
+DOM.matchCount.textContent = results.length;
+DOM.checkedCountEl.textContent = checkedCount;
+DOM.memoryCount.textContent = seenMessages.size;
+if (!results.length) {
+DOM.resultsLog.innerHTML = '<div class="empty-state"><div class="icon">📭</div><p>Лог пуст.</p></div>';
+return;
+}
+DOM.resultsLog.innerHTML = results.map(r =>
+`<div class="log-entry alert"><div class="header-log"><span class="source">${escapeHtml(r.source)}</span><span class="time">${escapeHtml(new Date(r.foundAt).toLocaleString())}</span></div><div class="keywords">Триггеры: ${(r.keywords || []).map(escapeHtml).join(', ')}</div><div class="text">${highlightText(r.text, r.keywords)}</div><a href="${escapeHtml(r.url)}" target="_blank" rel="noopener" class="link-btn">Источник ↗</a></div>`
+).join('');
+}
 
-            // 4. Hacker News
-            if (document.getElementById('srcHN').checked) {
-                try {
-                    const res = await fetchWithTimeout(`https://hn.algolia.com/api/v1/search?query=${encodeURIComponent(query)}&tags=story&hitsPerPage=5`);
-                    if(res.ok) { (await res.json()).hits.forEach(h => { resultsHTML += `<div class="card" onclick="window.open('${escapeHtml(h.url || 'https://news.ycombinator.com/item?id='+h.objectID)}','_blank')"><div class="stats">🟧 Hacker News</div><h3>${escapeHtml(h.title)}</h3></div>`; found++; }); }
-                } catch(e) {} updateProgress(60);
-            }
+function renderSearchCards(cards) {
+if (!cards.length) {
+DOM.searchResults.innerHTML = '<div class="empty-state" style="grid-column:1/-1;"><div class="icon">🔍</div><p>Ничего не найдено</p></div>';
+return;
+}
+DOM.searchResults.innerHTML = cards.map(c =>
+`<div class="card" data-url="${escapeHtml(c.url)}"><div class="stats">${escapeHtml(c.badge)}</div><h3>${escapeHtml(c.title)}</h3>${c.subtitle ? `<p>${escapeHtml(c.subtitle)}</p>` : ''}</div>`
+).join('');
+}
 
-            // 5. Reddit
-            if (document.getElementById('srcReddit').checked) {
-                try {
-                    const data = await fetchJSONWithProxy(`https://www.reddit.com/search.json?q=${encodeURIComponent(query)}&limit=5&raw_json=1`);
-                    if (data?.data?.children) { data.data.children.forEach(post => { resultsHTML += `<div class="card" onclick="window.open('https://www.reddit.com${post.data.permalink}','_blank')"><div class="stats">🟥 Reddit</div><h3>${escapeHtml(post.data.title)}</h3><p>r/${escapeHtml(post.data.subreddit)}</p></div>`; found++; }); }
-                } catch(e) {} updateProgress(75);
-            }
+// --- Search source functions (each returns array of cards, never throws) ---
+async function searchDDG(query) {
+try {
+const html = await fetchWithProxy(`https://html.duckduckgo.com/html/?q=${encodeURIComponent(query)}`);
+if (!html) return [];
+const doc = new DOMParser().parseFromString(html, 'text/html');
+const cards = [];
+doc.querySelectorAll('.result__a').forEach((a, i) => {
+if (i >= 5) return;
+const url = ddgRealUrl(a.getAttribute('href') || '');
+const container = a.closest('.result, .web-result, .results_links, .links_main');
+const snippetEl = container ? container.querySelector('.result__snippet') : null;
+const title = (a.textContent || '').trim();
+if (title && url) cards.push({ badge: '🌐 Web (DDG)', title, subtitle: ((snippetEl && snippetEl.textContent) || '').trim().slice(0, 120), url });
+});
+return cards;
+} catch(e) { return []; }
+}
 
-            // Render Search
-            setTimeout(() => {
-                DOM.searchProgress.style.display = 'none';
-                DOM.searchResults.innerHTML = found ? resultsHTML : '<div class="empty-state" style="grid-column:1/-1;"><div class="icon">🔍</div><p>Ничего не найдено</p></div>';
-                if(found) showToast(`Найдено ${found} совпадений`, 'success');
-            }, 300);
-        }
+async function searchTelegram(query) {
+try {
+const html = await fetchWithProxy(`https://html.duckduckgo.com/html/?q=${encodeURIComponent(query + ' site:t.me')}`);
+if (!html) return [];
+const doc = new DOMParser().parseFromString(html, 'text/html');
+const seen = new Set();
+const skip = ['s', 'joinchat', 'share', 'socks', 'proxy', 'addstickers', 'addtheme', 'iv'];
+const cards = [];
+doc.querySelectorAll('a').forEach(a => {
+const real = ddgRealUrl(a.getAttribute('href') || '');
+const m = real.match(/t\.me\/(?:s\/)?([a-zA-Z0-9_]{4,32})/);
+if (m) {
+const ch = m[1].toLowerCase();
+if (!skip.includes(ch) && !seen.has(ch)) {
+seen.add(ch);
+cards.push({ badge: '✈️ Telegram', title: '@' + ch, subtitle: 'Открыть канал в Telegram', url: `https://t.me/${ch}` });
+}
+}
+});
+return cards.slice(0, 6);
+} catch(e) { return []; }
+}
 
-        // --- Safe Monitoring Parsers ---
-        async function parseTelegram(channelName) {
-            try {
-                const html = await fetchWithProxy(`https://t.me/s/${channelName}`);
-                const doc = new DOMParser().parseFromString(html, 'text/html'); const messages = [];
-                doc.querySelectorAll('.tgme_widget_message').forEach(el => {
-                    const text = el.querySelector('.tgme_widget_message_text')?.textContent.trim() || '';
-                    const postId = el.getAttribute('data-post');
-                    if (text && postId) messages.push({ id: `tg_${postId}`, source: `TG: @${channelName}`, text, url: `https://t.me/${postId}`, date: new Date().toISOString() });
-                });
-                return messages;
-            } catch(e) { return []; }
-        }
-        
-        async function parseReddit(subreddit) {
-            try {
-                const data = await fetchJSONWithProxy(`https://www.reddit.com/r/${subreddit}/new.json?limit=10&raw_json=1`);
-                return (data.data?.children || []).map(post => ({ id: `reddit_${post.data.id}`, source: `Reddit: r/${subreddit}`, text: post.data.title + '\n' + (post.data.selftext || ''), url: `https://www.reddit.com${post.data.permalink}`, date: new Date(post.data.created_utc * 1000).toISOString() }));
-            } catch(e) { return []; }
-        }
+async function searchMastodon(query) {
+try {
+const tag = (query.trim().split(/\s+/)[0] || '').replace(/[^a-zA-Z0-9]/g, '');
+if (!tag) return [];
+const res = await fetchWithTimeout(`https://mastodon.social/api/v1/timelines/tag/${encodeURIComponent(tag)}?limit=5`);
+if (!res.ok) return [];
+const data = await res.json();
+return (Array.isArray(data) ? data : []).map(s => ({
+badge: '🐘 Mastodon',
+title: '@' + ((s.account && s.account.username) || 'user'),
+subtitle: stripHtml(s.content || '').slice(0, 100),
+url: s.url
+})).filter(c => c.url);
+} catch(e) { return []; }
+}
 
-        function checkAndSaveMessages(messages) {
-            let newCount = 0; const maxRes = parseInt(DOM.maxResultsInput.value) || 300;
-            for (const msg of messages) {
-                if (seenMessages.has(msg.id)) continue;
-                seenMessages.add(msg.id); checkedCount++;
-                const matched = keywords.filter(kw => msg.text.toLowerCase().includes(kw));
-                if (matched.length) { results.unshift({ ...msg, keywords: matched, foundAt: new Date().toISOString() }); newCount++; if (results.length > maxRes) results.pop(); }
-            }
-            if (newCount) { saveState(); renderResults(); triggerHaptic('heavy'); showToast(`Перехвачено ${newCount} новых данных`, 'success'); }
-            if (seenMessages.size > CONFIG.MAX_SEEN_MESSAGES) seenMessages = new Set(Array.from(seenMessages).slice(-Math.floor(CONFIG.MAX_SEEN_MESSAGES/2)));
-            DOM.checkedCountEl.textContent = checkedCount; DOM.memoryCount.textContent = seenMessages.size;
-            return newCount;
-        }
+async function searchHN(query) {
+try {
+const res = await fetchWithTimeout(`https://hn.algolia.com/api/v1/search?query=${encodeURIComponent(query)}&tags=story&hitsPerPage=5`);
+if (!res.ok) return [];
+const data = await res.json();
+return (data.hits || []).map(h => ({
+badge: '🟧 Hacker News',
+title: h.title || h.story_title || '(без заголовка)',
+subtitle: h.author ? ('by ' + h.author) : '',
+url: h.url || `https://news.ycombinator.com/item?id=${h.objectID}`
+}));
+} catch(e) { return []; }
+}
 
-        async function monitorCycle() {
-            if (!isRunning) return;
-            const doTG = document.getElementById('monTG').checked; const doReddit = document.getElementById('monReddit').checked;
-            let total = 0;
-            if (doTG && channels.length) { for (const ch of channels) { if (!isRunning) break; total += checkAndSaveMessages(await parseTelegram(ch.name)); await new Promise(r => setTimeout(r, 800)); } }
-            if (doReddit && reddits.length) { for (const r of reddits) { if (!isRunning) break; total += checkAndSaveMessages(await parseReddit(r)); await new Promise(r => setTimeout(r, 800)); } }
-        }
+async function searchReddit(query) {
+try {
+const data = await fetchJSONWithProxy(`https://www.reddit.com/search.json?q=${encodeURIComponent(query)}&limit=5&raw_json=1`);
+if (!data || !data.data || !Array.isArray(data.data.children)) return [];
+return data.data.children.map(p => ({
+badge: '🟥 Reddit',
+title: p.data.title,
+subtitle: 'r/' + p.data.subreddit,
+url: 'https://www.reddit.com' + p.data.permalink
+}));
+} catch(e) { return []; }
+}
 
-        function startMonitoring() {
-            if (!keywords.length) return showToast('Добавьте триггеры', 'warning');
-            isRunning = true; DOM.startBtn.disabled = true; DOM.stopBtn.disabled = false; DOM.statusDot.classList.add('active'); DOM.statusText.textContent = 'Сканирование...';
-            const intervalSec = Math.max(30, parseInt(DOM.intervalInput.value) || 60); const autoStopMin = Math.max(1, parseInt(DOM.autoStopInput.value) || 15);
-            if (killSwitchTimeout) clearTimeout(killSwitchTimeout);
-            killSwitchTimeout = setTimeout(() => { if (isRunning) stopMonitoring(); showToast('Автостоп', 'info'); }, autoStopMin * 60000);
-            if (monitoringInterval) clearInterval(monitoringInterval);
-            monitorCycle(); monitoringInterval = setInterval(monitorCycle, intervalSec * 1000); showToast('Запущено', 'success');
-        }
+async function searchDevto(query) {
+try {
+const tag = query.trim().toLowerCase().replace(/[^a-z0-9]+/g, '');
+if (!tag) return [];
+const res = await fetchWithTimeout(`https://dev.to/api/articles?per_page=5&tag=${encodeURIComponent(tag)}`);
+if (!res.ok) return [];
+const data = await res.json();
+return (Array.isArray(data) ? data : []).map(a => ({
+badge: '⬛ Dev.to',
+title: a.title,
+subtitle: a.description || ('by ' + ((a.user && a.user.username) || '')),
+url: a.url
+}));
+} catch(e) { return []; }
+}
 
-        function stopMonitoring() {
-            isRunning = false; clearInterval(monitoringInterval); clearTimeout(killSwitchTimeout);
-            DOM.startBtn.disabled = false; DOM.stopBtn.disabled = true; DOM.statusDot.classList.remove('active'); DOM.statusText.textContent = 'Ожидание'; showToast('Остановлено', 'info');
-        }
+async function searchLobsters(query) {
+try {
+const data = await fetchJSONWithProxy('https://lobste.rs/newest.json');
+if (!Array.isArray(data)) return [];
+const q = query.toLowerCase();
+return data
+.filter(s => ((s.title || '') + ' ' + (Array.isArray(s.tags) ? s.tags.join(' ') : '')).toLowerCase().includes(q))
+.slice(0, 5)
+.map(s => ({
+badge: '🦞 Lobste.rs',
+title: s.title,
+subtitle: Array.isArray(s.tags) ? s.tags.join(', ') : '',
+url: s.url || s.short_id_url || s.comments_url
+}));
+} catch(e) { return []; }
+}
 
-        // --- Export/Import ---
-        function exportResults(type) {
-            if (!results.length) return showToast('Нет данных', 'warning');
-            const data = type === 'json' ? JSON.stringify(results, null, 2) : 'Source,Time,Link,Text\n' + results.map(r => `"${r.source}","${r.foundAt}","${r.url}","${r.text.replace(/"/g, '""')}"`).join('\n');
-            const blob = new Blob([data], {type: type === 'json' ? 'application/json' : 'text/csv'});
-            const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `amigo_results.${type}`; a.click();
-        }
+async function searchHabr(query) {
+try {
+const feed = `https://habr.com/ru/rss/search/?q=${encodeURIComponent(query)}&target_type=posts&order=relevance`;
+const res = await fetchWithTimeout(`${CONFIG.RSS2JSON_API}?rss_url=${encodeURIComponent(feed)}`, CONFIG.FETCH_TIMEOUT);
+if (!res.ok) return [];
+const data = await res.json();
+return (data.items || []).slice(0, 5).map(it => ({
+badge: '📘 Habr',
+title: it.title,
+subtitle: stripHtml(it.description || '').slice(0, 100),
+url: it.link
+}));
+} catch(e) { return []; }
+}
 
-        function addInputLogic(inputElement, btnElement, actionFunc) {
-            btnElement.addEventListener('click', actionFunc);
-            inputElement.addEventListener('keypress', (e) => { if (e.key === 'Enter') actionFunc(); });
-        }
+// --- Search orchestration (parallel) ---
+async function globalSearch() {
+const query = DOM.globalSearchInput.value.trim();
+if (!query) return showToast('Введите запрос', 'warning');
 
-        function bindEvents() {
-            DOM.themeIcon.addEventListener('click', toggleTheme);
-            addInputLogic(DOM.globalSearchInput, DOM.globalSearchBtn, globalSearch);
-            addInputLogic(DOM.manualChannelInput, DOM.addChannelBtn, () => { const val = DOM.manualChannelInput.value.trim().replace('@',''); if (val && !channels.find(c=>c.name===val)) { channels.push({ name: val }); saveState(); renderUI(); DOM.manualChannelInput.value = ''; showToast('Канал добавлен', 'success'); } });
-            addInputLogic(DOM.manualRedditInput, DOM.addRedditBtn, () => { const val = DOM.manualRedditInput.value.trim().replace('r/',''); if (val && !reddits.includes(val)) { reddits.push(val); saveState(); renderUI(); DOM.manualRedditInput.value = ''; showToast('Сабреддит добавлен', 'success'); } });
-            addInputLogic(DOM.keywordInput, DOM.addKeywordBtn, () => { const val = DOM.keywordInput.value.trim().toLowerCase(); if (val && !keywords.includes(val)) { keywords.push(val); saveState(); renderUI(); DOM.keywordInput.value = ''; showToast('Триггер добавлен', 'success'); } });
-            addInputLogic(DOM.customRssInput, DOM.addRssBtn, addRssFeed);
+const sources = [
+{ id: 'srcDDG', fn: searchDDG },
+{ id: 'srcMastodon', fn: searchMastodon },
+{ id: 'srcTG', fn: searchTelegram },
+{ id: 'srcHN', fn: searchHN },
+{ id: 'srcReddit', fn: searchReddit },
+{ id: 'srcDev', fn: searchDevto },
+{ id: 'srcLobsters', fn: searchLobsters },
+{ id: 'srcHabr', fn: searchHabr }
+];
 
-            DOM.startBtn.addEventListener('click', startMonitoring); DOM.stopBtn.addEventListener('click', stopMonitoring);
-            DOM.exportJsonBtn.addEventListener('click', () => exportResults('json')); DOM.exportCsvBtn.addEventListener('click', () => exportResults('csv'));
-            DOM.clearResultsBtn.addEventListener('click', () => { results = []; saveState(); renderResults(); showToast('Очищено', 'info'); });
-            DOM.hardResetBtn.addEventListener('click', () => { if(confirm('Удалить всё?')) { localStorage.clear(); location.reload(); } });
-            document.querySelectorAll('.tab').forEach(tab => tab.addEventListener('click', () => switchTab(tab.getAttribute('data-tab'))));
-        }
+const active = sources.filter(s => { const el = document.getElementById(s.id); return el && el.checked; });
+if (!active.length) return showToast('Выберите хотя бы один источник', 'warning');
 
-        function init() { initTheme(); loadState(); renderUI(); renderResults(); loadTicker(); renderRssTags(); enableDragScroll(); bindEvents(); if (tg) { tg.ready(); tg.expand(); } }
-        init();
-    })();
-    </script>
+DOM.searchProgress.style.display = 'block';
+DOM.searchProgressBar.style.width = '0%';
+DOM.searchResults.innerHTML = '<div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div>';
+
+let done = 0;
+const total = active.length;
+const updateProgress = () => { DOM.searchProgressBar.style.width = Math.round((done / total) * 100) + '%'; };
+
+const tasks = active.map(s => s.fn(query)
+.then(cards => { done++; updateProgress(); return Array.isArray(cards) ? cards : []; })
+.catch(() => { done++; updateProgress(); return []; })
+);
+
+const allCards = (await Promise.all(tasks)).flat();
+DOM.searchProgressBar.style.width = '100%';
+
+setTimeout(() => {
+DOM.searchProgress.style.display = 'none';
+renderSearchCards(allCards);
+if (allCards.length) showToast(`Найдено ${allCards.length} совпадений`, 'success');
+}, 250);
+}
+
+// --- Monitoring parsers ---
+async function parseTelegram(channelName) {
+try {
+const html = await fetchWithProxy(`https://t.me/s/${channelName}`);
+if (!html) return [];
+const doc = new DOMParser().parseFromString(html, 'text/html');
+const messages = [];
+doc.querySelectorAll('.tgme_widget_message').forEach(el => {
+const textEl = el.querySelector('.tgme_widget_message_text');
+const text = textEl ? textEl.textContent.trim() : '';
+const postId = el.getAttribute('data-post');
+if (text && postId) messages.push({ id: `tg_${postId}`, source: `TG: @${channelName}`, text, url: `https://t.me/${postId}`, date: new Date().toISOString() });
+});
+return messages;
+} catch(e) { return []; }
+}
+
+async function parseReddit(subreddit) {
+try {
+const data = await fetchJSONWithProxy(`https://www.reddit.com/r/${subreddit}/new.json?limit=10&raw_json=1`);
+if (!data || !data.data || !Array.isArray(data.data.children)) return [];
+return data.data.children.map(post => ({
+id: `reddit_${post.data.id}`,
+source: `Reddit: r/${subreddit}`,
+text: post.data.title + '\n' + (post.data.selftext || ''),
+url: `https://www.reddit.com${post.data.permalink}`,
+date: new Date(post.data.created_utc * 1000).toISOString()
+}));
+} catch(e) { return []; }
+}
+
+async function parseHackerNews() {
+try {
+const res = await fetchWithTimeout('https://hn.algolia.com/api/v1/search_by_date?tags=story&hitsPerPage=30');
+if (!res.ok) return [];
+const data = await res.json();
+return (data.hits || []).map(h => ({
+id: `hn_${h.objectID}`,
+source: 'HN',
+text: (h.title || h.story_title || '') + (h.story_text ? '\n' + stripHtml(h.story_text) : ''),
+url: h.url || `https://news.ycombinator.com/item?id=${h.objectID}`,
+date: h.created_at || new Date().toISOString()
+}));
+} catch(e) { return []; }
+}
+
+async function parseMastodon() {
+try {
+const res = await fetchWithTimeout('https://mastodon.social/api/v1/timelines/public?limit=40');
+if (!res.ok) return [];
+const data = await res.json();
+return (Array.isArray(data) ? data : []).map(s => ({
+id: `masto_${s.id}`,
+source: `Mastodon: @${(s.account && s.account.username) || ''}`,
+text: stripHtml(s.content || ''),
+url: s.url,
+date: s.created_at || new Date().toISOString()
+})).filter(m => m.url);
+} catch(e) { return []; }
+}
+
+function checkAndSaveMessages(messages) {
+let newCount = 0;
+const maxRes = parseInt(DOM.maxResultsInput.value, 10) || CONFIG.MAX_RESULTS;
+for (const msg of messages) {
+if (!msg || seenMessages.has(msg.id)) continue;
+seenMessages.add(msg.id);
+checkedCount++;
+const lowerText = (msg.text || '').toLowerCase();
+const matched = keywords.filter(kw => lowerText.includes(kw));
+if (matched.length) {
+results.unshift({ ...msg, keywords: matched, foundAt: new Date().toISOString() });
+newCount++;
+if (results.length > maxRes) results.pop();
+}
+}
+if (newCount) { saveState(); renderResults(); triggerHaptic('heavy'); showToast(`Перехвачено ${newCount} новых данных`, 'success'); }
+if (seenMessages.size > CONFIG.MAX_SEEN_MESSAGES) seenMessages = new Set(Array.from(seenMessages).slice(-Math.floor(CONFIG.MAX_SEEN_MESSAGES / 2)));
+DOM.checkedCountEl.textContent = checkedCount;
+DOM.memoryCount.textContent = seenMessages.size;
+return newCount;
+}
+
+async function monitorCycle() {
+if (!isRunning) return;
+const doTG = !!document.getElementById('monTG').checked;
+const doReddit = !!document.getElementById('monReddit').checked;
+const doHN = !!document.getElementById('monHN').checked;
+const doMastodon = !!document.getElementById('monMastodon').checked;
+
+try {
+if (doTG && channels.length) {
+for (const ch of channels) {
+if (!isRunning) break;
+checkAndSaveMessages(await parseTelegram(ch.name));
+await new Promise(r => setTimeout(r, 800));
+}
+}
+if (doReddit && reddits.length) {
+for (const r of reddits) {
+if (!isRunning) break;
+checkAndSaveMessages(await parseReddit(r));
+await new Promise(res => setTimeout(res, 800));
+}
+}
+if (doHN && isRunning) checkAndSaveMessages(await parseHackerNews());
+if (doMastodon && isRunning) checkAndSaveMessages(await parseMastodon());
+} catch(e) { console.warn('[Amigo] monitorCycle error', e); }
+}
+
+function startMonitoring() {
+if (!keywords.length) return showToast('Добавьте триггеры', 'warning');
+isRunning = true;
+DOM.startBtn.disabled = true; DOM.stopBtn.disabled = false;
+DOM.statusDot.classList.add('active'); DOM.statusText.textContent = 'Сканирование...';
+const intervalSec = Math.max(30, parseInt(DOM.intervalInput.value, 10) || 60);
+const autoStopMin = Math.max(1, parseInt(DOM.autoStopInput.value, 10) || 15);
+if (killSwitchTimeout) clearTimeout(killSwitchTimeout);
+killSwitchTimeout = setTimeout(() => { if (isRunning) { stopMonitoring(); showToast('Автостоп', 'info'); } }, autoStopMin * 60000);
+if (monitoringInterval) clearInterval(monitoringInterval);
+monitorCycle();
+monitoringInterval = setInterval(monitorCycle, intervalSec * 1000);
+showToast('Запущено', 'success');
+}
+
+function stopMonitoring() {
+isRunning = false;
+if (monitoringInterval) clearInterval(monitoringInterval);
+if (killSwitchTimeout) clearTimeout(killSwitchTimeout);
+monitoringInterval = null; killSwitchTimeout = null;
+DOM.startBtn.disabled = false; DOM.stopBtn.disabled = true;
+DOM.statusDot.classList.remove('active'); DOM.statusText.textContent = 'Режим ожидания';
+showToast('Остановлено', 'info');
+}
+
+// --- Export / Import ---
+function downloadBlob(data, filename, mime) {
+const blob = new Blob([data], { type: mime });
+const url = URL.createObjectURL(blob);
+const a = document.createElement('a');
+a.href = url; a.download = filename;
+document.body.appendChild(a); a.click(); a.remove();
+setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+function exportResults(type) {
+if (!results.length) return showToast('Нет данных', 'warning');
+let data, mime;
+if (type === 'json') {
+data = JSON.stringify(results, null, 2); mime = 'application/json';
+} else {
+data = 'Source,Time,Link,Text\n' + results.map(r =>
+`"${(r.source || '').replace(/"/g, '""')}","${r.foundAt}","${(r.url || '').replace(/"/g, '""')}","${(r.text || '').replace(/"/g, '""')}"`
+).join('\n');
+mime = 'text/csv';
+}
+downloadBlob(data, `amigo_results.${type}`, mime);
+}
+
+function exportBackup() {
+const backup = {
+version: '2.6.0',
+exportedAt: new Date().toISOString(),
+channels, reddits, keywords, results, rssFeeds,
+seen: Array.from(seenMessages)
+};
+downloadBlob(JSON.stringify(backup, null, 2), `amigo_backup_${Date.now()}.json`, 'application/json');
+showToast('Бэкап сохранён', 'success');
+}
+
+function importBackup(file) {
+if (!file) return;
+const reader = new FileReader();
+reader.onload = (ev) => {
+try {
+const data = JSON.parse(ev.target.result);
+channels = Array.isArray(data.channels) ? data.channels : channels;
+reddits = Array.isArray(data.reddits) ? data.reddits : reddits;
+keywords = Array.isArray(data.keywords) ? data.keywords : keywords;
+results = Array.isArray(data.results) ? data.results : results;
+rssFeeds = Array.isArray(data.rssFeeds) ? data.rssFeeds : rssFeeds;
+if (Array.isArray(data.seen)) seenMessages = new Set(data.seen);
+saveState(); renderUI(); renderResults(); renderRssTags(); loadTicker();
+showToast('Бэкап загружен', 'success');
+} catch(e) {
+showToast('Ошибка чтения файла', 'error');
+}
+};
+reader.onerror = () => showToast('Не удалось прочитать файл', 'error');
+reader.readAsText(file);
+}
+
+// --- Event binding ---
+function addInputLogic(inputElement, btnElement, actionFunc) {
+btnElement.addEventListener('click', actionFunc);
+inputElement.addEventListener('keypress', (e) => { if (e.key === 'Enter') actionFunc(); });
+}
+
+function bindEvents() {
+DOM.themeIcon.addEventListener('click', toggleTheme);
+addInputLogic(DOM.globalSearchInput, DOM.globalSearchBtn, globalSearch);
+
+addInputLogic(DOM.manualChannelInput, DOM.addChannelBtn, () => {
+const val = DOM.manualChannelInput.value.trim().replace(/^@/, '');
+if (val && !channels.find(c => c.name === val)) {
+channels.push({ name: val }); saveState(); renderUI(); DOM.manualChannelInput.value = ''; showToast('Канал добавлен', 'success');
+}
+});
+addInputLogic(DOM.manualRedditInput, DOM.addRedditBtn, () => {
+const val = DOM.manualRedditInput.value.trim().replace(/^r\//i, '');
+if (val && !reddits.includes(val)) {
+reddits.push(val); saveState(); renderUI(); DOM.manualRedditInput.value = ''; showToast('Сабреддит добавлен', 'success');
+}
+});
+addInputLogic(DOM.keywordInput, DOM.addKeywordBtn, () => {
+const val = DOM.keywordInput.value.trim().toLowerCase();
+if (val && !keywords.includes(val)) {
+keywords.push(val); saveState(); renderUI(); DOM.keywordInput.value = ''; showToast('Триггер добавлен', 'success');
+}
+});
+addInputLogic(DOM.customRssInput, DOM.addRssBtn, addRssFeed);
+
+DOM.startBtn.addEventListener('click', startMonitoring);
+DOM.stopBtn.addEventListener('click', stopMonitoring);
+DOM.exportJsonBtn.addEventListener('click', () => exportResults('json'));
+DOM.exportCsvBtn.addEventListener('click', () => exportResults('csv'));
+DOM.clearResultsBtn.addEventListener('click', () => { results = []; saveState(); renderResults(); showToast('Очищено', 'info'); });
+
+DOM.exportBackupBtn.addEventListener('click', exportBackup);
+DOM.importBackupBtn.addEventListener('click', () => DOM.importFile.click());
+DOM.importFile.addEventListener('change', (e) => { if (e.target.files && e.target.files[0]) importBackup(e.target.files[0]); e.target.value = ''; });
+
+DOM.hardResetBtn.addEventListener('click', () => { if (confirm('Удалить всё?')) { localStorage.clear(); location.reload(); } });
+
+DOM.searchResults.addEventListener('click', (e) => {
+if (dragMoved) { dragMoved = false; return; }
+const card = e.target.closest('.card');
+if (card && card.dataset.url) window.open(card.dataset.url, '_blank', 'noopener');
+});
+
+document.querySelectorAll('.tab').forEach(tab => tab.addEventListener('click', () => switchTab(tab.getAttribute('data-tab'))));
+}
+
+function init() {
+initTheme();
+loadState();
+renderUI();
+renderResults();
+loadTicker();
+renderRssTags();
+enableDragScroll();
+bindEvents();
+if (tg) { try { tg.ready(); tg.expand(); } catch(e) {} }
+}
+
+if (document.readyState === 'loading') {
+document.addEventListener('DOMContentLoaded', init);
+} else {
+init();
+}
+})();
+</script>
 </body>
 </html>
+```
+
