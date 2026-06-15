@@ -133,6 +133,7 @@
             outline: none; border-color: var(--accent);
             box-shadow: 0 0 0 3px var(--accent-glow);
         }
+        input:invalid { border-color: var(--danger); }
 
         button {
             padding: 10px 20px; background: var(--accent); color: #ffffff;
@@ -143,7 +144,7 @@
         button:hover { background: var(--accent-hover); transform: translateY(-1px); box-shadow: 0 4px 12px var(--accent-glow); }
         button:active { transform: translateY(0); }
         button:disabled { background: var(--border); color: var(--text-secondary); cursor: not-allowed; transform: none; box-shadow: none; }
-        
+
         button.secondary { background: var(--bg-tertiary); color: var(--text-primary); border: 1px solid var(--border); }
         button.secondary:hover { background: var(--border); }
         button.danger { background: var(--danger); color: white; }
@@ -161,17 +162,17 @@
         .tag .remove:hover { transform: scale(1.2); }
 
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px; margin-top: 15px; }
+        @media (max-width: 640px) { .grid { grid-template-columns: 1fr; } }
 
         .card {
             background: var(--bg-primary); border: 1px solid var(--border);
             border-radius: var(--radius); padding: 15px; cursor: pointer;
             transition: var(--transition); border-left: 3px solid var(--accent);
-            display: flex; flex-direction: column; justify-content: space-between;
         }
         .card:hover { transform: translateY(-2px); box-shadow: var(--card-shadow); border-left-color: var(--accent-hover); }
         .card h3 { color: var(--text-primary); font-size: 1em; margin-bottom: 8px; word-break: break-word; }
         .card p { color: var(--text-secondary); font-size: 0.85em; margin-bottom: 10px; }
-        .card .stats { font-size: 0.8em; color: var(--accent); font-weight: 500; margin-bottom: 5px;}
+        .card .stats { font-size: 0.8em; color: var(--accent); font-weight: 500; }
 
         .log {
             background: var(--bg-primary); border: 1px solid var(--border);
@@ -186,17 +187,20 @@
             animation: entryIn 0.3s ease;
         }
         @keyframes entryIn { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: translateX(0); } }
-        
+        .log-entry.alert { border-left-color: var(--warning); }
+        .log-entry.error { border-left-color: var(--danger); }
+        .log-entry.success { border-left-color: var(--success); }
+
         .log-entry .header-log { display: flex; justify-content: space-between; margin-bottom: 8px; border-bottom: 1px solid var(--border); padding-bottom: 5px; flex-wrap: wrap; gap: 5px; }
         .log-entry .time { color: var(--text-secondary); font-size: 11px; }
         .log-entry .source { font-weight: 700; font-size: 0.95em; color: var(--accent); }
-        
-        .log-entry .text { margin: 10px 0; color: var(--text-primary); white-space: pre-wrap; word-break: break-word; max-height: 200px; overflow-y: auto; }
+
+        .log-entry .text { margin: 10px 0; color: var(--text-primary); white-space: pre-wrap; word-break: break-word; }
         .log-entry .keywords { color: var(--warning); font-size: 0.85em; font-weight: bold; }
         .log-entry .link-btn { display: inline-block; margin-top: 10px; color: var(--accent); text-decoration: none; font-weight: bold; }
         .log-entry .link-btn:hover { text-decoration: underline; }
 
-        .highlight { background-color: var(--highlight); padding: 0 2px; border-radius: 2px; font-weight: bold; color: var(--warning);}
+        .highlight { background-color: var(--highlight); padding: 0 2px; border-radius: 2px; font-weight: bold; color: var(--warning); }
 
         .status-bar {
             display: flex; justify-content: space-between; align-items: center;
@@ -251,7 +255,7 @@
         .skeleton {
             background: linear-gradient(90deg, var(--bg-primary) 25%, var(--bg-tertiary) 50%, var(--bg-primary) 75%);
             background-size: 200% 100%; animation: skeleton 1.5s infinite;
-            border-radius: var(--radius); height: 100px; 
+            border-radius: var(--radius); height: 80px; margin-bottom: 10px;
         }
         @keyframes skeleton { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
 
@@ -268,10 +272,10 @@
     <div class="toast-container" id="toastContainer"></div>
     <div class="container">
         <div class="header">
-            <h1>🅰️ Amigo Recon <span class="badge">v2.5 STEALTH</span></h1>
+            <h1>🅰️ Amigo Recon <span class="badge">v. STEALTH</span></h1>
             <button class="theme-toggle" id="themeIcon" aria-label="Toggle theme">🌙</button>
         </div>
-        <p class="subtitle">Мульти-источниковый OSINT поиск и мониторинг</p>
+        <p class="subtitle">Мульти-источниковый поиск и мониторинг</p>
 
         <div class="ticker-wrap">
             <div class="ticker-label">INTEL</div>
@@ -291,20 +295,22 @@
             <div class="panel">
                 <h2>🔎 Умный Поиск (Глобальный)</h2>
                 <p style="color: var(--text-secondary); font-size: 0.9em; margin-bottom: 15px;">
-                    Поиск по открытым источникам. Выберите площадки:
+                    Поиск по открытым источникам: Telegram (через GitHub), Hacker News, Reddit, Dev.to, Lobste.rs, Habr, VC.ru, Codeby.net и др.
                 </p>
                 <div class="source-toggles">
-                    <label class="source-toggle"><input type="checkbox" id="srcDDG" checked> 🌐 Web (DuckDuckGo)</label>
-                    <label class="source-toggle"><input type="checkbox" id="srcMastodon" checked> 🐘 Mastodon</label>
-                    <label class="source-toggle"><input type="checkbox" id="srcTG" checked> ✈️ Telegram (GH)</label>
-                    <label class="source-toggle"><input type="checkbox" id="srcHN" checked> 🟧 Hacker News</label>
-                    <label class="source-toggle"><input type="checkbox" id="srcReddit" checked> 🟥 Reddit</label>
-                    <label class="source-toggle"><input type="checkbox" id="srcDev"> ⬛ Dev.to</label>
-                    <label class="source-toggle"><input type="checkbox" id="srcLobsters"> 🦞 Lobste.rs</label>
-                    <label class="source-toggle"><input type="checkbox" id="srcHabr"> 📘 Habr</label>
+                    <label class="source-toggle"><input type="checkbox" id="srcTG" checked> Telegram (GitHub)</label>
+                    <label class="source-toggle"><input type="checkbox" id="srcHN" checked> Hacker News</label>
+                    <label class="source-toggle"><input type="checkbox" id="srcReddit" checked> Reddit</label>
+                    <label class="source-toggle"><input type="checkbox" id="srcDev"> Dev.to</label>
+                    <label class="source-toggle"><input type="checkbox" id="srcLobsters"> Lobste.rs</label>
+                    <label class="source-toggle"><input type="checkbox" id="srcHabr"> Habr</label>
+                    <label class="source-toggle"><input type="checkbox" id="srcVC"> VC.ru</label>
+                    <label class="source-toggle"><input type="checkbox" id="srcCodeby"> Codeby.net</label>
+                    <label class="source-toggle"><input type="checkbox" id="srcXakep"> Xakep.ru</label>
+                    <label class="source-toggle"><input type="checkbox" id="srcSecurityLab"> SecurityLab</label>
                 </div>
                 <div class="input-group">
-                    <input type="text" id="globalSearchInput" placeholder="Запрос (например: automation bypass, airdrop)">
+                    <input type="text" id="globalSearchInput" placeholder="Запрос (например: automation bypass, airdrop script)">
                     <button id="globalSearchBtn">🔍 Искать везде</button>
                 </div>
                 <div class="progress" id="searchProgress" style="display: none;">
@@ -324,7 +330,7 @@
                     <div class="tags" id="channelTags"></div>
                 </div>
             </div>
-            
+
             <div class="panel">
                 <h2>➕ Управление Reddit Сабреддитами</h2>
                 <div class="input-group">
@@ -337,7 +343,7 @@
                 </div>
             </div>
         </div>
-                
+
         <div id="monitor-tab" class="tab-content">
             <div class="panel">
                 <h2>🔑 Ключевые слова / Триггеры</h2>
@@ -351,23 +357,24 @@
             <div class="panel">
                 <h2>⚙️ Панель управления (Stealth Mode)</h2>
                 <div class="source-toggles" style="background: var(--bg-primary); padding: 10px; border-radius: var(--radius); margin-bottom: 15px;">
-                    <strong style="font-size: 0.9em; margin-right: 10px;">Активные:</strong>
-                    <label class="source-toggle"><input type="checkbox" id="monTG" checked> Telegram</label>
+                    <strong style="font-size: 0.9em; margin-right: 10px;">Активные источники:</strong>
+                    <label class="source-toggle"><input type="checkbox" id="monTG" checked> Telegram Каналы</label>
                     <label class="source-toggle"><input type="checkbox" id="monHN" checked> Hacker News</label>
+                    <label class="source-toggle"><input type="checkbox" id="monDev"> Dev.to</label>
                     <label class="source-toggle"><input type="checkbox" id="monReddit" checked> Reddit</label>
-                    <label class="source-toggle"><input type="checkbox" id="monMastodon"> Mastodon</label>
+                    <label class="source-toggle"><input type="checkbox" id="monLobsters"> Lobste.rs</label>
                 </div>
                 <div class="input-group">
-                    <div style="flex: 1; min-width: 150px;">
+                    <div style="flex: 1; min-width: 200px;">
                         <input type="number" id="intervalInput" value="60" min="30" max="3600">
                         <small style="display:block; color:var(--text-secondary); margin-top:4px;">Интервал (сек)</small>
                     </div>
-                    <div style="flex: 1; min-width: 150px;">
+                    <div style="flex: 1; min-width: 200px;">
                         <input type="number" id="autoStopInput" value="15" min="1" max="1440">
                         <small style="display:block; color:var(--text-secondary); margin-top:4px;">Автостоп (мин)</small>
                     </div>
-                    <div style="flex: 1; min-width: 150px;">
-                        <input type="number" id="maxResultsInput" value="300" min="50" max="1000">
+                    <div style="flex: 1; min-width: 200px;">
+                        <input type="number" id="maxResultsInput" value="500" min="100" max="5000">
                         <small style="display:block; color:var(--text-secondary); margin-top:4px;">Макс. результатов</small>
                     </div>
                     <button id="startBtn">▶️ Запуск</button>
@@ -379,9 +386,9 @@
                         <span id="statusText">Режим ожидания</span>
                     </div>
                     <div style="color: var(--text-secondary); font-size: 0.9em;">
-                        Хиты: <strong id="matchCount" style="color: var(--accent);">0</strong> | 
-                        Проверено: <strong id="checkedCount" style="color: var(--text-secondary);">0</strong> | 
-                        RAM (Кэш): <strong id="memoryCount" style="color: var(--text-secondary);">0</strong>
+                        Перехвачено: <strong id="matchCount" style="color: var(--accent);">0</strong> |
+                        Проверено: <strong id="checkedCount" style="color: var(--text-secondary);">0</strong> |
+                        Память: <strong id="memoryCount" style="color: var(--text-secondary);">0</strong>
                     </div>
                 </div>
             </div>
@@ -410,7 +417,7 @@
             <div class="panel">
                 <h2>📡 Кастомная RSS Лента (Тикер)</h2>
                 <p style="color: var(--text-secondary); font-size: 0.9em; margin-bottom: 15px;">
-                    Добавьте ссылки на RSS для бегущей строки (разделитель - запятая).
+                    Вставьте одну или несколько ссылок через запятую. Оставьте пустым для дефолтного Hacker News.
                 </p>
                 <div class="input-group">
                     <input type="url" id="customRssInput" placeholder="https://example.com/feed/">
@@ -420,7 +427,7 @@
             </div>
 
             <div class="panel">
-                <h2>💾 Резервное копирование</h2>
+                <h2>💾 Экспорт / Импорт конфигурации</h2>
                 <div class="input-group">
                     <button id="exportBackupBtn" class="secondary">⬇️ Скачать бэкап</button>
                     <button id="importBackupBtn" class="secondary">⬆️ Загрузить бэкап</button>
@@ -436,27 +443,20 @@
     </div>
 
     <script>
-    // ================================================================
-    // AMIGO RECON v2.5 - Optimized Production OSINT Tool
-    // ================================================================
-    
     (function() {
         "use strict";
-        
+
         // --- CONFIGURATION ---
         const CONFIG = {
-            MAX_RESULTS: 300, // Reduced to prevent localStorage QuotaExceeded
-            MAX_SEEN_MESSAGES: 2000, 
-            PROXY_TIMEOUT: 12000,
+            MAX_SEEN_MESSAGES: 10000,
+            PROXY_TIMEOUT: 15000,
             FETCH_TIMEOUT: 10000,
             RSS_FEEDS_DEFAULT: ["https://hnrss.org/frontpage"],
             RSS2JSON_API: "https://api.rss2json.com/v1/api.json",
-            // Improved Proxy Pool
             PROXIES: [
-                url => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
-                url => `https://corsproxy.io/?${encodeURIComponent(url)}`,
-                url => `https://thingproxy.freeboard.io/fetch/${url}`,
-                url => `https://api.codetabs.com/v1/proxy/?quest=${encodeURIComponent(url)}`
+                url => "https://api.allorigins.win/raw?url=" + encodeURIComponent(url),
+                url => "https://corsproxy.io/?" + encodeURIComponent(url),
+                url => "https://api.codetabs.com/v1/proxy/?quest=" + encodeURIComponent(url)
             ]
         };
 
@@ -517,25 +517,19 @@
             toastContainer: document.getElementById('toastContainer')
         };
 
-        // --- Helper functions ---
+        // --- Helpers ---
         function saveState() {
             try {
+                const maxRes = parseInt(DOM.maxResultsInput.value) || 500;
                 localStorage.setItem('amigo_channels', JSON.stringify(channels));
                 localStorage.setItem('amigo_reddits', JSON.stringify(reddits));
                 localStorage.setItem('amigo_keywords', JSON.stringify(keywords));
-                localStorage.setItem('amigo_results', JSON.stringify(results.slice(0, CONFIG.MAX_RESULTS)));
+                localStorage.setItem('amigo_results', JSON.stringify(results.slice(0, maxRes)));
                 localStorage.setItem('amigo_rssFeeds', JSON.stringify(rssFeeds));
-                localStorage.setItem('amigo_seen', JSON.stringify(Array.from(seenMessages).slice(-CONFIG.MAX_SEEN_MESSAGES)));
-            } catch(e) { 
-                // Emergency cleanup if localStorage is full (QuotaExceededError)
-                if(e.name === 'QuotaExceededError') {
-                    showToast('Память переполнена! Очистка старых данных...', 'warning');
-                    seenMessages = new Set(Array.from(seenMessages).slice(-500));
-                    results = results.slice(0, 100);
-                    saveState(); 
-                } else {
-                    showToast('Ошибка сохранения: ' + e.message, 'error'); 
-                }
+                const seenArr = Array.from(seenMessages).slice(-CONFIG.MAX_SEEN_MESSAGES);
+                localStorage.setItem('amigo_seen', JSON.stringify(seenArr));
+            } catch (e) {
+                showToast('Ошибка сохранения: ' + e.message, 'error');
             }
         }
 
@@ -546,9 +540,10 @@
                 keywords = JSON.parse(localStorage.getItem('amigo_keywords') || '[]');
                 results = JSON.parse(localStorage.getItem('amigo_results') || '[]');
                 rssFeeds = JSON.parse(localStorage.getItem('amigo_rssFeeds') || '[]');
-                const seen = JSON.parse(localStorage.getItem('amigo_seen') || '[]');
-                seenMessages = new Set(seen);
-            } catch(e) { console.error('Load error', e); }
+                seenMessages = new Set(JSON.parse(localStorage.getItem('amigo_seen') || '[]'));
+            } catch (e) {
+                console.error('Load error', e);
+            }
         }
 
         function showToast(message, type = 'info', duration = 3000) {
@@ -564,17 +559,24 @@
 
         function escapeHtml(str) {
             if (!str) return '';
-            return String(str).replace(/[&<>]/g, function(m) {
-                if (m === '&') return '&amp;';
-                if (m === '<') return '&lt;';
-                if (m === '>') return '&gt;';
-                return m;
-            });
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
+        function safeUrl(url) {
+            if (!url) return '#';
+            const trimmed = String(url).trim();
+            if (/^https?:\/\//i.test(trimmed)) return trimmed;
+            return '#';
         }
 
         function triggerHaptic(type = 'light') {
             if (tg && tg.HapticFeedback) {
-                try { tg.HapticFeedback.impactOccurred(type); } catch(e) {}
+                try { tg.HapticFeedback.impactOccurred(type); } catch (e) {}
             }
         }
 
@@ -590,6 +592,7 @@
                 DOM.themeIcon.textContent = '🌙';
             }
         }
+
         function toggleTheme() {
             const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
             document.documentElement.setAttribute('data-theme', isDark ? 'light' : 'dark');
@@ -612,7 +615,7 @@
             document.querySelectorAll('.drag-scroll').forEach(slider => {
                 let isDown = false, startX, startY, scrollLeft, scrollTop;
                 slider.addEventListener('mousedown', (e) => {
-                    if (e.target.closest('button, a, input, .remove')) return;
+                    if (e.target.closest('button, a, input')) return;
                     isDown = true;
                     slider.classList.add('active');
                     startX = e.pageX - slider.offsetLeft;
@@ -633,115 +636,136 @@
             });
         }
 
-        // --- Network helpers with SMART proxy logic ---
-        async function fetchWithTimeout(url, timeout = CONFIG.FETCH_TIMEOUT, options = {}) {
+        // --- Network ---
+        async function fetchWithTimeout(url, timeout = CONFIG.FETCH_TIMEOUT) {
             const controller = new AbortController();
             const id = setTimeout(() => controller.abort(), timeout);
             try {
-                const response = await fetch(url, { ...options, signal: controller.signal });
+                const response = await fetch(url, { signal: controller.signal });
                 clearTimeout(id);
                 return response;
-            } catch(e) {
+            } catch (e) {
                 clearTimeout(id);
                 throw e;
             }
         }
 
-        async function fetchWithProxy(url, expectJson = false) {
+        async function fetchWithProxy(url) {
+            const errors = [];
             for (const proxy of CONFIG.PROXIES) {
                 try {
                     const proxyUrl = proxy(url);
                     const res = await fetchWithTimeout(proxyUrl, CONFIG.PROXY_TIMEOUT);
-                    
-                    if (res.ok) {
-                        const text = await res.text();
-                        // Smart verification: If we expect JSON, but proxy returns HTML error page, throw to next proxy
-                        if (expectJson) {
-                            try { JSON.parse(text); return text; } catch(e) { throw new Error('Not JSON'); }
-                        }
-                        return text;
-                    }
-                } catch(e) {
-                    continue; // try next proxy
+                    if (res.ok) return await res.text();
+                } catch (e) {
+                    errors.push(e);
                 }
             }
-            throw new Error('All proxies failed for: ' + url);
+            throw new Error('All proxies failed: ' + errors.map(e => e.message).join(', '));
         }
 
         async function fetchJSONWithProxy(url) {
-            const text = await fetchWithProxy(url, true);
+            const text = await fetchWithProxy(url);
             return JSON.parse(text);
         }
 
         // --- RSS Ticker ---
         async function loadTicker() {
             const feeds = rssFeeds.length ? rssFeeds : CONFIG.RSS_FEEDS_DEFAULT;
+            const promises = feeds.map(url =>
+                fetchWithTimeout(`${CONFIG.RSS2JSON_API}?rss_url=${encodeURIComponent(url)}`, 10000)
+                    .then(res => res.ok ? res.json() : { items: [] })
+                    .catch(() => ({ items: [] }))
+            );
+            const resultsArr = await Promise.allSettled(promises);
             let allItems = [];
-            
-            for(const url of feeds) {
-                try {
-                    const res = await fetchWithTimeout(`${CONFIG.RSS2JSON_API}?rss_url=${encodeURIComponent(url)}`, 8000);
-                    if(res.ok) {
-                        const data = await res.json();
-                        if(data.items) allItems.push(...data.items);
-                    }
-                } catch(e) {}
-            }
-
+            resultsArr.forEach(r => {
+                if (r.status === 'fulfilled' && r.value.items) allItems.push(...r.value.items);
+            });
             if (allItems.length) {
-                const items = allItems.sort(() => 0.5 - Math.random()).slice(0, 30); // Randomize a bit
-                const html = items.map(item => `<a href="${escapeHtml(item.link)}" target="_blank" class="ticker-item">⚡ ${escapeHtml(item.title)}</a>`).join('');
+                const items = allItems.slice(0, 30);
+                const html = items.map(item =>
+                    `<a href="${safeUrl(item.link)}" target="_blank" rel="noopener noreferrer" class="ticker-item">⚡ ${escapeHtml(item.title)}</a>`
+                ).join('');
                 DOM.tickerContent.innerHTML = html + html;
             } else {
-                DOM.tickerContent.innerHTML = '<span class="ticker-item">[!] Ожидание данных (или проблемы с сетью)...</span>';
+                DOM.tickerContent.innerHTML = '<span class="ticker-item">[!] Нет данных RSS</span>';
             }
         }
 
         function renderRssTags() {
-            DOM.rssTags.innerHTML = rssFeeds.map(url => `<div class="tag">${escapeHtml(url.substring(0, 30))}... <span class="remove" data-url="${escapeHtml(url)}">×</span></div>`).join('');
+            DOM.rssTags.innerHTML = rssFeeds.map(url =>
+                `<div class="tag">${escapeHtml(url.substring(0, 30))}... <span class="remove" data-url="${escapeHtml(url)}">×</span></div>`
+            ).join('');
             document.querySelectorAll('#rssTags .remove').forEach(el => {
-                el.addEventListener('click', () => {
-                    rssFeeds = rssFeeds.filter(f => f !== el.getAttribute('data-url'));
-                    saveState(); loadTicker(); renderRssTags();
-                    showToast('RSS удален', 'info');
+                el.addEventListener('click', (e) => {
+                    const url = el.getAttribute('data-url');
+                    rssFeeds = rssFeeds.filter(f => f !== url);
+                    saveState();
+                    loadTicker();
+                    renderRssTags();
+                    showToast('RSS источник удален', 'info');
                 });
             });
         }
 
         function addRssFeed() {
             const val = DOM.customRssInput.value.trim();
-            if (!val) return showToast('Введите URL', 'warning');
+            if (!val) { showToast('Введите URL', 'warning'); return; }
             const urls = val.split(',').map(s => s.trim()).filter(s => s.startsWith('http'));
-            if (!urls.length) return showToast('Некорректный URL', 'error');
-            rssFeeds = [...new Set([...rssFeeds, ...urls])];
-            saveState(); loadTicker(); renderRssTags();
+            if (!urls.length) { showToast('Некорректный URL', 'error'); return; }
+            const unique = [...new Set([...rssFeeds, ...urls])];
+            if (unique.length === rssFeeds.length) {
+                showToast('Такие RSS уже есть', 'warning');
+                return;
+            }
+            rssFeeds = unique;
+            saveState();
+            loadTicker();
+            renderRssTags();
             DOM.customRssInput.value = '';
-            showToast(`Добавлено ${urls.length} RSS`, 'success');
+            showToast(`Добавлено ${unique.length - rssFeeds.length} RSS`, 'success');
         }
 
-        // --- Rendering UI ---
+        // --- UI Rendering ---
         function renderUI() {
-            DOM.channelTags.innerHTML = channels.map(c => `<div class="tag">@${escapeHtml(c.name)} <span class="remove" data-channel="${escapeHtml(c.name)}">×</span></div>`).join('');
-            DOM.redditTags.innerHTML = reddits.map(r => `<div class="tag">r/${escapeHtml(r)} <span class="remove" data-reddit="${escapeHtml(r)}">×</span></div>`).join('');
-            DOM.keywordTags.innerHTML = keywords.map(k => `<div class="tag">${escapeHtml(k)} <span class="remove" data-keyword="${escapeHtml(k)}">×</span></div>`).join('');
+            DOM.channelTags.innerHTML = channels.map(c =>
+                `<div class="tag">@${escapeHtml(c.name)} <span class="remove" data-channel="${escapeHtml(c.name)}">×</span></div>`
+            ).join('');
+            DOM.redditTags.innerHTML = reddits.map(r =>
+                `<div class="tag">r/${escapeHtml(r)} <span class="remove" data-reddit="${escapeHtml(r)}">×</span></div>`
+            ).join('');
+            DOM.keywordTags.innerHTML = keywords.map(k =>
+                `<div class="tag">${escapeHtml(k)} <span class="remove" data-keyword="${escapeHtml(k)}">×</span></div>`
+            ).join('');
             DOM.channelCount.textContent = channels.length;
             DOM.redditCount.textContent = reddits.length;
 
             document.querySelectorAll('#channelTags .remove').forEach(el => {
-                el.addEventListener('click', () => { channels = channels.filter(c => c.name !== el.getAttribute('data-channel')); saveState(); renderUI(); });
+                el.addEventListener('click', () => {
+                    channels = channels.filter(c => c.name !== el.getAttribute('data-channel'));
+                    saveState(); renderUI(); showToast('Канал удален', 'info');
+                });
             });
             document.querySelectorAll('#redditTags .remove').forEach(el => {
-                el.addEventListener('click', () => { reddits = reddits.filter(r => r !== el.getAttribute('data-reddit')); saveState(); renderUI(); });
+                el.addEventListener('click', () => {
+                    reddits = reddits.filter(r => r !== el.getAttribute('data-reddit'));
+                    saveState(); renderUI(); showToast('Сабреддит удален', 'info');
+                });
             });
             document.querySelectorAll('#keywordTags .remove').forEach(el => {
-                el.addEventListener('click', () => { keywords = keywords.filter(k => k !== el.getAttribute('data-keyword')); saveState(); renderUI(); });
+                el.addEventListener('click', () => {
+                    keywords = keywords.filter(k => k !== el.getAttribute('data-keyword'));
+                    saveState(); renderUI(); showToast('Триггер удален', 'info');
+                });
             });
         }
 
         function highlightText(text, kws) {
             let result = escapeHtml(text);
             kws.forEach(kw => {
-                const regex = new RegExp(`(${escapeHtml(kw)})`, 'gi');
+                const escapedKw = escapeHtml(kw);
+                const regex = new RegExp(`(${escapedKw})`, 'gi');
                 result = result.replace(regex, '<span class="highlight">$1</span>');
             });
             return result;
@@ -751,13 +775,10 @@
             DOM.matchCount.textContent = results.length;
             DOM.checkedCountEl.textContent = checkedCount;
             DOM.memoryCount.textContent = seenMessages.size;
-            
             if (!results.length) {
                 DOM.resultsLog.innerHTML = '<div class="empty-state"><div class="icon">📭</div><p>Лог пуст.</p></div>';
                 return;
             }
-            
-            // Render efficiently using map and join
             DOM.resultsLog.innerHTML = results.map(r => `
                 <div class="log-entry alert">
                     <div class="header-log">
@@ -766,162 +787,230 @@
                     </div>
                     <div class="keywords">Триггеры: ${r.keywords.map(escapeHtml).join(', ')}</div>
                     <div class="text">${highlightText(r.text, r.keywords)}</div>
-                    <a href="${escapeHtml(r.url)}" target="_blank" class="link-btn">Источник ↗</a>
+                    <a href="${safeUrl(r.url)}" target="_blank" rel="noopener noreferrer" class="link-btn">Перейти к источнику ↗</a>
                 </div>
             `).join('');
         }
 
-        // --- Global search (Optimized) ---
+        // --- Global search (secure, debounced) ---
+        let searchDebounce = null;
         async function globalSearch() {
             const query = DOM.globalSearchInput.value.trim();
             if (!query) { showToast('Введите запрос', 'warning'); return; }
-            
+
+            DOM.searchBtn.disabled = true;
             DOM.searchProgress.style.display = 'block';
-            DOM.searchResults.innerHTML = '<div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div>';
+            DOM.searchResults.innerHTML = '<div class="skeleton"></div><div class="skeleton"></div>';
             DOM.searchProgressBar.style.width = '0%';
-            
+
             let found = 0;
-            let resultsHTML = ''; // Batch HTML additions
-            
             const updateProgress = (pct) => { DOM.searchProgressBar.style.width = pct + '%'; };
+            const addCards = (html) => {
+                if (html) {
+                    DOM.searchResults.insertAdjacentHTML('beforeend', html);
+                    found += (html.match(/class="card"/g) || []).length;
+                }
+            };
 
-            // 1. DuckDuckGo Lite (Web Search)
-            if (document.getElementById('srcDDG')?.checked) {
-                try {
-                    const html = await fetchWithProxy(`https://lite.duckduckgo.com/lite/?q=${encodeURIComponent(query)}`);
-                    const doc = new DOMParser().parseFromString(html, 'text/html');
-                    doc.querySelectorAll('.result-snippet').forEach((el, idx) => {
-                        if(idx > 4) return;
-                        const titleEl = el.parentElement.querySelector('.result-title');
-                        if(titleEl) {
-                            resultsHTML += `<div class="card" onclick="window.open('${escapeHtml(titleEl.href)}','_blank')"><div class="stats">🌐 Web (DDG)</div><h3>${escapeHtml(titleEl.textContent)}</h3><p>${escapeHtml(el.textContent.substring(0,100))}...</p></div>`;
-                            found++;
-                        }
-                    });
-                } catch(e) {}
-                updateProgress(15);
-            }
+            const fetchViaProxy = async (url) => {
+                try { return await fetchJSONWithProxy(url); } catch (e) { return null; }
+            };
 
-            // 2. Mastodon (Decentralized Social)
-            if (document.getElementById('srcMastodon')?.checked) {
-                try {
-                    const res = await fetchWithTimeout(`https://mastodon.social/api/v2/search?q=${encodeURIComponent(query)}&type=statuses&limit=5`);
-                    if(res.ok) {
-                        const data = await res.json();
-                        data.statuses.forEach(s => {
-                            // Strip HTML tags for clean display
-                            const cleanText = s.content.replace(/<[^>]*>?/gm, '');
-                            resultsHTML += `<div class="card" onclick="window.open('${escapeHtml(s.url)}','_blank')"><div class="stats">🐘 Mastodon</div><h3>@${escapeHtml(s.account.username)}</h3><p>${escapeHtml(cleanText.substring(0,80))}...</p></div>`;
-                            found++;
-                        });
-                    }
-                } catch(e) {}
-                updateProgress(30);
-            }
+            const tasks = [];
 
-            // 3. GitHub (Telegram hack) - Now with rate limit warning mitigation
             if (document.getElementById('srcTG').checked) {
-                try {
-                    const res = await fetchWithTimeout(`https://api.github.com/search/code?q=${encodeURIComponent('t.me ' + query)}&per_page=5`);
-                    if(res.ok) {
-                        const ghData = await res.json();
-                        const tgChannels = new Set();
-                        
-                        // We only process first 2 to save time and API limits
-                        for (const item of (ghData.items || []).slice(0, 2)) {
-                            try {
-                                const rawData = await fetchWithProxy(item.url, true);
-                                const decoded = typeof rawData === 'string' ? rawData : JSON.stringify(rawData);
-                                const matches = decoded.match(/t\.me\/([a-zA-Z0-9_]{4,})/g) || [];
-                                matches.forEach(m => {
-                                    const ch = m.replace('t.me/', '').toLowerCase();
-                                    if (!['joinchat', 'addtheme', 'share', 'socks'].includes(ch)) tgChannels.add(ch);
-                                });
-                            } catch(e) {}
+                tasks.push((async () => {
+                    try {
+                        const ghUrl = `https://api.github.com/search/code?q=${encodeURIComponent('t.me ' + query)}&per_page=10`;
+                        const ghData = await fetchViaProxy(ghUrl);
+                        if (ghData && ghData.items) {
+                            const tgChannels = new Set();
+                            for (const item of ghData.items.slice(0, 5)) {
+                                try {
+                                    const rawUrl = item.url;
+                                    const rawData = await fetchViaProxy(rawUrl);
+                                    if (rawData && typeof rawData === 'string') {
+                                        const matches = rawData.match(/t\.me\/([a-zA-Z0-9_]{4,})/g) || [];
+                                        matches.forEach(m => {
+                                            const ch = m.replace('t.me/', '').toLowerCase();
+                                            if (!['joinchat', 'addtheme', 'share', 'socks'].includes(ch)) tgChannels.add(ch);
+                                        });
+                                    }
+                                } catch (e) {}
+                            }
+                            const cards = Array.from(tgChannels).slice(0, 10).map(ch =>
+                                `<div class="card" data-url="https://t.me/${escapeHtml(ch)}"><div class="stats">✈️ Telegram</div><h3>@${escapeHtml(ch)}</h3><p>Найден на GitHub</p></div>`
+                            ).join('');
+                            addCards(cards);
                         }
-                        
-                        Array.from(tgChannels).slice(0, 5).forEach(ch => {
-                            resultsHTML += `<div class="card" onclick="window.open('https://t.me/${ch}','_blank')"><div class="stats">✈️ Telegram (GH)</div><h3>@${escapeHtml(ch)}</h3><p>Упоминается в связи с: ${escapeHtml(query)}</p></div>`;
-                            found++;
-                        });
-                    }
-                } catch(e) {}
-                updateProgress(45);
+                    } catch (e) { console.warn('TG search error', e); }
+                    updateProgress(10);
+                })());
             }
 
-            // 4. Hacker News
             if (document.getElementById('srcHN').checked) {
-                try {
-                    const res = await fetchWithTimeout(`https://hn.algolia.com/api/v1/search?query=${encodeURIComponent(query)}&tags=story&hitsPerPage=5`);
-                    if(res.ok) {
+                tasks.push((async () => {
+                    try {
+                        const res = await fetchWithTimeout(`https://hn.algolia.com/api/v1/search?query=${encodeURIComponent(query)}&tags=story&hitsPerPage=6`);
                         const data = await res.json();
-                        data.hits.forEach(h => {
-                            resultsHTML += `<div class="card" onclick="window.open('${escapeHtml(h.url || 'https://news.ycombinator.com/item?id='+h.objectID)}','_blank')"><div class="stats">🟧 Hacker News</div><h3>${escapeHtml(h.title)}</h3><p>Points: ${h.points || 0}</p></div>`;
-                            found++;
-                        });
-                    }
-                } catch(e) {}
-                updateProgress(60);
+                        const cards = data.hits.map(h =>
+                            `<div class="card" data-url="${safeUrl(h.url || 'https://news.ycombinator.com/item?id='+h.objectID)}"><div class="stats">🟧 Hacker News</div><h3>${escapeHtml(h.title)}</h3><p>Points: ${h.points || 0}</p></div>`
+                        ).join('');
+                        addCards(cards);
+                    } catch (e) {}
+                    updateProgress(20);
+                })());
             }
 
-            // 5. Reddit
             if (document.getElementById('srcReddit').checked) {
-                try {
-                    // Added raw_json=1 to prevent strict filtering
-                    const data = await fetchJSONWithProxy(`https://www.reddit.com/search.json?q=${encodeURIComponent(query)}&limit=5&raw_json=1`);
-                    if (data && data.data) {
-                        (data.data.children || []).forEach(post => {
-                            resultsHTML += `<div class="card" onclick="window.open('https://www.reddit.com${post.data.permalink}','_blank')"><div class="stats">🟥 Reddit</div><h3>${escapeHtml(post.data.title)}</h3><p>r/${escapeHtml(post.data.subreddit)} | ↑${post.data.ups}</p></div>`;
-                            found++;
-                        });
-                    }
-                } catch(e) {}
-                updateProgress(75);
+                tasks.push((async () => {
+                    try {
+                        const data = await fetchViaProxy(`https://www.reddit.com/search.json?q=${encodeURIComponent(query)}&limit=6`);
+                        if (data && data.data) {
+                            const cards = (data.data.children || []).map(post =>
+                                `<div class="card" data-url="${safeUrl('https://www.reddit.com' + post.data.permalink)}"><div class="stats">🟥 Reddit</div><h3>${escapeHtml(post.data.title)}</h3><p>r/${escapeHtml(post.data.subreddit)} | ↑${post.data.ups}</p></div>`
+                            ).join('');
+                            addCards(cards);
+                        }
+                    } catch (e) {}
+                    updateProgress(30);
+                })());
             }
 
-            // 6. Dev.to
-            if (document.getElementById('srcDev')?.checked) {
-                try {
-                    const res = await fetchWithTimeout(`https://dev.to/api/articles?q=${encodeURIComponent(query)}&per_page=4`);
-                    if(res.ok) {
+            if (document.getElementById('srcDev').checked) {
+                tasks.push((async () => {
+                    try {
+                        const res = await fetchWithTimeout(`https://dev.to/api/articles?q=${encodeURIComponent(query)}&per_page=6`);
                         const data = await res.json();
-                        data.forEach(art => {
-                            resultsHTML += `<div class="card" onclick="window.open('${escapeHtml(art.url)}','_blank')"><div class="stats">⬛ Dev.to</div><h3>${escapeHtml(art.title)}</h3><p>❤️ ${art.public_reactions_count || 0}</p></div>`;
-                            found++;
-                        });
-                    }
-                } catch(e) {}
-                updateProgress(85);
+                        const cards = data.map(art =>
+                            `<div class="card" data-url="${safeUrl(art.url)}"><div class="stats">⬛ Dev.to</div><h3>${escapeHtml(art.title)}</h3><p>❤️ ${art.public_reactions_count || 0}</p></div>`
+                        ).join('');
+                        addCards(cards);
+                    } catch (e) {}
+                    updateProgress(40);
+                })());
             }
 
-            // 7. Habr (RSS via Proxy)
-            if (document.getElementById('srcHabr')?.checked) {
-                try {
-                    const data = await fetchJSONWithProxy(`${CONFIG.RSS2JSON_API}?rss_url=${encodeURIComponent('https://habr.com/ru/rss/hub/all/')}`);
-                    if (data && data.items) {
-                        const filtered = data.items.filter(item => item.title.toLowerCase().includes(query.toLowerCase())).slice(0, 4);
-                        filtered.forEach(item => {
-                            resultsHTML += `<div class="card" onclick="window.open('${escapeHtml(item.link)}','_blank')"><div class="stats">📘 Habr</div><h3>${escapeHtml(item.title)}</h3><p>${escapeHtml(item.pubDate.substring(0,16))}</p></div>`;
-                            found++;
-                        });
-                    }
-                } catch(e) {}
-                updateProgress(100);
+            if (document.getElementById('srcLobsters').checked) {
+                tasks.push((async () => {
+                    try {
+                        const data = await fetchViaProxy('https://lobste.rs/hottest.json');
+                        if (data && Array.isArray(data)) {
+                            const filtered = data.filter(item => item.title.toLowerCase().includes(query.toLowerCase())).slice(0, 6);
+                            const cards = filtered.map(item =>
+                                `<div class="card" data-url="${safeUrl('https://lobste.rs' + item.url)}"><div class="stats">🦞 Lobste.rs</div><h3>${escapeHtml(item.title)}</h3><p>${item.score} points</p></div>`
+                            ).join('');
+                            addCards(cards);
+                        }
+                    } catch (e) {}
+                    updateProgress(50);
+                })());
             }
 
-            // Render final batch
+            if (document.getElementById('srcHabr').checked) {
+                tasks.push((async () => {
+                    try {
+                        const data = await fetchViaProxy(`${CONFIG.RSS2JSON_API}?rss_url=${encodeURIComponent('https://habr.com/ru/rss/hub/all')}`);
+                        if (data && data.items) {
+                            const filtered = data.items.filter(item => item.title.toLowerCase().includes(query.toLowerCase())).slice(0, 6);
+                            const cards = filtered.map(item =>
+                                `<div class="card" data-url="${safeUrl(item.link)}"><div class="stats">📘 Habr</div><h3>${escapeHtml(item.title)}</h3><p>${escapeHtml(item.pubDate.substring(0,16))}</p></div>`
+                            ).join('');
+                            addCards(cards);
+                        }
+                    } catch (e) {}
+                    updateProgress(60);
+                })());
+            }
+
+            if (document.getElementById('srcVC').checked) {
+                tasks.push((async () => {
+                    try {
+                        const data = await fetchViaProxy(`${CONFIG.RSS2JSON_API}?rss_url=${encodeURIComponent('https://vc.ru/rss')}`);
+                        if (data && data.items) {
+                            const filtered = data.items.filter(item => item.title.toLowerCase().includes(query.toLowerCase())).slice(0, 6);
+                            const cards = filtered.map(item =>
+                                `<div class="card" data-url="${safeUrl(item.link)}"><div class="stats">💼 VC.ru</div><h3>${escapeHtml(item.title)}</h3><p>${escapeHtml(item.pubDate.substring(0,16))}</p></div>`
+                            ).join('');
+                            addCards(cards);
+                        }
+                    } catch (e) {}
+                    updateProgress(70);
+                })());
+            }
+
+            if (document.getElementById('srcCodeby').checked) {
+                tasks.push((async () => {
+                    try {
+                        const data = await fetchViaProxy(`${CONFIG.RSS2JSON_API}?rss_url=${encodeURIComponent('https://codeby.net/forum/forums/-/index.rss')}`);
+                        if (data && data.items) {
+                            const filtered = data.items.filter(item => item.title.toLowerCase().includes(query.toLowerCase())).slice(0, 6);
+                            const cards = filtered.map(item =>
+                                `<div class="card" data-url="${safeUrl(item.link)}"><div class="stats">🛡️ Codeby</div><h3>${escapeHtml(item.title)}</h3><p>${escapeHtml(item.pubDate.substring(0,16))}</p></div>`
+                            ).join('');
+                            addCards(cards);
+                        }
+                    } catch (e) {}
+                    updateProgress(80);
+                })());
+            }
+
+            if (document.getElementById('srcXakep').checked) {
+                tasks.push((async () => {
+                    try {
+                        const data = await fetchViaProxy(`${CONFIG.RSS2JSON_API}?rss_url=${encodeURIComponent('https://xakep.ru/feed/')}`);
+                        if (data && data.items) {
+                            const filtered = data.items.filter(item => item.title.toLowerCase().includes(query.toLowerCase())).slice(0, 6);
+                            const cards = filtered.map(item =>
+                                `<div class="card" data-url="${safeUrl(item.link)}"><div class="stats">🐉 Xakep</div><h3>${escapeHtml(item.title)}</h3><p>${escapeHtml(item.pubDate.substring(0,16))}</p></div>`
+                            ).join('');
+                            addCards(cards);
+                        }
+                    } catch (e) {}
+                    updateProgress(90);
+                })());
+            }
+
+            if (document.getElementById('srcSecurityLab').checked) {
+                tasks.push((async () => {
+                    try {
+                        const data = await fetchViaProxy(`${CONFIG.RSS2JSON_API}?rss_url=${encodeURIComponent('https://www.securitylab.ru/export/rss/')}`);
+                        if (data && data.items) {
+                            const filtered = data.items.filter(item => item.title.toLowerCase().includes(query.toLowerCase())).slice(0, 6);
+                            const cards = filtered.map(item =>
+                                `<div class="card" data-url="${safeUrl(item.link)}"><div class="stats">🔒 SecurityLab</div><h3>${escapeHtml(item.title)}</h3><p>${escapeHtml(item.pubDate.substring(0,16))}</p></div>`
+                            ).join('');
+                            addCards(cards);
+                        }
+                    } catch (e) {}
+                    updateProgress(100);
+                })());
+            }
+
+            await Promise.allSettled(tasks);
+
+            // Delegate clicks on search cards
+            DOM.searchResults.addEventListener('click', (e) => {
+                const card = e.target.closest('.card');
+                if (card && card.dataset.url) {
+                    window.open(card.dataset.url, '_blank', 'noopener');
+                }
+            });
+
             setTimeout(() => {
                 DOM.searchProgress.style.display = 'none';
-                if (!found) {
-                    DOM.searchResults.innerHTML = '<div class="empty-state" style="grid-column:1/-1;"><div class="icon">🔍</div><p>Ничего не найдено</p></div>';
-                } else {
-                    DOM.searchResults.innerHTML = resultsHTML;
-                    showToast(`Найдено ${found} совпадений`, 'success');
-                }
-            }, 300);
+                if (!found) DOM.searchResults.innerHTML = '<div class="empty-state" style="grid-column:1/-1;"><div class="icon">🔍</div><p>Ничего не найдено</p></div>';
+                else showToast(`Найдено ${found} результатов`, 'success');
+                DOM.searchBtn.disabled = false;
+            }, 500);
         }
 
-        // --- Parsers for monitoring ---
+        function debounceSearch() {
+            clearTimeout(searchDebounce);
+            searchDebounce = setTimeout(globalSearch, 300);
+        }
+
+        // --- Monitoring parsers (with error handling) ---
         async function parseTelegram(channelName) {
             try {
                 const html = await fetchWithProxy(`https://t.me/s/${channelName}`);
@@ -931,152 +1020,197 @@
                     const textEl = el.querySelector('.tgme_widget_message_text');
                     const text = textEl ? textEl.textContent.trim() : '';
                     const postId = el.getAttribute('data-post');
-                    if (text && postId) messages.push({ id: `tg_${postId}`, source: `Telegram: @${channelName}`, text, url: `https://t.me/${postId}`, date: new Date().toISOString() });
+                    if (text && postId) {
+                        messages.push({
+                            id: `tg_${postId}`,
+                            source: `Telegram: @${channelName}`,
+                            text,
+                            url: `https://t.me/${postId}`,
+                            date: new Date().toISOString()
+                        });
+                    }
                 });
                 return messages;
-            } catch(e) { return []; }
+            } catch (e) {
+                console.warn('Telegram parse failed for', channelName, e);
+                return [];
+            }
         }
-        
+
         async function parseReddit(subreddit) {
             try {
-                const data = await fetchJSONWithProxy(`https://www.reddit.com/r/${subreddit}/new.json?limit=10&raw_json=1`);
-                return (data.data?.children || []).map(post => ({ id: `reddit_${post.data.id}`, source: `Reddit: r/${subreddit}`, text: post.data.title + '\n' + (post.data.selftext || ''), url: `https://www.reddit.com${post.data.permalink}`, date: new Date(post.data.created_utc * 1000).toISOString() }));
-            } catch(e) { return []; }
+                const data = await fetchJSONWithProxy(`https://www.reddit.com/r/${subreddit}/new.json?limit=5`);
+                return (data.data?.children || []).map(post => ({
+                    id: `reddit_${post.data.id}`,
+                    source: `Reddit: r/${subreddit}`,
+                    text: post.data.title + '\n' + (post.data.selftext || ''),
+                    url: `https://www.reddit.com${post.data.permalink}`,
+                    date: new Date(post.data.created_utc * 1000).toISOString()
+                }));
+            } catch (e) {
+                console.warn('Reddit parse failed for', subreddit, e);
+                return [];
+            }
         }
-        
+
         async function parseHackerNews() {
             const messages = [];
-            for (const kw of keywords.slice(0, 3)) { // Limit kw loop to save requests
-                try {
-                    const res = await fetchWithTimeout(`https://hn.algolia.com/api/v1/search_by_date?query=${encodeURIComponent(kw)}&hitsPerPage=5`);
-                    if(res.ok) {
-                        const data = await res.json();
-                        data.hits.forEach(h => messages.push({ id: `hn_${h.objectID}`, source: 'Hacker News', text: h.title + '\n' + (h.story_text || ''), url: h.url || `https://news.ycombinator.com/item?id=${h.objectID}`, date: h.created_at }));
-                    }
-                } catch(e) {}
-            }
+            const kwSlice = keywords.slice(0, 5);
+            const promises = kwSlice.map(kw =>
+                fetchWithTimeout(`https://hn.algolia.com/api/v1/search_by_date?query=${encodeURIComponent(kw)}&hitsPerPage=3`)
+                    .then(res => res.ok ? res.json() : { hits: [] })
+                    .catch(() => ({ hits: [] }))
+            );
+            const results = await Promise.allSettled(promises);
+            results.forEach(r => {
+                if (r.status === 'fulfilled' && r.value.hits) {
+                    r.value.hits.forEach(h => messages.push({
+                        id: `hn_${h.objectID}`,
+                        source: 'Hacker News',
+                        text: h.title + '\n' + (h.story_text || ''),
+                        url: h.url || `https://news.ycombinator.com/item?id=${h.objectID}`,
+                        date: h.created_at
+                    }));
+                }
+            });
             return messages;
         }
 
-        async function parseMastodon() {
+        async function parseDevTo() {
             const messages = [];
-            for (const kw of keywords.slice(0, 3)) {
-                try {
-                    const res = await fetchWithTimeout(`https://mastodon.social/api/v2/search?q=${encodeURIComponent(kw)}&type=statuses&limit=5`);
-                    if(res.ok) {
-                        const data = await res.json();
-                        data.statuses.forEach(s => {
-                            const cleanText = s.content.replace(/<[^>]*>?/gm, '');
-                            messages.push({ id: `mast_${s.id}`, source: 'Mastodon', text: cleanText, url: s.url, date: s.created_at });
+            const kwSlice = keywords.slice(0, 5);
+            const promises = kwSlice.map(kw =>
+                fetchWithTimeout(`https://dev.to/api/articles?q=${encodeURIComponent(kw)}&per_page=3`)
+                    .then(res => res.ok ? res.json() : [])
+                    .catch(() => [])
+            );
+            const results = await Promise.allSettled(promises);
+            results.forEach(r => {
+                if (r.status === 'fulfilled' && Array.isArray(r.value)) {
+                    r.value.forEach(art => messages.push({
+                        id: `dev_${art.id}`,
+                        source: 'Dev.to',
+                        text: art.title + '\n' + art.description,
+                        url: art.url,
+                        date: art.created_at
+                    }));
+                }
+            });
+            return messages;
+        }
+
+        async function parseLobsters() {
+            try {
+                const data = await fetchJSONWithProxy('https://lobste.rs/hottest.json');
+                const messages = [];
+                data.forEach(item => {
+                    const text = item.title;
+                    if (keywords.some(kw => text.toLowerCase().includes(kw))) {
+                        messages.push({
+                            id: `lobsters_${item.id}`,
+                            source: 'Lobste.rs',
+                            text,
+                            url: `https://lobste.rs${item.url}`,
+                            date: new Date().toISOString()
                         });
                     }
-                } catch(e) {}
+                });
+                return messages.slice(0, 10);
+            } catch (e) {
+                console.warn('Lobsters parse failed', e);
+                return [];
             }
-            return messages;
         }
 
         // --- Monitor engine ---
         function checkAndSaveMessages(messages) {
             let newCount = 0;
-            const maxRes = parseInt(DOM.maxResultsInput.value) || 300;
-            
+            const maxRes = parseInt(DOM.maxResultsInput.value) || 500;
             for (const msg of messages) {
                 if (seenMessages.has(msg.id)) continue;
                 seenMessages.add(msg.id);
                 checkedCount++;
-                
-                const lowerText = msg.text.toLowerCase();
-                const matched = keywords.filter(kw => lowerText.includes(kw));
-                
+                const lower = msg.text.toLowerCase();
+                const matched = keywords.filter(kw => lower.includes(kw));
                 if (matched.length) {
                     results.unshift({ ...msg, keywords: matched, foundAt: new Date().toISOString() });
                     newCount++;
                     if (results.length > maxRes) results.pop();
                 }
             }
-            
             if (newCount) {
                 saveState();
                 renderResults();
                 triggerHaptic('heavy');
-                showToast(`Перехвачено ${newCount} новых данных`, 'success');
+                showToast(`Перехвачено ${newCount}`, 'success');
             }
-            
-            // Memory Management
             if (seenMessages.size > CONFIG.MAX_SEEN_MESSAGES) {
-                seenMessages = new Set(Array.from(seenMessages).slice(-Math.floor(CONFIG.MAX_SEEN_MESSAGES/2)));
+                const arr = Array.from(seenMessages);
+                seenMessages = new Set(arr.slice(-Math.floor(CONFIG.MAX_SEEN_MESSAGES / 2)));
             }
-            
-            // Update stats visually even if no matches
-            DOM.checkedCountEl.textContent = checkedCount;
-            DOM.memoryCount.textContent = seenMessages.size;
-            
+            renderResults();
             return newCount;
         }
 
         async function monitorCycle() {
             if (!isRunning) return;
-            
             const doTG = document.getElementById('monTG').checked;
             const doReddit = document.getElementById('monReddit').checked;
             const doHN = document.getElementById('monHN').checked;
-            const doMastodon = document.getElementById('monMastodon')?.checked;
-            
+            const doDev = document.getElementById('monDev').checked;
+            const doLobsters = document.getElementById('monLobsters').checked;
             let total = 0;
-            
+
+            const safeParse = async (fn, ...args) => {
+                try { return await fn(...args); } catch (e) { return []; }
+            };
+
             if (doTG && channels.length) {
                 for (const ch of channels) {
                     if (!isRunning) break;
-                    const msgs = await parseTelegram(ch.name);
+                    const msgs = await safeParse(parseTelegram, ch.name);
                     total += checkAndSaveMessages(msgs);
-                    await new Promise(r => setTimeout(r, 500)); // Delay between sources
+                    await new Promise(r => setTimeout(r, 300));
                 }
             }
             if (doReddit && reddits.length) {
                 for (const r of reddits) {
                     if (!isRunning) break;
-                    const msgs = await parseReddit(r);
+                    const msgs = await safeParse(parseReddit, r);
                     total += checkAndSaveMessages(msgs);
-                    await new Promise(r => setTimeout(r, 500));
+                    await new Promise(r => setTimeout(r, 300));
                 }
             }
-            if (doHN && keywords.length) total += checkAndSaveMessages(await parseHackerNews());
-            if (doMastodon && keywords.length) total += checkAndSaveMessages(await parseMastodon());
-            
-            console.log(`[Amigo] Monitor cycle complete. Checked: ${checkedCount}, New: ${total}`);
+            if (doHN && keywords.length) total += checkAndSaveMessages(await safeParse(parseHackerNews));
+            if (doDev && keywords.length) total += checkAndSaveMessages(await safeParse(parseDevTo));
+            if (doLobsters && keywords.length) total += checkAndSaveMessages(await safeParse(parseLobsters));
+
+            if (total) console.log(`Cycle found ${total}`);
         }
 
         function startMonitoring() {
-            if (!keywords.length) { showToast('Сначала добавьте триггеры (ключевые слова)', 'warning'); return; }
-            
+            if (!keywords.length) { showToast('Добавьте ключевые слова', 'warning'); return; }
             isRunning = true;
             DOM.startBtn.disabled = true;
             DOM.stopBtn.disabled = false;
             DOM.statusDot.classList.add('active');
             DOM.statusText.textContent = 'Активный перехват';
-            
             const intervalSec = Math.max(30, parseInt(DOM.intervalInput.value) || 60);
             const autoStopMin = Math.max(1, parseInt(DOM.autoStopInput.value) || 15);
-            
             if (killSwitchTimeout) clearTimeout(killSwitchTimeout);
             killSwitchTimeout = setTimeout(() => {
                 if (isRunning) stopMonitoring();
-                showToast(`Автостоп сработал (${autoStopMin} мин)`, 'info');
+                showToast(`Автостоп через ${autoStopMin} мин`, 'info');
             }, autoStopMin * 60 * 1000);
-            
             if (monitoringInterval) clearInterval(monitoringInterval);
-            
-            // Run immediately, then set interval
             monitorCycle();
             monitoringInterval = setInterval(monitorCycle, intervalSec * 1000);
-            showToast('Сканирование запущено', 'success');
         }
 
         function stopMonitoring() {
             isRunning = false;
             if (monitoringInterval) clearInterval(monitoringInterval);
             if (killSwitchTimeout) clearTimeout(killSwitchTimeout);
-            
             DOM.startBtn.disabled = false;
             DOM.stopBtn.disabled = true;
             DOM.statusDot.classList.remove('active');
@@ -1084,33 +1218,33 @@
             showToast('Мониторинг остановлен', 'info');
         }
 
-        // --- Export/Import ---
+        // --- Export / Import / Reset ---
         function exportResults(type) {
-            if (!results.length) return showToast('Нет данных для экспорта', 'warning');
-            
-            let data, filename, mime;
             if (type === 'json') {
-                data = JSON.stringify(results, null, 2);
-                filename = 'amigo_results.json';
-                mime = 'application/json';
+                const data = JSON.stringify(results, null, 2);
+                const blob = new Blob([data], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url; a.download = 'amigo_results.json'; a.click();
+                URL.revokeObjectURL(url);
             } else if (type === 'csv') {
-                const rows = results.map(r => `"${r.source}","${r.foundAt}","${r.url}","${r.text.replace(/"/g, '""')}"`);
-                data = 'Source,Time,Link,Text\n' + rows.join('\n');
-                filename = 'amigo_results.csv';
-                mime = 'text/csv';
+                const header = 'Source,Time,Link,Text\n';
+                const rows = results.map(r =>
+                    `"${r.source.replace(/"/g, '""')}","${r.foundAt}","${r.url.replace(/"/g, '""')}","${r.text.replace(/"/g, '""')}"`
+                ).join('\n');
+                const csv = header + rows;
+                const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url; a.download = 'amigo_results.csv'; a.click();
+                URL.revokeObjectURL(url);
             }
-            
-            const blob = new Blob([data], {type: mime});
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url; a.download = filename; a.click();
-            URL.revokeObjectURL(url);
         }
 
         function exportBackup() {
             const backup = { channels, reddits, keywords, results, rssFeeds, seen: Array.from(seenMessages) };
             const data = JSON.stringify(backup);
-            const blob = new Blob([data], {type: 'application/json'});
+            const blob = new Blob([data], { type: 'application/json' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url; a.download = 'amigo_backup.json'; a.click();
@@ -1130,68 +1264,114 @@
                     results = data.results || [];
                     rssFeeds = data.rssFeeds || [];
                     seenMessages = new Set(data.seen || []);
-                    saveState(); renderUI(); loadTicker(); renderRssTags(); renderResults();
-                    showToast('Бэкап успешно загружен', 'success');
-                } catch(err) { showToast('Ошибка формата файла бэкапа', 'error'); }
+                    saveState();
+                    renderUI();
+                    loadTicker();
+                    renderRssTags();
+                    renderResults();
+                    showToast('Бэкап загружен', 'success');
+                } catch (err) {
+                    showToast('Ошибка импорта', 'error');
+                }
             };
             reader.readAsText(file);
-            DOM.importFile.value = ''; // reset
+            DOM.importFile.value = '';
         }
 
         function hardReset() {
-            if (confirm('ВНИМАНИЕ! Это действие удалит все локальные данные. Продолжить?')) {
+            if (confirm('Удалить все данные?')) {
                 localStorage.clear();
                 channels = []; reddits = []; keywords = []; results = []; seenMessages = new Set(); rssFeeds = [];
                 checkedCount = 0;
-                saveState(); renderUI(); renderResults(); loadTicker(); renderRssTags();
-                showToast('Все данные системы уничтожены', 'warning');
+                saveState();
+                renderUI();
+                renderResults();
+                loadTicker();
+                renderRssTags();
+                showToast('Все данные удалены', 'warning');
             }
         }
 
-        // --- Bind Inputs logic ---
-        function addInputLogic(inputElement, btnElement, actionFunc) {
-            btnElement.addEventListener('click', actionFunc);
-            inputElement.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') actionFunc();
-            });
-        }
-
-        // --- Event listeners ---
+        // --- Event bindings ---
         function bindEvents() {
             DOM.themeIcon.addEventListener('click', toggleTheme);
-            
-            addInputLogic(DOM.globalSearchInput, DOM.globalSearchBtn, globalSearch);
-            
-            addInputLogic(DOM.manualChannelInput, DOM.addChannelBtn, () => { 
-                const val = DOM.manualChannelInput.value.trim().replace('@','');
-                if (val && !channels.find(c=>c.name===val)) { channels.push({ name: val }); saveState(); renderUI(); DOM.manualChannelInput.value = ''; showToast('Канал добавлен', 'success'); } 
-            });
-            
-            addInputLogic(DOM.manualRedditInput, DOM.addRedditBtn, () => { 
-                const val = DOM.manualRedditInput.value.trim().replace('r/','');
-                if (val && !reddits.includes(val)) { reddits.push(val); saveState(); renderUI(); DOM.manualRedditInput.value = ''; showToast('Сабреддит добавлен', 'success'); } 
-            });
-            
-            addInputLogic(DOM.keywordInput, DOM.addKeywordBtn, () => { 
-                const val = DOM.keywordInput.value.trim().toLowerCase();
-                if (val && !keywords.includes(val)) { keywords.push(val); saveState(); renderUI(); DOM.keywordInput.value = ''; showToast('Триггер добавлен', 'success'); } 
+
+            DOM.globalSearchBtn.addEventListener('click', globalSearch);
+            DOM.globalSearchInput.addEventListener('input', debounceSearch);
+            DOM.globalSearchInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') { e.preventDefault(); globalSearch(); }
             });
 
-            addInputLogic(DOM.customRssInput, DOM.addRssBtn, addRssFeed);
+            DOM.addChannelBtn.addEventListener('click', () => {
+                const val = DOM.manualChannelInput.value.trim().replace('@', '');
+                if (!val) return;
+                if (channels.some(c => c.name === val)) {
+                    showToast('Канал уже добавлен', 'warning');
+                    return;
+                }
+                channels.push({ name: val });
+                saveState();
+                renderUI();
+                DOM.manualChannelInput.value = '';
+                showToast('Канал добавлен', 'success');
+            });
+
+            DOM.addRedditBtn.addEventListener('click', () => {
+                const val = DOM.manualRedditInput.value.trim().replace('r/', '');
+                if (!val) return;
+                if (reddits.includes(val)) {
+                    showToast('Сабреддит уже добавлен', 'warning');
+                    return;
+                }
+                reddits.push(val);
+                saveState();
+                renderUI();
+                DOM.manualRedditInput.value = '';
+                showToast('Сабреддит добавлен', 'success');
+            });
+
+            DOM.addKeywordBtn.addEventListener('click', () => {
+                const val = DOM.keywordInput.value.trim().toLowerCase();
+                if (!val) return;
+                if (keywords.includes(val)) {
+                    showToast('Триггер уже добавлен', 'warning');
+                    return;
+                }
+                keywords.push(val);
+                saveState();
+                renderUI();
+                DOM.keywordInput.value = '';
+                showToast('Триггер добавлен', 'success');
+            });
 
             DOM.startBtn.addEventListener('click', startMonitoring);
             DOM.stopBtn.addEventListener('click', stopMonitoring);
+
             DOM.exportJsonBtn.addEventListener('click', () => exportResults('json'));
             DOM.exportCsvBtn.addEventListener('click', () => exportResults('csv'));
-            DOM.clearResultsBtn.addEventListener('click', () => { results = []; saveState(); renderResults(); showToast('Результаты очищены', 'info'); });
-            
+            DOM.clearResultsBtn.addEventListener('click', () => {
+                results = [];
+                saveState();
+                renderResults();
+                showToast('Результаты очищены', 'info');
+            });
+
             DOM.exportBackupBtn.addEventListener('click', exportBackup);
             DOM.importBackupBtn.addEventListener('click', () => DOM.importFile.click());
             DOM.importFile.addEventListener('change', importBackup);
             DOM.hardResetBtn.addEventListener('click', hardReset);
-            
+
+            DOM.addRssBtn.addEventListener('click', addRssFeed);
             document.querySelectorAll('.tab').forEach(tab => {
                 tab.addEventListener('click', () => switchTab(tab.getAttribute('data-tab')));
+            });
+
+            // Click-outside for search card URLs (delegated)
+            DOM.searchResults.addEventListener('click', (e) => {
+                const card = e.target.closest('.card');
+                if (card && card.dataset.url) {
+                    window.open(card.dataset.url, '_blank', 'noopener');
+                }
             });
         }
 
@@ -1207,7 +1387,7 @@
             bindEvents();
             if (tg) { tg.ready(); tg.expand(); }
         }
-        
+
         init();
     })();
     </script>
