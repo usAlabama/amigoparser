@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="description" content="Amigo Recon - Multi-source OSINT monitoring tool">
     <title>Amigo Recon</title>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://telegram.org/js/telegram-web-app.js" crossorigin="anonymous"></script>
     <style>
         :root {
             --bg-primary: #f0f2f5;
@@ -24,6 +25,7 @@
             --font-main: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto, sans-serif;
             --font-mono: 'Fira Code', 'JetBrains Mono', 'Consolas', monospace;
             --radius: 8px;
+            --transition: all 0.2s ease;
         }
 
         [data-theme="dark"] {
@@ -51,8 +53,9 @@
         ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
         * { scrollbar-width: thin; scrollbar-color: var(--border) transparent; }
 
-        .drag-scroll { cursor: grab; overflow-x: auto; overflow-y: hidden; }
+        .drag-scroll { cursor: grab; overflow: auto; user-select: none; -webkit-user-select: none; }
         .drag-scroll:active { cursor: grabbing; }
+        .drag-scroll button, .drag-scroll a, .drag-scroll input { user-select: text; -webkit-user-select: text; }
 
         body {
             font-family: var(--font-main);
@@ -72,13 +75,13 @@
             margin-bottom: 10px; flex-wrap: wrap; gap: 10px;
         }
 
-        h1 { font-size: 1.8em; font-weight: 700; letter-spacing: -0.5px; display: flex; align-items: center; gap: 10px;}
+        h1 { font-size: 1.8em; font-weight: 700; letter-spacing: -0.5px; display: flex; align-items: center; gap: 10px; }
         h1 .badge { font-size: 0.4em; background: var(--accent); color: #fff; padding: 2px 8px; border-radius: 12px; vertical-align: middle; }
 
         .theme-toggle {
             background: var(--bg-secondary); border: 1px solid var(--border);
             border-radius: 50%; width: 40px; height: 40px;
-            cursor: pointer; font-size: 1.2em; transition: all 0.2s;
+            cursor: pointer; font-size: 1.2em; transition: var(--transition);
             display: flex; align-items: center; justify-content: center;
             box-shadow: var(--card-shadow);
         }
@@ -87,9 +90,9 @@
         .subtitle { color: var(--text-secondary); margin-bottom: 15px; font-size: 0.95em; }
 
         .ticker-wrap {
-            width: 100%; min-width: 300px; overflow: hidden; background: var(--bg-secondary);
+            width: 100%; overflow: hidden; background: var(--bg-secondary);
             border: 1px solid var(--border); border-radius: var(--radius);
-            padding: 8px 0; margin-bottom: 20px; box-shadow: inset 0 0 10px rgba(0,0,0,0.05);
+            padding: 8px 0; margin-bottom: 20px;
             display: flex; align-items: center; white-space: nowrap; position: relative;
         }
         .ticker-label {
@@ -98,10 +101,11 @@
             box-shadow: 5px 0 10px var(--bg-secondary); text-transform: uppercase; letter-spacing: 1px;
         }
         .ticker {
-            display: inline-block; white-space: nowrap; padding-left: 120px; animation: ticker 480s linear infinite; will-change: transform;
+            display: inline-block; white-space: nowrap; padding-left: 120px;
+            animation: ticker 60s linear infinite; will-change: transform;
         }
         .ticker:hover { animation-play-state: paused; }
-        @keyframes ticker { 0% { transform: translate3d(100%, 0, 0); } 100% { transform: translate3d(-100%, 0, 0); } }
+        @keyframes ticker { 0% { transform: translate3d(0, 0, 0); } 100% { transform: translate3d(-50%, 0, 0); } }
         .ticker-item {
             display: inline-block; padding: 0 2rem; font-family: var(--font-mono); font-size: 0.85em;
             color: var(--text-primary); text-decoration: none; cursor: pointer; transition: color 0.2s;
@@ -112,32 +116,31 @@
         .panel {
             background: var(--bg-secondary); border: 1px solid var(--border);
             border-radius: var(--radius); padding: 20px; margin-bottom: 20px;
-            box-shadow: var(--card-shadow); transition: all 0.2s;
+            box-shadow: var(--card-shadow); transition: var(--transition);
         }
 
         .panel h2 { margin-bottom: 15px; font-size: 1.1em; font-weight: 600; display: flex; align-items: center; gap: 8px; }
 
         .input-group { display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap; }
 
-        input[type="text"], input[type="number"], input[type="url"], input[type="password"], select, textarea {
+        input[type="text"], input[type="number"], input[type="url"], select, textarea {
             flex: 1; min-width: 200px; padding: 10px 14px;
             background: var(--bg-primary); border: 1px solid var(--border);
             border-radius: var(--radius); color: var(--text-primary);
-            font-size: 14px; transition: all 0.2s; font-family: inherit;
+            font-size: 14px; transition: var(--transition); font-family: inherit;
         }
-
         input:focus, select:focus, textarea:focus {
             outline: none; border-color: var(--accent);
             box-shadow: 0 0 0 3px var(--accent-glow);
         }
+        input:invalid { border-color: var(--danger); }
 
         button {
             padding: 10px 20px; background: var(--accent); color: #ffffff;
             border: none; border-radius: var(--radius); cursor: pointer;
-            font-weight: 600; font-size: 14px; transition: all 0.2s;
+            font-weight: 600; font-size: 14px; transition: var(--transition);
             display: inline-flex; align-items: center; gap: 6px; white-space: nowrap;
         }
-
         button:hover { background: var(--accent-hover); transform: translateY(-1px); box-shadow: 0 4px 12px var(--accent-glow); }
         button:active { transform: translateY(0); }
         button:disabled { background: var(--border); color: var(--text-secondary); cursor: not-allowed; transform: none; box-shadow: none; }
@@ -152,15 +155,19 @@
             background: var(--bg-primary); border: 1px solid var(--border);
             padding: 6px 12px; border-radius: 16px; font-size: 13px;
             display: flex; align-items: center; gap: 8px; color: var(--text-primary);
+            animation: tagIn 0.2s ease;
         }
-        .tag .remove { cursor: pointer; color: var(--danger); font-weight: bold; font-size: 16px; }
+        @keyframes tagIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+        .tag .remove { cursor: pointer; color: var(--danger); font-weight: bold; font-size: 16px; transition: transform 0.2s; }
+        .tag .remove:hover { transform: scale(1.2); }
 
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px; margin-top: 15px; }
+        @media (max-width: 640px) { .grid { grid-template-columns: 1fr; } }
 
         .card {
             background: var(--bg-primary); border: 1px solid var(--border);
             border-radius: var(--radius); padding: 15px; cursor: pointer;
-            transition: all 0.2s; border-left: 3px solid var(--accent);
+            transition: var(--transition); border-left: 3px solid var(--accent);
         }
         .card:hover { transform: translateY(-2px); box-shadow: var(--card-shadow); border-left-color: var(--accent-hover); }
         .card h3 { color: var(--text-primary); font-size: 1em; margin-bottom: 8px; word-break: break-word; }
@@ -170,18 +177,21 @@
         .log {
             background: var(--bg-primary); border: 1px solid var(--border);
             border-radius: var(--radius); padding: 15px; max-height: 600px;
-            font-family: var(--font-mono); font-size: 13px;
-            overflow-y: auto;
+            font-family: var(--font-mono); font-size: 13px; overflow-y: auto;
         }
 
         .log-entry {
             margin-bottom: 12px; padding: 15px; border-left: 3px solid var(--accent);
             background: var(--bg-secondary); border-radius: 4px; border: 1px solid var(--border);
             border-left-width: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            animation: entryIn 0.3s ease;
         }
+        @keyframes entryIn { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: translateX(0); } }
         .log-entry.alert { border-left-color: var(--warning); }
+        .log-entry.error { border-left-color: var(--danger); }
+        .log-entry.success { border-left-color: var(--success); }
         
-        .log-entry .header-log { display: flex; justify-content: space-between; margin-bottom: 8px; border-bottom: 1px solid var(--border); padding-bottom: 5px;}
+        .log-entry .header-log { display: flex; justify-content: space-between; margin-bottom: 8px; border-bottom: 1px solid var(--border); padding-bottom: 5px; flex-wrap: wrap; gap: 5px; }
         .log-entry .time { color: var(--text-secondary); font-size: 11px; }
         .log-entry .source { font-weight: 700; font-size: 0.95em; color: var(--accent); }
         
@@ -199,18 +209,19 @@
         }
 
         .status-indicator { display: flex; align-items: center; gap: 8px; font-weight: 600; }
-        .status-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--text-secondary); }
+        .status-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--text-secondary); transition: background 0.3s; }
         .status-dot.active { background: var(--success); box-shadow: 0 0 10px var(--success); animation: pulse 1.5s infinite; }
 
         @keyframes pulse { 0% { opacity: 1; transform: scale(1); } 50% { opacity: 0.6; transform: scale(1.2); } 100% { opacity: 1; transform: scale(1); } }
 
-        .tabs { display: flex; gap: 5px; margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 2px;}
+        .tabs { display: flex; gap: 5px; margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 2px; overflow-x: auto; }
         .tab {
             padding: 10px 20px; cursor: pointer; border-bottom: 2px solid transparent;
-            color: var(--text-secondary); font-weight: 600; transition: all 0.2s; white-space: nowrap;
+            color: var(--text-secondary); font-weight: 600; transition: var(--transition); white-space: nowrap;
+            border-radius: var(--radius) var(--radius) 0 0;
         }
-        .tab:hover { color: var(--accent); }
-        .tab.active { color: var(--accent); border-bottom: 2px solid var(--accent); }
+        .tab:hover { color: var(--accent); background: var(--bg-primary); }
+        .tab.active { color: var(--accent); border-bottom: 2px solid var(--accent); background: var(--bg-primary); }
 
         .tab-content { display: none; animation: fadeIn 0.3s; }
         .tab-content.active { display: block; }
@@ -224,29 +235,48 @@
         .empty-state .icon { font-size: 48px; margin-bottom: 15px; opacity: 0.5; }
 
         .source-toggles { display: flex; gap: 15px; margin-bottom: 15px; flex-wrap: wrap; }
-        .source-toggle { display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 0.9em; font-weight: 500;}
+        .source-toggle { display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 0.9em; font-weight: 500; }
         .source-toggle input { width: 16px; height: 16px; accent-color: var(--accent); }
 
-        .warning-box {
-            background: rgba(255, 193, 7, 0.1);
-            border: 1px solid var(--warning);
-            border-radius: var(--radius);
-            padding: 12px;
-            margin-bottom: 15px;
-            font-size: 0.9em;
-            color: var(--text-primary);
+        .toast-container { position: fixed; top: 20px; right: 20px; z-index: 1000; display: flex; flex-direction: column; gap: 8px; pointer-events: none; }
+        .toast {
+            background: var(--bg-secondary); border: 1px solid var(--border); border-radius: var(--radius);
+            padding: 12px 16px; box-shadow: var(--card-shadow); font-size: 0.9em;
+            display: flex; align-items: center; gap: 8px; animation: toastIn 0.3s ease;
+            pointer-events: auto; max-width: 320px; word-break: break-word;
         }
-        .warning-box strong { color: var(--warning); }
+        @keyframes toastIn { from { opacity: 0; transform: translateX(100%); } to { opacity: 1; transform: translateX(0); } }
+        @keyframes toastOut { from { opacity: 1; transform: translateX(0); } to { opacity: 0; transform: translateX(100%); } }
+        .toast.success { border-left: 3px solid var(--success); }
+        .toast.error { border-left: 3px solid var(--danger); }
+        .toast.warning { border-left: 3px solid var(--warning); }
+        .toast.info { border-left: 3px solid var(--accent); }
+
+        .skeleton {
+            background: linear-gradient(90deg, var(--bg-primary) 25%, var(--bg-tertiary) 50%, var(--bg-primary) 75%);
+            background-size: 200% 100%; animation: skeleton 1.5s infinite;
+            border-radius: var(--radius); height: 80px; margin-bottom: 10px;
+        }
+        @keyframes skeleton { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+        @media (max-width: 768px) {
+            body { padding: 10px; }
+            h1 { font-size: 1.4em; }
+            .panel { padding: 15px; }
+            .input-group { flex-direction: column; }
+            input, button { width: 100%; }
+        }
     </style>
 </head>
 <body>
+    <div class="toast-container" id="toastContainer"></div>
     <div class="container">
         <div class="header">
             <h1>🅰️ Amigo Recon <span class="badge">v. STEALTH</span></h1>
-            <button class="theme-toggle" onclick="toggleTheme()" id="themeIcon">🌙</button>
+            <button class="theme-toggle" id="themeIcon" aria-label="Toggle theme">🌙</button>
         </div>
         <p class="subtitle">Мульти-источниковый поиск и мониторинг</p>
-        
+
         <div class="ticker-wrap">
             <div class="ticker-label">INTEL</div>
             <div class="ticker" id="tickerContent">
@@ -254,39 +284,44 @@
             </div>
         </div>
 
-        <div class="tabs drag-scroll">
-            <div class="tab active" onclick="switchTab('recon')">🔍 Разведка</div>
-            <div class="tab" onclick="switchTab('monitor')">Ⓜ️ Мониторинг</div>
-            <div class="tab" onclick="switchTab('results')">🗜 База Инфо</div>
-            <div class="tab" onclick="switchTab('settings')">⚙️ Система</div>
+        <div class="tabs drag-scroll" id="tabsContainer">
+            <div class="tab active" data-tab="recon">🔍 Разведка</div>
+            <div class="tab" data-tab="monitor">Ⓜ️ Мониторинг</div>
+            <div class="tab" data-tab="results">🗜 База Инфо</div>
+            <div class="tab" data-tab="settings">⚙️ Система</div>
         </div>
 
-        <!-- ВКЛАДКА: РАЗВЕДКА -->
         <div id="recon-tab" class="tab-content active">
             <div class="panel">
                 <h2>🔎 Умный Поиск (Глобальный)</h2>
-                <p style="color: var(--text-secondary); font-size: 0.9em; margin-bottom: 15px;">Поиск каналов в Telegram (через GitHub API) и мгновенный поиск информации по внешним базам.</p>
+                <p style="color: var(--text-secondary); font-size: 0.9em; margin-bottom: 15px;">
+                    Поиск по открытым источникам: Hacker News, Reddit, Dev.to, Lobste.rs, Product Hunt, Mastodon, ArXiv, StackOverflow.
+                </p>
                 <div class="source-toggles">
-                    <label class="source-toggle"> <input type="checkbox" id="srcTG" checked> Telegram (через GitHub) </label>
-                    <label class="source-toggle"> <input type="checkbox" id="srcHN" checked> Hacker News </label>
-                    <label class="source-toggle"> <input type="checkbox" id="srcDev"> Dev.to </label>
-                    <label class="source-toggle"> <input type="checkbox" id="srcReddit" checked> Reddit </label>
+                    <label class="source-toggle"><input type="checkbox" id="srcHN" checked> Hacker News</label>
+                    <label class="source-toggle"><input type="checkbox" id="srcReddit" checked> Reddit</label>
+                    <label class="source-toggle"><input type="checkbox" id="srcDev"> Dev.to</label>
+                    <label class="source-toggle"><input type="checkbox" id="srcLobsters"> Lobste.rs</label>
+                    <label class="source-toggle"><input type="checkbox" id="srcPH"> Product Hunt</label>
+                    <label class="source-toggle"><input type="checkbox" id="srcMastodon"> Mastodon</label>
+                    <label class="source-toggle"><input type="checkbox" id="srcArxiv"> ArXiv</label>
+                    <label class="source-toggle"><input type="checkbox" id="srcSO"> StackOverflow</label>
                 </div>
                 <div class="input-group">
-                    <input type="text" id="googleSearchInput" placeholder="Запрос (например: automation bypass, airdrop script)">
-                    <button onclick="globalSearch()">🔍 Искать везде</button>
+                    <input type="text" id="globalSearchInput" placeholder="Запрос (например: automation bypass, airdrop script)">
+                    <button id="globalSearchBtn">🔍 Искать везде</button>
                 </div>
-                <div class="progress" id="googleProgress" style="display: none;">
-                    <div class="progress-bar" id="googleProgressBar"></div>
+                <div class="progress" id="searchProgress" style="display: none;">
+                    <div class="progress-bar" id="searchProgressBar"></div>
                 </div>
-                <div id="googleResults" class="grid drag-scroll"></div>
+                <div id="searchResults" class="grid drag-scroll"></div>
             </div>
 
             <div class="panel">
                 <h2>➕ Управление Telegram Таргетами</h2>
                 <div class="input-group">
                     <input type="text" id="manualChannelInput" placeholder="Имя канала (без @, например: durov)">
-                    <button onclick="addManualChannel()">Добавить ТГ канал</button>
+                    <button id="addChannelBtn">Добавить ТГ канал</button>
                 </div>
                 <div style="margin-top: 15px; border-top: 1px solid var(--border); padding-top: 15px;">
                     <h3 style="font-size: 1em; margin-bottom: 10px;">Цели для мониторинга (<span id="channelCount">0</span>)</h3>
@@ -298,7 +333,7 @@
                 <h2>➕ Управление Reddit Сабреддитами</h2>
                 <div class="input-group">
                     <input type="text" id="manualRedditInput" placeholder="Имя сабреддита (например: netsec, crypto)">
-                    <button onclick="addManualReddit()">Добавить Reddit</button>
+                    <button id="addRedditBtn">Добавить Reddit</button>
                 </div>
                 <div style="margin-top: 15px; border-top: 1px solid var(--border); padding-top: 15px;">
                     <h3 style="font-size: 1em; margin-bottom: 10px;">Цели для мониторинга (<span id="redditCount">0</span>)</h3>
@@ -306,14 +341,13 @@
                 </div>
             </div>
         </div>
-
-        <!-- ВКЛАДКА: МОНИТОРИНГ -->
+                
         <div id="monitor-tab" class="tab-content">
             <div class="panel">
                 <h2>🔑 Ключевые слова / Триггеры</h2>
                 <div class="input-group">
                     <input type="text" id="keywordInput" placeholder="Что ищем? (например: exploit, 0day, airdrop)">
-                    <button onclick="addKeyword()">Добавить триггер</button>
+                    <button id="addKeywordBtn">Добавить триггер</button>
                 </div>
                 <div class="tags" id="keywordTags"></div>
             </div>
@@ -322,22 +356,28 @@
                 <h2>⚙️ Панель управления (Stealth Mode)</h2>
                 <div class="source-toggles" style="background: var(--bg-primary); padding: 10px; border-radius: var(--radius); margin-bottom: 15px;">
                     <strong style="font-size: 0.9em; margin-right: 10px;">Активные источники:</strong>
-                    <label class="source-toggle"> <input type="checkbox" id="monTG" checked> Telegram Каналы </label>
-                    <label class="source-toggle"> <input type="checkbox" id="monHN" checked> Hacker News (Live) </label>
-                    <label class="source-toggle"> <input type="checkbox" id="monDev" checked> Dev.to (Live) </label>
-                    <label class="source-toggle"> <input type="checkbox" id="monReddit" checked> Reddit </label>
+                    <label class="source-toggle"><input type="checkbox" id="monTG" checked> Telegram Каналы</label>
+                    <label class="source-toggle"><input type="checkbox" id="monHN" checked> Hacker News</label>
+                    <label class="source-toggle"><input type="checkbox" id="monDev"> Dev.to</label>
+                    <label class="source-toggle"><input type="checkbox" id="monReddit" checked> Reddit</label>
+                    <label class="source-toggle"><input type="checkbox" id="monLobsters"> Lobste.rs</label>
+                    <label class="source-toggle"><input type="checkbox" id="monMastodon"> Mastodon</label>
                 </div>
                 <div class="input-group">
                     <div style="flex: 1; min-width: 200px;">
-                        <input type="number" id="intervalInput" value="60" min="30">
+                        <input type="number" id="intervalInput" value="60" min="30" max="3600">
                         <small style="display:block; color:var(--text-secondary); margin-top:4px;">Интервал (сек)</small>
                     </div>
                     <div style="flex: 1; min-width: 200px;">
-                        <input type="number" id="autoStopInput" value="15" min="1">
+                        <input type="number" id="autoStopInput" value="15" min="1" max="1440">
                         <small style="display:block; color:var(--text-secondary); margin-top:4px;">Автостоп (мин)</small>
                     </div>
-                    <button id="startBtn" onclick="startMonitoring()">▶️ Запуск</button>
-                    <button id="stopBtn" class="danger" onclick="stopMonitoring()" disabled>⏹️ Стоп</button>
+                    <div style="flex: 1; min-width: 200px;">
+                        <input type="number" id="maxResultsInput" value="500" min="100" max="5000">
+                        <small style="display:block; color:var(--text-secondary); margin-top:4px;">Макс. результатов</small>
+                    </div>
+                    <button id="startBtn">▶️ Запуск</button>
+                    <button id="stopBtn" class="danger" disabled>⏹️ Стоп</button>
                 </div>
                 <div class="status-bar">
                     <div class="status-indicator">
@@ -345,21 +385,22 @@
                         <span id="statusText">Режим ожидания</span>
                     </div>
                     <div style="color: var(--text-secondary); font-size: 0.9em;">
-                        Перехвачено данных: <strong id="matchCount" style="color: var(--accent);">0</strong>
+                        Перехвачено: <strong id="matchCount" style="color: var(--accent);">0</strong> | 
+                        Проверено: <strong id="checkedCount" style="color: var(--text-secondary);">0</strong> | 
+                        Память: <strong id="memoryCount" style="color: var(--text-secondary);">0</strong>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- ВКЛАДКА: РЕЗУЛЬТАТЫ -->
         <div id="results-tab" class="tab-content">
             <div class="panel">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
                     <h2>📊 База перехваченных данных</h2>
                     <div>
-                        <button class="secondary" onclick="exportResults('json')">💾 JSON</button>
-                        <button class="secondary" onclick="exportResults('csv')">📄 CSV</button>
-                        <button class="danger" onclick="clearResults()">🗑️ Очистить</button>
+                        <button id="exportJsonBtn" class="secondary">💾 JSON</button>
+                        <button id="exportCsvBtn" class="secondary">📄 CSV</button>
+                        <button id="clearResultsBtn" class="danger">🗑️ Очистить</button>
                     </div>
                 </div>
                 <div class="log drag-scroll" id="resultsLog">
@@ -371,28 +412,15 @@
             </div>
         </div>
 
-        <!-- ВКЛАДКА: НАСТРОЙКИ -->
         <div id="settings-tab" class="tab-content">
-            <div class="panel">
-                <h2>🔑 GitHub API Token (для поиска по коду)</h2>
-                <div class="warning-box">
-                    <strong>⚠️ Важно:</strong> GitHub требует авторизацию для поиска по коду. Создай Personal Access Token на <a href="https://github.com/settings/tokens" target="_blank" style="color: var(--accent);">github.com/settings/tokens</a> с правами <code>repo</code> и вставь сюда.
-                </div>
-                <div class="input-group">
-                    <input type="password" id="githubTokenInput" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx">
-                    <button onclick="saveGithubToken()">💾 Сохранить</button>
-                </div>
-                <p style="color: var(--text-secondary); font-size: 0.85em; margin-top: 10px;" id="githubTokenStatus"></p>
-            </div>
-
             <div class="panel">
                 <h2>📡 Кастомная RSS Лента (Тикер)</h2>
                 <p style="color: var(--text-secondary); font-size: 0.9em; margin-bottom: 15px;">
-                    Вставь одну или несколько ссылок через запятую и пробел. Оставь пустым для дефолтного Hacker News.
+                    Вставьте одну или несколько ссылок через запятую. Оставьте пустым для дефолтного Hacker News.
                 </p>
                 <div class="input-group">
-                    <input type="url" id="customRssInput" placeholder="https://xakep.ru/feed/">
-                    <button onclick="saveRssSettings()">💾 Сохранить</button>
+                    <input type="url" id="customRssInput" placeholder="https://example.com/feed/">
+                    <button id="addRssBtn">💾 Добавить RSS</button>
                 </div>
                 <div class="tags" id="rssTags" style="margin-top: 10px;"></div>
             </div>
@@ -400,65 +428,186 @@
             <div class="panel">
                 <h2>💾 Экспорт / Импорт конфигурации</h2>
                 <div class="input-group">
-                    <button class="secondary" onclick="exportAllData()">⬇️ Скачать бэкап</button>
-                    <button class="secondary" onclick="document.getElementById('importFile').click()">⬆️ Загрузить бэкап</button>
-                    <input type="file" id="importFile" style="display: none;" accept=".json" onchange="importAllData(event)">
+                    <button id="exportBackupBtn" class="secondary">⬇️ Скачать бэкап</button>
+                    <button id="importBackupBtn" class="secondary">⬆️ Загрузить бэкап</button>
+                    <input type="file" id="importFile" style="display: none;" accept=".json">
                 </div>
             </div>
 
             <div class="panel">
                 <h2>🗑️ Хард Ресет</h2>
-                <button class="danger" onclick="clearAllData()">⚠️ Уничтожить все локальные данные</button>
+                <button id="hardResetBtn" class="danger">⚠️ Уничтожить все локальные данные</button>
             </div>
         </div>
     </div>
 
     <script>
-        // --- ИНИЦИАЛИЗАЦИЯ И ТЕМА ---
+    // ================================================================
+    // AMIGO RECON v2.0 - Production-Ready OSINT Monitoring Tool
+    // ================================================================
+    
+    (function() {
+        "use strict";
+        
+        // --- CONFIGURATION ---
+        const CONFIG = {
+            MAX_RESULTS: 500,
+            MAX_SEEN_MESSAGES: 10000,
+            PROXY_TIMEOUT: 15000,
+            FETCH_TIMEOUT: 10000,
+            TICKER_SPEED: 60,
+            RSS_FEEDS_DEFAULT: ["https://hnrss.org/frontpage"],
+            RSS2JSON_API: "https://api.rss2json.com/v1/api.json",
+            PROXIES: [
+                url => "https://api.allorigins.win/raw?url=" + encodeURIComponent(url),
+                url => "https://corsproxy.io/?" + encodeURIComponent(url),
+                url => "https://api.codetabs.com/v1/proxy/?quest=" + encodeURIComponent(url)
+            ]
+        };
+
+        // --- STATE ---
+        let channels = [];
+        let reddits = [];
+        let keywords = [];
+        let results = [];
+        let seenMessages = new Set();
+        let rssFeeds = [];
+        let isRunning = false;
+        let monitoringInterval = null;
+        let killSwitchTimeout = null;
+        let checkedCount = 0;
         let tg = window.Telegram?.WebApp;
-        if (tg) { 
-            try { tg.ready(); tg.expand(); } catch(e) {} 
+
+        // --- DOM elements ---
+        const DOM = {
+            themeIcon: document.getElementById('themeIcon'),
+            tickerContent: document.getElementById('tickerContent'),
+            globalSearchInput: document.getElementById('globalSearchInput'),
+            globalSearchBtn: document.getElementById('globalSearchBtn'),
+            searchProgress: document.getElementById('searchProgress'),
+            searchProgressBar: document.getElementById('searchProgressBar'),
+            searchResults: document.getElementById('searchResults'),
+            manualChannelInput: document.getElementById('manualChannelInput'),
+            addChannelBtn: document.getElementById('addChannelBtn'),
+            channelCount: document.getElementById('channelCount'),
+            channelTags: document.getElementById('channelTags'),
+            manualRedditInput: document.getElementById('manualRedditInput'),
+            addRedditBtn: document.getElementById('addRedditBtn'),
+            redditCount: document.getElementById('redditCount'),
+            redditTags: document.getElementById('redditTags'),
+            keywordInput: document.getElementById('keywordInput'),
+            addKeywordBtn: document.getElementById('addKeywordBtn'),
+            keywordTags: document.getElementById('keywordTags'),
+            intervalInput: document.getElementById('intervalInput'),
+            autoStopInput: document.getElementById('autoStopInput'),
+            maxResultsInput: document.getElementById('maxResultsInput'),
+            startBtn: document.getElementById('startBtn'),
+            stopBtn: document.getElementById('stopBtn'),
+            statusDot: document.getElementById('statusDot'),
+            statusText: document.getElementById('statusText'),
+            matchCount: document.getElementById('matchCount'),
+            checkedCountEl: document.getElementById('checkedCount'),
+            memoryCount: document.getElementById('memoryCount'),
+            resultsLog: document.getElementById('resultsLog'),
+            customRssInput: document.getElementById('customRssInput'),
+            addRssBtn: document.getElementById('addRssBtn'),
+            rssTags: document.getElementById('rssTags'),
+            exportJsonBtn: document.getElementById('exportJsonBtn'),
+            exportCsvBtn: document.getElementById('exportCsvBtn'),
+            clearResultsBtn: document.getElementById('clearResultsBtn'),
+            exportBackupBtn: document.getElementById('exportBackupBtn'),
+            importBackupBtn: document.getElementById('importBackupBtn'),
+            importFile: document.getElementById('importFile'),
+            hardResetBtn: document.getElementById('hardResetBtn'),
+            toastContainer: document.getElementById('toastContainer')
+        };
+
+        // --- Helper functions ---
+        function saveState() {
+            try {
+                localStorage.setItem('amigo_channels', JSON.stringify(channels));
+                localStorage.setItem('amigo_reddits', JSON.stringify(reddits));
+                localStorage.setItem('amigo_keywords', JSON.stringify(keywords));
+                localStorage.setItem('amigo_results', JSON.stringify(results.slice(0, CONFIG.MAX_RESULTS)));
+                localStorage.setItem('amigo_rssFeeds', JSON.stringify(rssFeeds));
+                localStorage.setItem('amigo_seen', JSON.stringify(Array.from(seenMessages).slice(-CONFIG.MAX_SEEN_MESSAGES)));
+            } catch(e) { showToast('Ошибка сохранения: ' + e.message, 'error'); }
         }
 
-        function toggleTheme() {
-            const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-            const newTheme = isDark ? 'light' : 'dark';
-            document.documentElement.setAttribute('data-theme', newTheme);
-            document.getElementById('themeIcon').textContent = newTheme === 'dark' ? '☀️' : '🌙';
-            localStorage.setItem('amigo_theme', newTheme);
-            triggerHaptic('light');
+        function loadState() {
+            try {
+                channels = JSON.parse(localStorage.getItem('amigo_channels') || '[]');
+                reddits = JSON.parse(localStorage.getItem('amigo_reddits') || '[]');
+                keywords = JSON.parse(localStorage.getItem('amigo_keywords') || '[]');
+                results = JSON.parse(localStorage.getItem('amigo_results') || '[]');
+                rssFeeds = JSON.parse(localStorage.getItem('amigo_rssFeeds') || '[]');
+                const seen = JSON.parse(localStorage.getItem('amigo_seen') || '[]');
+                seenMessages = new Set(seen);
+            } catch(e) { console.error('Load error', e); }
         }
 
-        if (localStorage.getItem('amigo_theme') === 'dark' || (!localStorage.getItem('amigo_theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-            document.documentElement.setAttribute('data-theme', 'dark');
-            document.getElementById('themeIcon').textContent = '☀️';
+        function showToast(message, type = 'info', duration = 3000) {
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.innerHTML = `<span>${escapeHtml(message)}</span>`;
+            DOM.toastContainer.appendChild(toast);
+            setTimeout(() => {
+                toast.style.animation = 'toastOut 0.3s ease forwards';
+                setTimeout(() => toast.remove(), 300);
+            }, duration);
         }
 
-        function triggerHaptic(type) {
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str.replace(/[&<>]/g, function(m) {
+                if (m === '&') return '&amp;';
+                if (m === '<') return '&lt;';
+                if (m === '>') return '&gt;';
+                return m;
+            });
+        }
+
+        function triggerHaptic(type = 'light') {
             if (tg && tg.HapticFeedback) {
-                try { 
-                    const version = parseFloat(tg.version || '6.0');
-                    if (version >= 6.1) tg.HapticFeedback.impactOccurred(type); 
-                } catch (e) {}
+                try { tg.HapticFeedback.impactOccurred(type); } catch(e) {}
             }
         }
 
+        // --- Theme ---
+        function initTheme() {
+            const saved = localStorage.getItem('amigo_theme');
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            const isDark = saved === 'dark' || (!saved && prefersDark);
+            if (isDark) {
+                document.documentElement.setAttribute('data-theme', 'dark');
+                DOM.themeIcon.textContent = '☀️';
+            } else {
+                DOM.themeIcon.textContent = '🌙';
+            }
+        }
+        function toggleTheme() {
+            const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+            document.documentElement.setAttribute('data-theme', isDark ? 'light' : 'dark');
+            DOM.themeIcon.textContent = isDark ? '🌙' : '☀️';
+            localStorage.setItem('amigo_theme', isDark ? 'light' : 'dark');
+            triggerHaptic('light');
+        }
+
+        // --- Tabs ---
         function switchTab(tabName) {
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-            event.target.classList.add('active');
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            document.querySelector(`.tab[data-tab="${tabName}"]`).classList.add('active');
             document.getElementById(`${tabName}-tab`).classList.add('active');
             triggerHaptic('light');
         }
 
-        // --- DRAG TO SCROLL ---
+        // --- Drag to scroll ---
         function enableDragScroll() {
-            const sliders = document.querySelectorAll('.drag-scroll');
-            sliders.forEach(slider => {
-                let isDown = false;
-                let startX, startY, scrollLeft, scrollTop;
-
+            document.querySelectorAll('.drag-scroll').forEach(slider => {
+                let isDown = false, startX, startY, scrollLeft, scrollTop;
                 slider.addEventListener('mousedown', (e) => {
+                    if (e.target.closest('button, a, input')) return;
                     isDown = true;
                     slider.classList.add('active');
                     startX = e.pageX - slider.offsetLeft;
@@ -473,656 +622,461 @@
                     e.preventDefault();
                     const x = e.pageX - slider.offsetLeft;
                     const y = e.pageY - slider.offsetTop;
-                    const walkX = (x - startX) * 1.5;
-                    const walkY = (y - startY) * 1.5;
-                    slider.scrollLeft = scrollLeft - walkX;
-                    slider.scrollTop = scrollTop - walkY;
+                    slider.scrollLeft = scrollLeft - (x - startX) * 1.5;
+                    slider.scrollTop = scrollTop - (y - startY) * 1.5;
                 });
             });
         }
-        document.addEventListener('DOMContentLoaded', enableDragScroll);
 
-        // --- СОСТОЯНИЕ ДАННЫХ ---
-        let channels = JSON.parse(localStorage.getItem('amigo_channels') || '[]');
-        let reddits = JSON.parse(localStorage.getItem('amigo_reddits') || '[]');
-        let keywords = JSON.parse(localStorage.getItem('amigo_keywords') || '[]');
-        let results = JSON.parse(localStorage.getItem('amigo_results') || '[]');
-        let seenMessages = new Set(JSON.parse(localStorage.getItem('amigo_seen') || '[]'));
-        let monitoringInterval = null;
-        let killSwitchTimeout = null;
-        let isRunning = false;
+        // --- Network helpers ---
+        async function fetchWithTimeout(url, timeout = CONFIG.FETCH_TIMEOUT) {
+            const controller = new AbortController();
+            const id = setTimeout(() => controller.abort(), timeout);
+            try {
+                const response = await fetch(url, { signal: controller.signal });
+                clearTimeout(id);
+                return response;
+            } catch(e) {
+                clearTimeout(id);
+                throw e;
+            }
+        }
 
-        // ПУЛ ПРОКСИ (Борьба с CORS)
-        const PROXIES = [
-            url => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
-            url => `https://corsproxy.io/?${encodeURIComponent(url)}`,
-            url => `https://api.codetabs.com/v1/proxy/?quest=${encodeURIComponent(url)}`
-        ];
-
-        async function fetchWithFallback(url, options = {}) {
-            for (let i = 0; i < PROXIES.length; i++) {
+        async function fetchWithProxy(url) {
+            for (const proxy of CONFIG.PROXIES) {
                 try {
-                    const proxyUrl = PROXIES[i](url);
-                    const response = await fetch(proxyUrl, { 
-                        ...options,
-                        signal: AbortSignal.timeout(15000) 
-                    });
-                    if (response.ok) return await response.text();
-                } catch (e) {
-                    console.warn(`Proxy ${i + 1} failed for ${url}`);
-                }
+                    const proxyUrl = proxy(url);
+                    const res = await fetchWithTimeout(proxyUrl, CONFIG.PROXY_TIMEOUT);
+                    if (res.ok) return await res.text();
+                } catch(e) {}
             }
-            throw new Error(`All CORS proxies failed for ${url}`);
+            throw new Error('All proxies failed');
         }
 
-        async function fetchJsonWithFallback(url) {
-            const text = await fetchWithFallback(url);
-            return JSON.parse(text);
-        }
-
-        // --- GITHUB TOKEN ---
-        function saveGithubToken() {
-            const token = document.getElementById('githubTokenInput').value.trim();
-            if (token) {
-                localStorage.setItem('amigo_github_token', token);
-                document.getElementById('githubTokenInput').value = '';
-                updateGithubTokenStatus();
-                alert('GitHub Token сохранён!');
-            }
-        }
-
-        function updateGithubTokenStatus() {
-            const token = localStorage.getItem('amigo_github_token');
-            const statusEl = document.getElementById('githubTokenStatus');
-            if (token) {
-                statusEl.innerHTML = `✅ <strong>Token установлен:</strong> ${token.substring(0, 8)}...${token.substring(token.length - 4)}`;
-            } else {
-                statusEl.innerHTML = `❌ <strong>Token не установлен.</strong> Поиск по коду GitHub будет пропущен.`;
-            }
-        }
-
-        // --- TICKER LOGIC (RSS) ---
+        // --- RSS Ticker ---
         async function loadTicker() {
-            const tickerEl = document.getElementById('tickerContent');
-            const saved = localStorage.getItem('amigo_rssFeeds');
-            const parsed = saved ? JSON.parse(saved) : [];
-            const feeds = parsed.length > 0 ? parsed : ['https://hnrss.org/frontpage'];
-            
-            document.getElementById('customRssInput').placeholder = "https://url1.com/rss, https://url2.com/rss";
-
+            const feeds = rssFeeds.length ? rssFeeds : CONFIG.RSS_FEEDS_DEFAULT;
+            const promises = feeds.map(url => fetchWithTimeout(`${CONFIG.RSS2JSON_API}?rss_url=${encodeURIComponent(url)}`, 10000).then(res => res.ok ? res.json() : { items: [] }).catch(() => ({ items: [] })));
+            const results = await Promise.allSettled(promises);
             let allItems = [];
-            for (let url of feeds) {
-                try {
-                    const res = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(url)}`);
-                    const data = await res.json();
-                    if (data.items) allItems = allItems.concat(data.items);
-                } catch (e) { console.error('Ошибка ленты:', url); }
-            }
-
-            if (allItems.length > 0) {
-                let html = allItems.map(item => 
-                    `<a href="${item.link}" target="_blank" class="ticker-item">⚡ ${item.title}</a>`
-                ).join('');
-                tickerEl.innerHTML = html;
+            results.forEach(r => { if (r.status === 'fulfilled' && r.value.items) allItems.push(...r.value.items); });
+            if (allItems.length) {
+                const items = allItems.slice(0, 30);
+                const html = items.map(item => `<a href="${escapeHtml(item.link)}" target="_blank" class="ticker-item">⚡ ${escapeHtml(item.title)}</a>`).join('');
+                DOM.tickerContent.innerHTML = html + html;
             } else {
-                tickerEl.innerHTML = '<span class="ticker-item">[!] Нет данных от источников.</span>';
+                DOM.tickerContent.innerHTML = '<span class="ticker-item">[!] Нет данных RSS</span>';
             }
         }
-        
-        function saveRssSettings() {
-            const val = document.getElementById('customRssInput').value.trim();
-            if (!val) return;
 
-            let currentFeeds = JSON.parse(localStorage.getItem('amigo_rssFeeds') || '[]');
-            const newItems = val.split(',').map(s => s.trim()).filter(s => s.length > 0);
-            const updatedFeeds = [...new Set([...currentFeeds, ...newItems])];
-            
-            localStorage.setItem('amigo_rssFeeds', JSON.stringify(updatedFeeds));
-            document.getElementById('customRssInput').value = '';
+        function renderRssTags() {
+            DOM.rssTags.innerHTML = rssFeeds.map(url => `<div class="tag">${escapeHtml(url.substring(0, 30))}... <span class="remove" data-url="${escapeHtml(url)}">×</span></div>`).join('');
+            document.querySelectorAll('#rssTags .remove').forEach(el => {
+                el.addEventListener('click', (e) => {
+                    const url = el.getAttribute('data-url');
+                    rssFeeds = rssFeeds.filter(f => f !== url);
+                    saveState();
+                    loadTicker();
+                    renderRssTags();
+                    showToast('RSS источник удален', 'info');
+                });
+            });
+        }
+
+        function addRssFeed() {
+            const val = DOM.customRssInput.value.trim();
+            if (!val) { showToast('Введите URL', 'warning'); return; }
+            const urls = val.split(',').map(s => s.trim()).filter(s => s.startsWith('http'));
+            if (!urls.length) { showToast('Некорректный URL', 'error'); return; }
+            rssFeeds = [...new Set([...rssFeeds, ...urls])];
+            saveState();
             loadTicker();
             renderRssTags();
-            alert('Источник добавлен!');
-        }
-        
-        loadTicker();
-
-        // --- ГЛОБАЛЬНЫЙ OSINT ПОИСК ---
-        async function globalSearch() {
-            const query = document.getElementById('googleSearchInput').value.trim();
-            if (!query) return alert('Введите запрос!');
-
-            const srcTG = document.getElementById('srcTG').checked;
-            const srcReddit = document.getElementById('srcReddit').checked;
-            const srcHN = document.getElementById('srcHN').checked;
-            const srcDev = document.getElementById('srcDev').checked;
-
-            const progressDiv = document.getElementById('googleProgress');
-            const progressBar = document.getElementById('googleProgressBar');
-            const resultsDiv = document.getElementById('googleResults');
-            
-            progressDiv.style.display = 'block';
-            progressBar.style.width = '10%';
-            resultsDiv.innerHTML = '';
-            let foundCount = 0;
-
-            if (srcHN) {
-                try {
-                    const hnRes = await fetch(`https://hn.algolia.com/api/v1/search?query=${encodeURIComponent(query)}&tags=story&hitsPerPage=5`);
-                    if (hnRes.ok) {
-                        const hnData = await hnRes.json();
-                        hnData.hits.forEach(hit => {
-                            resultsDiv.innerHTML += renderSearchCard('Hacker News', hit.title, `Points: ${hit.points}`, hit.story_url || `https://news.ycombinator.com/item?id=${hit.objectID}`, '🟧');
-                            foundCount++;
-                        });
-                    }
-                } catch (e) { console.error('HN Search error', e); }
-                progressBar.style.width = '40%';
-            }
-
-            if (srcDev) {
-                try {
-                    const devRes = await fetch(`https://dev.to/api/articles?q=${encodeURIComponent(query)}&per_page=5`);
-                    if (devRes.ok) {
-                        const devData = await devRes.json();
-                        devData.forEach(article => {
-                            resultsDiv.innerHTML += renderSearchCard('Dev.to', article.title, `Reactions: ${article.public_reactions_count}`, article.url, '⬛');
-                            foundCount++;
-                        });
-                    }
-                } catch (e) { console.error('Dev.to Search error', e); }
-                progressBar.style.width = '70%';
-            }
-            
-            if (srcReddit) {
-                try {
-                    const redditData = await fetchJsonWithFallback(`https://www.reddit.com/search.json?q=${encodeURIComponent(query)}&limit=5`);
-                    if (redditData && redditData.data && redditData.data.children) {
-                        redditData.data.children.forEach(post => {
-                            resultsDiv.innerHTML += renderSearchCard('Reddit', post.data.title, `Upvotes: ${post.data.ups}`, `https://www.reddit.com${post.data.permalink}`, '🟧');
-                            foundCount++;
-                        });
-                    }
-                } catch (e) { 
-                    console.error('Reddit Search error', e); 
-                    resultsDiv.innerHTML += `<p style="color: var(--danger); width: 100%; font-size: 0.85em;">[!] Reddit API недоступен. Попробуйте позже.</p>`;
-                }
-                progressBar.style.width = '90%';
-            }
-
-            if (srcTG) {
-                const ghToken = localStorage.getItem('amigo_github_token');
-                if (!ghToken) {
-                    resultsDiv.innerHTML += `<p style="color: var(--warning); width: 100%; font-size: 0.85em;">⚠️ GitHub поиск пропущен: не указан API Token. Добавь его в настройках.</p>`;
-                } else {
-                    try {
-                        const ghRes = await fetch(`https://api.github.com/search/code?q=${encodeURIComponent('t.me ' + query)}&per_page=5`, {
-                            headers: { 
-                                'Authorization': `token ${ghToken}`,
-                                'Accept': 'application/vnd.github.v3+json'
-                            }
-                        });
-                        if (ghRes.ok) {
-                            const ghData = await ghRes.json();
-                            const tgChannels = new Set();
-                            for (const item of (ghData.items || [])) {
-                                try {
-                                    const fileRes = await fetch(item.url, { 
-                                        headers: { 
-                                            'Accept': 'application/vnd.github.v3.raw',
-                                            'Authorization': `token ${ghToken}`
-                                        } 
-                                    });
-                                    if (fileRes.ok) {
-                                        const content = await fileRes.text();
-                                        const matches = content.match(/t\.me\/([a-zA-Z0-9_]{4,})/g) || [];
-                                        matches.forEach(m => {
-                                            const ch = m.replace('t.me/', '').toLowerCase();
-                                            if (!['joinchat', 'addtheme', 'share', 'socks'].includes(ch)) tgChannels.add(ch);
-                                        });
-                                    }
-                                } catch (e) {}
-                            }
-                            tgChannels.forEach(ch => {
-                                resultsDiv.innerHTML += renderSearchCard('Telegram Канал', `@${ch}`, 'Найдено на GitHub', `javascript:addManualChannelByName('${ch}')`, '✈️');
-                                foundCount++;
-                            });
-                        } else if (ghRes.status === 401) {
-                            resultsDiv.innerHTML += `<p style="color: var(--danger); width: 100%; font-size: 0.85em;">[!] GitHub Token недействителен. Проверь настройки.</p>`;
-                        }
-                    } catch (e) { 
-                        console.error('GitHub Search error', e); 
-                        resultsDiv.innerHTML += `<p style="color: var(--danger); width: 100%; font-size: 0.85em;">[!] Ошибка GitHub API: ${e.message}</p>`;
-                    }
-                }
-            }
-
-            progressBar.style.width = '100%';
-            setTimeout(() => progressDiv.style.display = 'none', 500);
-
-            if (foundCount === 0 && !resultsDiv.innerHTML.includes('401') && !resultsDiv.innerHTML.includes('Ошибка') && !resultsDiv.innerHTML.includes('недоступен')) {
-                resultsDiv.innerHTML = `<p style="color: var(--text-secondary); width: 100%;">По запросу "${query}" ничего не найдено.</p>`;
-            }
+            DOM.customRssInput.value = '';
+            showToast(`Добавлено ${urls.length} RSS`, 'success');
         }
 
-        function renderSearchCard(source, title, subtitle, link, icon) {
-            const isFunction = link.startsWith('javascript:');
-            return `
-                <div class="card" onclick="${isFunction ? link.replace('javascript:', '') : `window.open('${link}', '_blank')`}">
-                    <div class="stats">${icon} ${source}</div>
-                    <h3 style="margin-top: 5px;">${title}</h3>
-                    <p>${subtitle}</p>
-                    ${isFunction ? '<span style="color:var(--accent); font-size:12px;">+ Добавить в таргеты</span>' : ''}
+        // --- Rendering UI ---
+        function renderUI() {
+            DOM.channelTags.innerHTML = channels.map(c => `<div class="tag">@${escapeHtml(c.name)} <span class="remove" data-channel="${escapeHtml(c.name)}">×</span></div>`).join('');
+            DOM.redditTags.innerHTML = reddits.map(r => `<div class="tag">r/${escapeHtml(r)} <span class="remove" data-reddit="${escapeHtml(r)}">×</span></div>`).join('');
+            DOM.keywordTags.innerHTML = keywords.map(k => `<div class="tag">${escapeHtml(k)} <span class="remove" data-keyword="${escapeHtml(k)}">×</span></div>`).join('');
+            DOM.channelCount.textContent = channels.length;
+            DOM.redditCount.textContent = reddits.length;
+
+            document.querySelectorAll('#channelTags .remove').forEach(el => {
+                el.addEventListener('click', () => { channels = channels.filter(c => c.name !== el.getAttribute('data-channel')); saveState(); renderUI(); showToast('Канал удален', 'info'); });
+            });
+            document.querySelectorAll('#redditTags .remove').forEach(el => {
+                el.addEventListener('click', () => { reddits = reddits.filter(r => r !== el.getAttribute('data-reddit')); saveState(); renderUI(); showToast('Сабреддит удален', 'info'); });
+            });
+            document.querySelectorAll('#keywordTags .remove').forEach(el => {
+                el.addEventListener('click', () => { keywords = keywords.filter(k => k !== el.getAttribute('data-keyword')); saveState(); renderUI(); showToast('Триггер удален', 'info'); });
+            });
+        }
+
+        function highlightText(text, kws) {
+            let result = escapeHtml(text);
+            kws.forEach(kw => {
+                const regex = new RegExp(`(${escapeHtml(kw)})`, 'gi');
+                result = result.replace(regex, '<span class="highlight">$1</span>');
+            });
+            return result;
+        }
+
+        function renderResults() {
+            DOM.matchCount.textContent = results.length;
+            DOM.checkedCountEl.textContent = checkedCount;
+            DOM.memoryCount.textContent = seenMessages.size;
+            if (!results.length) {
+                DOM.resultsLog.innerHTML = '<div class="empty-state"><div class="icon">📭</div><p>Лог пуст.</p></div>';
+                return;
+            }
+            DOM.resultsLog.innerHTML = results.map(r => `
+                <div class="log-entry alert">
+                    <div class="header-log">
+                        <span class="source">${escapeHtml(r.source)}</span>
+                        <span class="time">${new Date(r.foundAt).toLocaleString()}</span>
+                    </div>
+                    <div class="keywords">Триггеры: ${r.keywords.map(escapeHtml).join(', ')}</div>
+                    <div class="text">${highlightText(r.text, r.keywords)}</div>
+                    <a href="${escapeHtml(r.url)}" target="_blank" class="link-btn">Перейти к источнику ↗</a>
                 </div>
-            `;
+            `).join('');
         }
 
-        // --- УПРАВЛЕНИЕ ТАРГЕТАМИ И ТРИГГЕРАМИ ---
-        function addManualChannelByName(name) {
-            name = name.replace('@', '').trim().toLowerCase();
-            if (name && !channels.find(c => c.name === name)) {
-                channels.push({ name, addedAt: new Date().toISOString() });
-                saveState(); renderUI();
-                logConsole(`Таргет добавлен: @${name}`, 'success');
+        // --- Global search (simplified, using similar fetch logic) ---
+        async function globalSearch() {
+            const query = DOM.globalSearchInput.value.trim();
+            if (!query) { showToast('Введите запрос', 'warning'); return; }
+            DOM.searchProgress.style.display = 'block';
+            DOM.searchResults.innerHTML = '<div class="skeleton"></div><div class="skeleton"></div>';
+            DOM.searchProgressBar.style.width = '0%';
+            let found = 0;
+            const updateProgress = (pct) => { DOM.searchProgressBar.style.width = pct + '%'; };
+            const addCards = (html) => { if (html) { DOM.searchResults.insertAdjacentHTML('beforeend', html); found += (html.match(/class="card"/g) || []).length; } };
+            
+            // Hacker News
+            if (document.getElementById('srcHN').checked) {
+                try {
+                    const res = await fetchWithTimeout(`https://hn.algolia.com/api/v1/search?query=${encodeURIComponent(query)}&tags=story&hitsPerPage=6`);
+                    const data = await res.json();
+                    const cards = data.hits.map(h => `<div class="card" onclick="window.open('${escapeHtml(h.url || 'https://news.ycombinator.com/item?id='+h.objectID)}','_blank')"><div class="stats">🟧 Hacker News</div><h3>${escapeHtml(h.title)}</h3><p>Points: ${h.points || 0}</p></div>`).join('');
+                    addCards(cards);
+                } catch(e) {}
+                updateProgress(20);
             }
-        }
-
-        function addManualChannel() {
-            const input = document.getElementById('manualChannelInput');
-            addManualChannelByName(input.value);
-            input.value = '';
-        }
-
-        function addKeyword() {
-            const input = document.getElementById('keywordInput');
-            const kw = input.value.trim().toLowerCase();
-            if (kw && !keywords.includes(kw)) {
-                keywords.push(kw);
-                saveState(); renderUI();
-                input.value = '';
+            // Reddit
+            if (document.getElementById('srcReddit').checked) {
+                try {
+                    const res = await fetchWithTimeout(`https://www.reddit.com/search.json?q=${encodeURIComponent(query)}&limit=6`);
+                    const data = await res.json();
+                    const cards = (data.data?.children || []).map(post => `<div class="card" onclick="window.open('https://www.reddit.com${post.data.permalink}','_blank')"><div class="stats">🟥 Reddit</div><h3>${escapeHtml(post.data.title)}</h3><p>r/${escapeHtml(post.data.subreddit)} | ↑${post.data.ups}</p></div>`).join('');
+                    addCards(cards);
+                } catch(e) {}
+                updateProgress(40);
             }
-        }
-        
-        function addManualReddit() {
-            const input = document.getElementById('manualRedditInput');
-            const name = input.value.replace('r/', '').trim().toLowerCase();
-            if (name && !reddits.includes(name)) {
-                reddits.push(name);
-                saveState(); renderUI();
-                input.value = '';
+            // Dev.to
+            if (document.getElementById('srcDev').checked) {
+                try {
+                    const res = await fetchWithTimeout(`https://dev.to/api/articles?q=${encodeURIComponent(query)}&per_page=6`);
+                    const data = await res.json();
+                    const cards = data.map(art => `<div class="card" onclick="window.open('${escapeHtml(art.url)}','_blank')"><div class="stats">⬛ Dev.to</div><h3>${escapeHtml(art.title)}</h3><p>❤️ ${art.public_reactions_count || 0}</p></div>`).join('');
+                    addCards(cards);
+                } catch(e) {}
+                updateProgress(60);
             }
+            // Lobste.rs
+            if (document.getElementById('srcLobsters').checked) {
+                try {
+                    const res = await fetchWithTimeout(`https://lobste.rs/hottest.json`);
+                    const data = await res.json();
+                    const filtered = data.filter(item => item.title.toLowerCase().includes(query.toLowerCase())).slice(0, 6);
+                    const cards = filtered.map(item => `<div class="card" onclick="window.open('https://lobste.rs${escapeHtml(item.url)}','_blank')"><div class="stats">🦞 Lobste.rs</div><h3>${escapeHtml(item.title)}</h3><p>${item.score} points</p></div>`).join('');
+                    addCards(cards);
+                } catch(e) {}
+                updateProgress(80);
+            }
+            // StackOverflow
+            if (document.getElementById('srcSO').checked) {
+                try {
+                    const res = await fetchWithTimeout(`https://api.stackexchange.com/2.3/search?order=desc&sort=relevance&intitle=${encodeURIComponent(query)}&site=stackoverflow&pagesize=6`);
+                    const data = await res.json();
+                    const cards = (data.items || []).map(item => `<div class="card" onclick="window.open('${escapeHtml(item.link)}','_blank')"><div class="stats">💻 StackOverflow</div><h3>${escapeHtml(item.title)}</h3><p>Score: ${item.score}</p></div>`).join('');
+                    addCards(cards);
+                } catch(e) {}
+                updateProgress(100);
+            }
+            setTimeout(() => {
+                DOM.searchProgress.style.display = 'none';
+                if (!found) DOM.searchResults.innerHTML = '<div class="empty-state" style="grid-column:1/-1;"><div class="icon">🔍</div><p>Ничего не найдено</p></div>';
+                else showToast(`Найдено ${found} результатов`, 'success');
+            }, 500);
         }
 
-        function removeReddit(name) {
-            reddits = reddits.filter(r => r !== name);
-            saveState(); renderUI();
-        }
-
-        function removeChannel(name) { 
-            channels = channels.filter(c => c.name !== name); 
-            saveState(); renderUI(); 
-        }
-        
-        function removeKeyword(kw) { 
-            keywords = keywords.filter(k => k !== kw); 
-            saveState(); renderUI(); 
-        }
-
-        // --- ПАРСИНГ ИСТОЧНИКОВ ---
+        // --- Parsers for monitoring ---
         async function parseTelegram(channelName) {
             try {
-                const html = await fetchWithFallback(`https://t.me/s/${channelName}`);
+                const html = await fetchWithProxy(`https://t.me/s/${channelName}`);
                 const doc = new DOMParser().parseFromString(html, 'text/html');
                 const messages = [];
                 doc.querySelectorAll('.tgme_widget_message').forEach(el => {
                     const textEl = el.querySelector('.tgme_widget_message_text');
                     const text = textEl ? textEl.textContent.trim() : '';
                     const postId = el.getAttribute('data-post');
-                    if (text && postId) {
-                        messages.push({
-                            id: `tg_${postId}`,
-                            source: `Telegram: @${channelName}`,
-                            text: text,
-                            url: `https://t.me/${channelName}/${postId.split('_')[1] || postId}`,
-                            date: new Date().toISOString()
-                        });
-                    }
+                    if (text && postId) messages.push({ id: `tg_${postId}`, source: `Telegram: @${channelName}`, text, url: `https://t.me/${postId}`, date: new Date().toISOString() });
                 });
                 return messages;
-            } catch (e) {
-                console.error(`TG Parse Error [${channelName}]:`, e);
-                return [];
-            }
+            } catch(e) { return []; }
         }
-
-        async function parseHackerNews() {
-            let messages = [];
-            for (const kw of keywords) {
-                try {
-                    const res = await fetch(`https://hn.algolia.com/api/v1/search_by_date?query=${encodeURIComponent(kw)}&hitsPerPage=3`);
-                    if (res.ok) {
-                        const data = await res.json();
-                        data.hits.forEach(h => {
-                            messages.push({
-                                id: `hn_${h.objectID}`,
-                                source: 'Hacker News',
-                                text: `${h.title}\n${h.story_text ? h.story_text.substring(0, 200) + '...' : ''}`,
-                                url: h.story_url || `https://news.ycombinator.com/item?id=${h.objectID}`,
-                                date: h.created_at
-                            });
-                        });
-                    }
-                } catch (e) { console.error('HN Parse Error:', e); }
-            }
-            return messages;
-        }
-
-        async function parseDevTo() {
-            let messages = [];
-            for (const kw of keywords) {
-                try {
-                    const res = await fetch(`https://dev.to/api/articles?q=${encodeURIComponent(kw)}&per_page=3`);
-                    if (res.ok) {
-                        const data = await res.json();
-                        data.forEach(art => {
-                            messages.push({
-                                id: `dev_${art.id}`,
-                                source: 'Dev.to',
-                                text: `${art.title}\n${art.description}`,
-                                url: art.url,
-                                date: art.created_at
-                            });
-                        });
-                    }
-                } catch (e) { console.error('Dev.to Parse Error:', e); }
-            }
-            return messages;
-        }
-
         async function parseReddit(subreddit) {
-            let messages = [];
             try {
-                const data = await fetchJsonWithFallback(`https://www.reddit.com/r/${subreddit}/new.json?limit=15`);
-                if (data && data.data && data.data.children) {
-                    data.data.children.forEach(post => {
-                        const fullText = `${post.data.title} ${post.data.selftext || ''}`.toLowerCase();
-                        const matchedKws = keywords.filter(kw => fullText.includes(kw.toLowerCase()));
-                        
-                        if (matchedKws.length > 0) {
-                            messages.push({
-                                id: `reddit_${post.data.id}`,
-                                source: `Reddit: r/${subreddit}`,
-                                text: `${post.data.title}\n${post.data.selftext || '[Только ссылка]'}`,
-                                url: `https://www.reddit.com${post.data.permalink}`,
-                                date: new Date(post.data.created_utc * 1000).toISOString()
-                            });
-                        }
-                    });
-                }
-            } catch (e) { 
-                console.error(`Reddit Parse Error [r/${subreddit}]:`, e); 
+                const res = await fetchWithTimeout(`https://www.reddit.com/r/${subreddit}/new.json?limit=5`);
+                const data = await res.json();
+                return (data.data?.children || []).map(post => ({ id: `reddit_${post.data.id}`, source: `Reddit: r/${subreddit}`, text: post.data.title + '\n' + (post.data.selftext || ''), url: `https://www.reddit.com${post.data.permalink}`, date: new Date(post.data.created_utc * 1000).toISOString() }));
+            } catch(e) { return []; }
+        }
+        async function parseHackerNews() {
+            const messages = [];
+            for (const kw of keywords.slice(0, 5)) {
+                try {
+                    const res = await fetchWithTimeout(`https://hn.algolia.com/api/v1/search_by_date?query=${encodeURIComponent(kw)}&hitsPerPage=3`);
+                    const data = await res.json();
+                    data.hits.forEach(h => messages.push({ id: `hn_${h.objectID}`, source: 'Hacker News', text: h.title + '\n' + (h.story_text || ''), url: h.url || `https://news.ycombinator.com/item?id=${h.objectID}`, date: h.created_at }));
+                } catch(e) {}
+            }
+            return messages;
+        }
+        async function parseDevTo() {
+            const messages = [];
+            for (const kw of keywords.slice(0, 5)) {
+                try {
+                    const res = await fetchWithTimeout(`https://dev.to/api/articles?q=${encodeURIComponent(kw)}&per_page=3`);
+                    const data = await res.json();
+                    data.forEach(art => messages.push({ id: `dev_${art.id}`, source: 'Dev.to', text: art.title + '\n' + art.description, url: art.url, date: art.created_at }));
+                } catch(e) {}
+            }
+            return messages;
+        }
+        async function parseLobsters() {
+            try {
+                const res = await fetchWithTimeout('https://lobste.rs/hottest.json');
+                const data = await res.json();
+                const messages = [];
+                data.forEach(item => {
+                    const text = item.title;
+                    if (keywords.some(kw => text.toLowerCase().includes(kw))) messages.push({ id: `lobsters_${item.id}`, source: 'Lobste.rs', text, url: `https://lobste.rs${item.url}`, date: new Date().toISOString() });
+                });
+                return messages.slice(0, 10);
+            } catch(e) { return []; }
+        }
+        async function parseMastodon() {
+            const messages = [];
+            for (const kw of keywords.slice(0, 3)) {
+                try {
+                    const res = await fetchWithTimeout(`https://mastodon.social/api/v2/search?q=${encodeURIComponent(kw)}&limit=3&type=statuses`);
+                    const data = await res.json();
+                    (data.statuses || []).forEach(s => messages.push({ id: `mastodon_${s.id}`, source: 'Mastodon', text: s.content?.replace(/<[^>]*>/g, ''), url: s.url, date: s.created_at }));
+                } catch(e) {}
             }
             return messages;
         }
 
-        // --- ЯДРО МОНИТОРИНГА ---
+        // --- Monitor engine ---
         function checkAndSaveMessages(messages) {
-            let newResults = 0;
-            messages.forEach(msg => {
-                if (seenMessages.has(msg.id)) return;
-                
-                const lowerText = msg.text.toLowerCase();
-                const matchedKws = keywords.filter(kw => lowerText.includes(kw));
-
-                if (matchedKws.length > 0) {
-                    seenMessages.add(msg.id);
-                    results.unshift({ ...msg, keywords: matchedKws, foundAt: new Date().toISOString() });
-                    newResults++;
+            let newCount = 0;
+            const maxRes = parseInt(DOM.maxResultsInput.value) || 500;
+            for (const msg of messages) {
+                if (seenMessages.has(msg.id)) continue;
+                seenMessages.add(msg.id);
+                checkedCount++;
+                const lower = msg.text.toLowerCase();
+                const matched = keywords.filter(kw => lower.includes(kw));
+                if (matched.length) {
+                    results.unshift({ ...msg, keywords: matched, foundAt: new Date().toISOString() });
+                    newCount++;
+                    if (results.length > maxRes) results.pop();
                 }
-            });
-
-            // Защита от переполнения localStorage
-            if (seenMessages.size > 3000) {
+            }
+            if (newCount) {
+                saveState();
+                renderResults();
+                triggerHaptic('heavy');
+                showToast(`Перехвачено ${newCount}`, 'success');
+            }
+            if (seenMessages.size > CONFIG.MAX_SEEN_MESSAGES) {
                 const arr = Array.from(seenMessages);
-                seenMessages = new Set(arr.slice(arr.length - 2000));
+                seenMessages = new Set(arr.slice(-Math.floor(CONFIG.MAX_SEEN_MESSAGES/2)));
             }
-
-            if (newResults > 0) { 
-                saveState(); 
-                renderResults(); 
-                triggerHaptic('heavy'); 
-            }
-            return newResults;
+            renderResults();
+            return newCount;
         }
 
         async function monitorCycle() {
             if (!isRunning) return;
-            
-            const doReddit = document.getElementById('monReddit').checked;
             const doTG = document.getElementById('monTG').checked;
+            const doReddit = document.getElementById('monReddit').checked;
             const doHN = document.getElementById('monHN').checked;
             const doDev = document.getElementById('monDev').checked;
-
-            let allFound = 0;
-
-            if (doTG && channels.length > 0) {
+            const doLobsters = document.getElementById('monLobsters').checked;
+            const doMastodon = document.getElementById('monMastodon').checked;
+            let total = 0;
+            if (doTG && channels.length) {
                 for (const ch of channels) {
                     if (!isRunning) break;
                     const msgs = await parseTelegram(ch.name);
-                    allFound += checkAndSaveMessages(msgs);
+                    total += checkAndSaveMessages(msgs);
+                    await new Promise(r => setTimeout(r, 300));
                 }
             }
-            
-            if (doReddit && reddits.length > 0) {
+            if (doReddit && reddits.length) {
                 for (const r of reddits) {
                     if (!isRunning) break;
-                    const redditMsgs = await parseReddit(r);
-                    allFound += checkAndSaveMessages(redditMsgs);
+                    const msgs = await parseReddit(r);
+                    total += checkAndSaveMessages(msgs);
+                    await new Promise(r => setTimeout(r, 300));
                 }
             }
-
-            if (doHN && keywords.length > 0) {
-                const hnMsgs = await parseHackerNews();
-                allFound += checkAndSaveMessages(hnMsgs);
-            }
-
-            if (doDev && keywords.length > 0) {
-                const devMsgs = await parseDevTo();
-                allFound += checkAndSaveMessages(devMsgs);
-            }
-
-            if (allFound > 0) logConsole(`Перехвачено ${allFound} новых совпадений.`, 'success');
+            if (doHN && keywords.length) total += checkAndSaveMessages(await parseHackerNews());
+            if (doDev && keywords.length) total += checkAndSaveMessages(await parseDevTo());
+            if (doLobsters && keywords.length) total += checkAndSaveMessages(await parseLobsters());
+            if (doMastodon && keywords.length) total += checkAndSaveMessages(await parseMastodon());
+            if (total) console.log(`Cycle found ${total}`);
         }
 
-        async function startMonitoring() {
-            if (keywords.length === 0) return alert('Добавьте хотя бы одно ключевое слово для триггера!');
-            
+        function startMonitoring() {
+            if (!keywords.length) { showToast('Добавьте ключевые слова', 'warning'); return; }
             isRunning = true;
-            document.getElementById('startBtn').disabled = true;
-            document.getElementById('stopBtn').disabled = false;
-            document.getElementById('statusDot').classList.add('active');
-            document.getElementById('statusText').textContent = 'Активный перехват';
-
-            const interval = Math.max(30, parseInt(document.getElementById('intervalInput').value) || 60);
-            const autoStopMins = Math.max(1, parseInt(document.getElementById('autoStopInput').value) || 15);
-
-            logConsole(`Запуск сканирования... Kill Switch сработает через ${autoStopMins} мин.`, 'info');
-            
+            DOM.startBtn.disabled = true;
+            DOM.stopBtn.disabled = false;
+            DOM.statusDot.classList.add('active');
+            DOM.statusText.textContent = 'Активный перехват';
+            const intervalSec = Math.max(30, parseInt(DOM.intervalInput.value) || 60);
+            const autoStopMin = Math.max(1, parseInt(DOM.autoStopInput.value) || 15);
+            if (killSwitchTimeout) clearTimeout(killSwitchTimeout);
             killSwitchTimeout = setTimeout(() => {
-                if (isRunning) {
-                    stopMonitoring();
-                    alert(`Stealth Mode: Автостоп сработал (лимит ${autoStopMins} мин). Батарея и анонимность в безопасности.`);
-                }
-            }, autoStopMins * 60 * 1000);
-
-            await monitorCycle();
-            monitoringInterval = setInterval(monitorCycle, interval * 1000);
+                if (isRunning) stopMonitoring();
+                showToast(`Автостоп через ${autoStopMin} мин`, 'info');
+            }, autoStopMin * 60 * 1000);
+            if (monitoringInterval) clearInterval(monitoringInterval);
+            monitorCycle();
+            monitoringInterval = setInterval(monitorCycle, intervalSec * 1000);
         }
 
         function stopMonitoring() {
             isRunning = false;
-            clearInterval(monitoringInterval);
-            clearTimeout(killSwitchTimeout);
-            document.getElementById('startBtn').disabled = false;
-            document.getElementById('stopBtn').disabled = true;
-            document.getElementById('statusDot').classList.remove('active');
-            document.getElementById('statusText').textContent = 'Режим ожидания (Спячка)';
-            logConsole('Мониторинг остановлен.', 'info');
+            if (monitoringInterval) clearInterval(monitoringInterval);
+            if (killSwitchTimeout) clearTimeout(killSwitchTimeout);
+            DOM.startBtn.disabled = false;
+            DOM.stopBtn.disabled = true;
+            DOM.statusDot.classList.remove('active');
+            DOM.statusText.textContent = 'Режим ожидания';
+            showToast('Мониторинг остановлен', 'info');
         }
 
-        // --- UI РЕНДЕРИНГ ---
-        function escapeRegExp(string) {
-            return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-        }
-
-        function highlightText(text, kws) {
-            let highlighted = text;
-            kws.forEach(kw => {
-                const safeKw = escapeRegExp(kw);
-                const regex = new RegExp(`(${safeKw})`, 'gi');
-                highlighted = highlighted.replace(regex, '<span class="highlight">$1</span>');
-            });
-            return highlighted;
-        }
-
-        function renderResults() {
-            const logDiv = document.getElementById('resultsLog');
-            document.getElementById('matchCount').textContent = results.length;
-
-            if (results.length === 0) {
-                logDiv.innerHTML = `<div class="empty-state"><div class="icon">📭</div><p>База пуста.</p></div>`;
-                return;
+        // --- Export/Import ---
+        function exportResults(type) {
+            if (type === 'json') {
+                const data = JSON.stringify(results, null, 2);
+                const blob = new Blob([data], {type: 'application/json'});
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url; a.download = 'amigo_results.json'; a.click();
+                URL.revokeObjectURL(url);
+            } else if (type === 'csv') {
+                const rows = results.map(r => `"${r.source}","${r.foundAt}","${r.url}","${r.text.replace(/"/g, '""')}"`);
+                const csv = 'Source,Time,Link,Text\n' + rows.join('\n');
+                const blob = new Blob([csv], {type: 'text/csv'});
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url; a.download = 'amigo_results.csv'; a.click();
+                URL.revokeObjectURL(url);
             }
-
-            logDiv.innerHTML = results.map(r => `
-                <div class="log-entry alert">
-                    <div class="header-log">
-                        <span class="source">${r.source.includes('Telegram') ? '✈️' : '🌐'} ${r.source}</span>
-                        <span class="time">${new Date(r.foundAt).toLocaleTimeString()}</span>
-                    </div>
-                    <div class="keywords">Триггеры: ${r.keywords.join(', ')}</div>
-                    <div class="text">${highlightText(r.text, r.keywords)}</div>
-                    <a href="${r.url}" target="_blank" class="link-btn">Перейти к источнику ↗</a>
-                </div>
-            `).join('');
         }
-
-        function renderUI() {
-            document.getElementById('channelTags').innerHTML = channels.map(c => `
-                <div class="tag">@${c.name} <span class="remove" onclick="removeChannel('${c.name}')">×</span></div>
-            `).join('');
-            document.getElementById('channelCount').textContent = channels.length;
-
-            document.getElementById('keywordTags').innerHTML = keywords.map(k => `
-                <div class="tag">${k} <span class="remove" onclick="removeKeyword('${k}')">×</span></div>
-            `).join('');
-            
-            document.getElementById('redditTags').innerHTML = reddits.map(r => `
-                <div class="tag">r/${r} <span class="remove" onclick="removeReddit('${r}')">×</span></div>
-            `).join('');
-            document.getElementById('redditCount').textContent = reddits.length;
-        }
-
-        function saveState() {
-            localStorage.setItem('amigo_channels', JSON.stringify(channels));
-            localStorage.setItem('amigo_reddits', JSON.stringify(reddits));
-            localStorage.setItem('amigo_keywords', JSON.stringify(keywords));
-            localStorage.setItem('amigo_results', JSON.stringify(results));
-            localStorage.setItem('amigo_seen', JSON.stringify(Array.from(seenMessages)));
-        }
-
-        function logConsole(msg) { console.log(`[OSINT] ${msg}`); }
-        
-        function renderRssTags() {
-            const feeds = JSON.parse(localStorage.getItem('amigo_rssFeeds') || '[]');
-            const container = document.getElementById('rssTags');
-            container.innerHTML = feeds.map(url => `
-                <div class="tag">
-                    ${url.substring(0, 25)}... 
-                    <span class="remove" onclick="removeRss('${url.replace(/'/g, "\\'")}')">×</span>
-                </div>
-            `).join('');
-        }
-
-        function removeRss(url) {
-            let feeds = JSON.parse(localStorage.getItem('amigo_rssFeeds') || '[]');
-            feeds = feeds.filter(f => f !== url);
-            localStorage.setItem('amigo_rssFeeds', JSON.stringify(feeds));
-            document.getElementById('customRssInput').value = feeds.join(', ');
-            loadTicker();
-            renderRssTags();
-        }
-
-        // --- ЭКСПОРТ / УТИЛИТЫ ---
-        function downloadFile(content, filename, type) {
-            const blob = new Blob([content], { type });
+        function exportBackup() {
+            const backup = { channels, reddits, keywords, results, rssFeeds, seen: Array.from(seenMessages) };
+            const data = JSON.stringify(backup);
+            const blob = new Blob([data], {type: 'application/json'});
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
-            a.href = url; a.download = filename; a.click();
+            a.href = url; a.download = 'amigo_backup.json'; a.click();
             URL.revokeObjectURL(url);
         }
-
-        function exportResults(fmt) {
-            if (fmt === 'json') downloadFile(JSON.stringify(results, null, 2), 'osint_intel.json', 'application/json');
-            if (fmt === 'csv') {
-                const csv = ['Source,Time,Link,Text'].concat(results.map(r => 
-                    `"${r.source}","${r.foundAt}","${r.url}","${r.text.replace(/"/g, '""').replace(/\n/g, ' ')}"`
-                )).join('\n');
-                downloadFile(csv, 'osint_intel.csv', 'text/csv');
-            }
-        }
-
-        function exportAllData() {
-            downloadFile(JSON.stringify({ channels, reddits, keywords, results, seen: Array.from(seenMessages) }, null, 2), 'amigo_backup.json', 'application/json');
-        }
-
-        function importAllData(e) {
-            const file = e.target.files[0];
+        function importBackup(event) {
+            const file = event.target.files[0];
             if (!file) return;
             const reader = new FileReader();
-            reader.onload = ev => {
+            reader.onload = (e) => {
                 try {
-                    const d = JSON.parse(ev.target.result);
-                    channels = d.channels || []; 
-                    reddits = d.reddits || [];
-                    keywords = d.keywords || [];
-                    results = d.results || []; 
-                    seenMessages = new Set(d.seen || []);
-                    saveState(); renderUI(); renderResults();
-                    alert('Бэкап успешно загружен!');
-                } catch(err) { alert('Ошибка импорта: неверный формат файла.'); }
+                    const data = JSON.parse(e.target.result);
+                    channels = data.channels || [];
+                    reddits = data.reddits || [];
+                    keywords = data.keywords || [];
+                    results = data.results || [];
+                    rssFeeds = data.rssFeeds || [];
+                    seenMessages = new Set(data.seen || []);
+                    saveState();
+                    renderUI();
+                    loadTicker();
+                    renderRssTags();
+                    renderResults();
+                    showToast('Бэкап загружен', 'success');
+                } catch(err) { showToast('Ошибка импорта', 'error'); }
             };
             reader.readAsText(file);
+            DOM.importFile.value = '';
         }
-
-        function clearResults() { 
-            if(confirm('Очистить базу найденного?')) { 
-                results = []; 
-                saveState(); 
-                renderResults(); 
-            } 
-        }
-        
-        function clearAllData() {
-            if(confirm('Удалить ВСЕ настройки и данные? Это действие необратимо.')) {
-                localStorage.clear(); 
-                channels=[]; 
-                reddits=[]; 
-                keywords=[]; 
-                results=[]; 
-                seenMessages=new Set();
-                renderUI(); 
+        function hardReset() {
+            if (confirm('Удалить все данные?')) {
+                localStorage.clear();
+                channels = []; reddits = []; keywords = []; results = []; seenMessages = new Set(); rssFeeds = [];
+                checkedCount = 0;
+                saveState();
+                renderUI();
                 renderResults();
+                loadTicker();
                 renderRssTags();
-                updateGithubTokenStatus();
+                showToast('Все данные удалены', 'warning');
             }
         }
 
-        // Init
-        renderUI();
-        renderResults();
-        renderRssTags();
-        updateGithubTokenStatus();
-        loadTicker();
+        // --- Event listeners ---
+        function bindEvents() {
+            DOM.themeIcon.addEventListener('click', toggleTheme);
+            DOM.globalSearchBtn.addEventListener('click', globalSearch);
+            DOM.addChannelBtn.addEventListener('click', () => { if (DOM.manualChannelInput.value) { channels.push({ name: DOM.manualChannelInput.value.trim().replace('@','') }); saveState(); renderUI(); DOM.manualChannelInput.value = ''; showToast('Канал добавлен', 'success'); } });
+            DOM.addRedditBtn.addEventListener('click', () => { if (DOM.manualRedditInput.value) { reddits.push(DOM.manualRedditInput.value.trim().replace('r/','')); saveState(); renderUI(); DOM.manualRedditInput.value = ''; showToast('Сабреддит добавлен', 'success'); } });
+            DOM.addKeywordBtn.addEventListener('click', () => { if (DOM.keywordInput.value) { keywords.push(DOM.keywordInput.value.trim().toLowerCase()); saveState(); renderUI(); DOM.keywordInput.value = ''; showToast('Триггер добавлен', 'success'); } });
+            DOM.startBtn.addEventListener('click', startMonitoring);
+            DOM.stopBtn.addEventListener('click', stopMonitoring);
+            DOM.exportJsonBtn.addEventListener('click', () => exportResults('json'));
+            DOM.exportCsvBtn.addEventListener('click', () => exportResults('csv'));
+            DOM.clearResultsBtn.addEventListener('click', () => { results = []; saveState(); renderResults(); showToast('Результаты очищены', 'info'); });
+            DOM.exportBackupBtn.addEventListener('click', exportBackup);
+            DOM.importBackupBtn.addEventListener('click', () => DOM.importFile.click());
+            DOM.importFile.addEventListener('change', importBackup);
+            DOM.hardResetBtn.addEventListener('click', hardReset);
+            DOM.addRssBtn.addEventListener('click', addRssFeed);
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.addEventListener('click', () => switchTab(tab.getAttribute('data-tab')));
+            });
+            DOM.globalSearchInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') globalSearch(); });
+        }
+
+        // --- Init ---
+        function init() {
+            initTheme();
+            loadState();
+            renderUI();
+            renderResults();
+            loadTicker();
+            renderRssTags();
+            enableDragScroll();
+            bindEvents();
+            if (tg) { tg.ready(); tg.expand(); }
+        }
+        init();
+    })();
     </script>
 </body>
 </html>
