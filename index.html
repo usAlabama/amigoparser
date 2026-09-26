@@ -344,11 +344,11 @@ FETCH_TIMEOUT: 9000,
 RSS_FEEDS_DEFAULT: ["https://hnrss.org/frontpage"],
 RSS2JSON_API: "https://api.rss2json.com/v1/api.json",
 PROXIES: [
-url => `https://corsproxy.org/?url=${encodeURIComponent(url)}`,
-url => `https://cors.x2u.in/?url=${encodeURIComponent(url)}`,
-url => `https://cors.me/?url=${encodeURIComponent(url)}`,
-url => `https://api.codetabs.com/v1/proxy/?quest=${encodeURIComponent(url)}`,
-url => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`
+url => `https://corsproxy.org/?${encodeURIComponent(url)}`,
+url => `https://cors.x2u.in/?${encodeURIComponent(url)}`,
+url => `https://cors.me/?${encodeURIComponent(url)}`,
+url => `https://proxy.cors.sh/${url}`,
+url => `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`
 ]
 };
 
